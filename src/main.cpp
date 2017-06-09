@@ -475,7 +475,7 @@ static void init() {
    caust_camDir = Vector3f(0.0, -1.0, 0.0);
 
    // Set background color.
-   Vector3f bGColor = Vector3f(.011f, 1.129f, .247f) * 0.3f;
+   Vector3f bGColor = Vector3f(.011f, 0.2f, 0.47f);
    glClearColor(bGColor[0], bGColor[1], bGColor[2], 1.0f);
 
    // Enable z-buffer test.
