@@ -54,8 +54,8 @@ void main()
 	}
 
 	vec3 redGreen = vec3(0.6f, 0.2f, 0.1f);
-	vec3 finalColor = vertCol - (redGreen * 0.2f*dist);
+	vec3 finalColor = vertCol - (redGreen * 0.1*dist);
 	finalColor += vec3(0.0f, 0.0f, 0.1f);
 
-	color = vec4(finalColor + (caustColor * 0.8), max(alpha, 0.0f));
+	color = vec4(finalColor + (caustColor * 0.8), max(alpha, 0.0));
 }

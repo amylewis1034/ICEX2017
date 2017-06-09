@@ -80,8 +80,8 @@ void main()
 
     vertCol += diffuseCol + specularCol;
 
-    vec3 redGreen = vec3(0.4f, 0.3f, 0.3f);
-    vec3 finalColor = vertCol - 0.3 * (redGreen * log(dist));
+    vec3 redGreen = vec3(0.6f, 0.2f, 0.1f);
+	vec3 finalColor = vertCol - (redGreen * 0.2f*dist);
     caustColor -= 0.3*(redGreen * log(dist));
     finalColor += vec3(0.0f, 0.0f, 0.1f);
 

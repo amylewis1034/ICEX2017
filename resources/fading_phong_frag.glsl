@@ -54,8 +54,8 @@ void main()
 	   alpha = 1.0f - (dist - fadeBegin)/(fadeEnd - fadeBegin);
 	}
     
-	vec3 redGreen = vec3(0.4f, 0.3f, 0.3f);
-	vec3 finalColor = vertCol - 0.5 * (redGreen * log(dist));
+	vec3 redGreen = vec3(0.6f, 0.2f, 0.1f);
+	vec3 finalColor = vertCol - (redGreen * 0.2f*dist);
 	finalColor += vec3(0.0f, 0.0f, 0.1f);
 
 	color = vec4(finalColor + (caustColor * 0.8), max((alpha * baseAlpha) - 0.2, 0.0f));
