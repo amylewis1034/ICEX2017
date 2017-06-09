@@ -1204,7 +1204,7 @@ static void render() {
 
    float lightPos[] = {200.0f, 200.0f, 200.0f,
                      globallightPos[0], globallightPos[1], globallightPos[2]};
-   float lightCol[] = {0.75f, 0.75f, 1.0f,
+   float lightCol[] = {0.55f, 0.65f, 1.0f,
                      0.5f, 0.5f, 0.5f};
 
    // Create the matrix stacks
@@ -1235,7 +1235,7 @@ static void render() {
    drawSeaweed(P, V, M, caust_V, lightPos, lightCol, t);
    drawBubbles(P, V, M, caust_V, lightPos, lightCol, t);
    drawTexturedObjects(P, V, M, caust_V, lightPos, lightCol);
-   // drawIver(P, V, M, caust_V, lightPos, lightCol, t);
+   drawIver(P, V, M, caust_V, lightPos, lightCol, t);
    if (keyToggles['l']) {
       drawCircularPath(P, V, M);
    }
