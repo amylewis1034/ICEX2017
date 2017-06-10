@@ -1,2 +1,6 @@
+## Ignore build and DS_Store
+
+# User-specific files
+
 build
 .DS_Store
