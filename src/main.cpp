@@ -393,7 +393,7 @@ void setMaterial(int i, shared_ptr<Program> prog) {
       case 0: // bubbles
          glUniform3f(prog->getUniform("matAmb"), 0.9f, 0.9f, 0.9f);
          glUniform3f(prog->getUniform("matDif"), 0.0f, 0.0f, 0.0f);
-         glUniform3f(prog->getUniform("matSpec"), 0.1f, 0.1f, 0.1f);
+         glUniform3f(prog->getUniform("matSpec"), 0.2f, 0.2f, 0.9f);
          glUniform1f(prog->getUniform("matShine"), 20.0f);
          break;
       case 1: // seaweed
