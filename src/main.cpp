@@ -18,7 +18,7 @@ Based on K. Reimer 471 final project
 #include "Texture.h"
 #include "Bubbles.h"
 #include "Utilities.h"
-#include "Image.h"
+// #include "Image.h"
 #include "ImageProcessor.h"
 #include "PRMAlg.h"
 
