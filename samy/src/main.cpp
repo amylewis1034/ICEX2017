@@ -42,7 +42,8 @@ void init() {
 }
 
 void update(float dt) {
-    Mouse::update();    
+    if (!DebugUI::enabled)
+        Mouse::update();    
     world->update(dt);
 }
 

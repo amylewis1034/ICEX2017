@@ -14,6 +14,8 @@
 * [Quick GUI for MBED projects using Dear ImGui and Serial](http://justanotherelectronicsblog.com/?p=179)
 * [Terrain Generation with a Heightmap](http://www.chadvernon.com/blog/resources/directx9/terrain-generation-with-a-heightmap/)
 * [Real-Time Rendering](http://www.realtimerendering.com/)
+* Fog and Atmospheric Scattering [1](http://in2gpu.com/2014/07/22/create-fog-shader/)
+
 
 ### Third Party Libraries
 * `tiny_obj_loader.h` from [syoyo](https://github.com/syoyo/tinyobjloader)
