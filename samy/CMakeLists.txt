@@ -66,3 +66,6 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
     ${OpenCV_LIBS}
 )
 
+if (APPLE)
+    add_definitions(-std=c++14)
+endif()
