@@ -59,25 +59,36 @@ void DebugUI::render(float dt, World *world) {
 		if (ImGui::Button("Darken")) {
 			world->scaleLightIntensity(1.0f / scale);
 		}
+
+		glm::vec3 mainlight_color = world->getMainlightColor();
+		ImGui::SliderFloat3("Mainlight Color", glm::value_ptr(mainlight_color), 0.0f, 1.0f);
+		world->setMainLightColor(mainlight_color);
 	}
 
 	/* Adjust postprocessing values */
 	{
 		PostprocessRenderer *pr = dynamic_cast<PostprocessRenderer *>(world->getPostrenderer());
-		float gamma = pr->getGamma(), exposure = pr->getExposure(), fogDensity = pr->getFogDensity(), 
-			ten = pr->getTen(), factor1 = pr->getFactor1(), factor2 = pr->getFactor2();
-		ImGui::SliderFloat("Gamma", &gamma, 0.0f, 5.0f);
-		ImGui::SliderFloat("Exposure", &exposure, 0.0f, 10.0f);
-		ImGui::SliderFloat("Fog Density", &fogDensity, 0.0f, 100.0f);
-		ImGui::SliderFloat("ten", &ten, 0.0f, 20.0f);
-		ImGui::SliderFloat("factor1", &factor1, 0.001f, 0.01f);
-		ImGui::SliderFloat("factor2", &factor2, 0.001f, 0.01f);
-		pr->setGamma(gamma);
-		pr->setExposure(exposure);
-		pr->setFogDensity(fogDensity);
-		pr->setTen(ten);
-		pr->setFactor1(factor1);
-		pr->setFactor2(factor2);
+
+		ImGui::SliderFloat("Gamma", &pr->gamma, 0.0f, 5.0f);
+		ImGui::SliderFloat("Exposure", &pr->exposure, 0.0f, 10.0f);
+		ImGui::SliderFloat3("Fog Color", glm::value_ptr(pr->fog_color), 0.0f, 1.0f);
+		ImGui::SliderFloat3("Fog Extinction", glm::value_ptr(pr->be), 0.0f, 0.1f);
+		ImGui::SliderFloat3("Fog Inscattering", glm::value_ptr(pr->bi), 0.0f, 0.1f);
+
+		// float gamma = pr->getGamma(), exposure = pr->getExposure(), fogDensity = pr->getFogDensity(), 
+		// 	ten = pr->getTen(), factor1 = pr->getFactor1(), factor2 = pr->getFactor2();
+		// ImGui::SliderFloat("Gamma", &gamma, 0.0f, 5.0f);
+		// ImGui::SliderFloat("Exposure", &exposure, 0.0f, 10.0f);
+		// ImGui::SliderFloat("Fog Density", &fogDensity, 0.0f, 100.0f);
+		// ImGui::SliderFloat("ten", &ten, 0.0f, 20.0f);
+		// ImGui::SliderFloat("factor1", &factor1, 0.001f, 0.01f);
+		// ImGui::SliderFloat("factor2", &factor2, 0.001f, 0.01f);
+		// pr->setGamma(gamma);
+		// pr->setExposure(exposure);
+		// pr->setFogDensity(fogDensity);
+		// pr->setTen(ten);
+		// pr->setFactor1(factor1);
+		// pr->setFactor2(factor2);
 	}
 
 	/* Toggle free camera */
@@ -115,13 +126,14 @@ void DebugUI::render(float dt, World *world) {
 		GameObject *player = world->getGameObjectWithComponent<PlayerInput>();
 		if (player != nullptr) {
 			PlayerInput *pi = player->getComponent<PlayerInput>();
+			if (pi != nullptr) {
+				static float speed = pi->getSpeed(), sensitivity = pi->getSensitivity();
+				ImGui::DragFloat("Player speed", &speed, 0.1f, 0.0f, 50.0f);
+				ImGui::DragFloat("Player sensitivity", &sensitivity, 0.0005f, 0.0f, 0.5f, "%.4f");
 
-			static float speed = pi->getSpeed(), sensitivity = pi->getSensitivity();
-			ImGui::DragFloat("Player speed", &speed, 0.1f, 0.0f, 50.0f);
-			ImGui::DragFloat("Player sensitivity", &sensitivity, 0.0005f, 0.0f, 0.5f, "%.4f");
-
-			pi->setSpeed(speed);
-			pi->setSensitivity(sensitivity);
+				pi->setSpeed(speed);
+				pi->setSensitivity(sensitivity);
+			}
 		}
 	}
 

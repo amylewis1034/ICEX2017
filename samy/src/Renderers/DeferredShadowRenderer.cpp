@@ -179,7 +179,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     }
 	gBuffer.bind();
 	gBuffer.bindTextures();
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClearColor(0.0f, 0.1f, 0.3f, 1.0f);
     glDepthMask(GL_TRUE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);

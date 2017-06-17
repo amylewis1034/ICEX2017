@@ -13,6 +13,7 @@
 #include <Components/Material.hpp>
 #include <Components/Mesh.hpp>
 #include <Components/PlayerInput.hpp>
+#include <Components/PRMInput.hpp>
 #include <Components/Shader.hpp>
 #include <Components/Skybox.hpp>
 #include <Components/Transform.hpp>

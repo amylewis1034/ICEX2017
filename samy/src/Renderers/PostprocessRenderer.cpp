@@ -81,10 +81,9 @@ PostprocessRenderer::PostprocessRenderer() {
 
     this->gamma = 0.0f;
     this->exposure = 0.678f;
-    this->fogDensity = 3.0f;
-    this->ten = 10.0f; 
-    this->factor1 = 0.006f;
-    this->factor2 = 0.008f;
+    this->fog_color = glm::vec3(0.7f);
+    this->be = glm::vec3(0.04f);
+    this->bi = glm::vec3(0.01f);
 }
 
 PostprocessRenderer::~PostprocessRenderer() {}
@@ -170,10 +169,9 @@ void PostprocessRenderer::render(const glm::mat4 &projection, const glm::mat4 &v
 
     glUniform1f(quadShader.uniformLocation("gamma"), this->gamma);
     glUniform1f(quadShader.uniformLocation("exposure"), this->exposure);
-    glUniform1f(quadShader.uniformLocation("fogDensity"), this->fogDensity);
-    glUniform1f(quadShader.uniformLocation("ten"), this->ten);
-    glUniform1f(quadShader.uniformLocation("factor1"), this->factor1);
-    glUniform1f(quadShader.uniformLocation("factor2"), this->factor2);
+    glUniform3fv(quadShader.uniformLocation("fog_color"), 1, glm::value_ptr(this->fog_color));
+    glUniform3fv(quadShader.uniformLocation("be"), 1, glm::value_ptr(this->be));
+    glUniform3fv(quadShader.uniformLocation("bi"), 1, glm::value_ptr(this->bi));
 
     static glm::mat4 lastVP = projection * view;
     float blurScale = 0.5f;
@@ -212,52 +210,4 @@ GLuint PostprocessRenderer::getBloomFBO() const {
 
 GLuint PostprocessRenderer::getFBO() const {
     return postprocessFBO.getHandle();
-}
-
-void PostprocessRenderer::setGamma(float gamma) {
-    this->gamma = gamma;
-}
-
-void PostprocessRenderer::setExposure(float exposure) {
-    this->exposure = exposure;
-}
-
-void PostprocessRenderer::setFogDensity(float fogDensity) {
-    this->fogDensity = fogDensity;
-}
-
-void PostprocessRenderer::setTen(float ten) {
-    this->ten = ten;
-}
-
-void PostprocessRenderer::setFactor1(float factor1) {
-    this->factor1 = factor1;
-}
-
-void PostprocessRenderer::setFactor2(float factor2) {
-    this->factor2 = factor2;
-}
-
-float PostprocessRenderer::getGamma() const {
-    return this->gamma;
-}
-
-float PostprocessRenderer::getExposure() const {
-    return this->exposure;
-}
-
-float PostprocessRenderer::getFogDensity() const {
-    return this->fogDensity;
-}
-
-float PostprocessRenderer::getTen() const {
-    return this->ten;
-}
-
-float PostprocessRenderer::getFactor1() const {
-    return this->factor1;
-}
-
-float PostprocessRenderer::getFactor2() const {
-    return this->factor2;
 }

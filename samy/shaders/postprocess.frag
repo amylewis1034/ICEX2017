@@ -12,10 +12,7 @@ uniform sampler2D bloom;
 
 uniform float gamma;
 uniform float exposure;
-uniform float fogDensity;
-uniform float ten;
-uniform float factor1;
-uniform float factor2;
+uniform vec3 fog_color, be, bi;
 
 uniform mat4 lastVP;
 uniform sampler2D worldPos;
@@ -91,13 +88,13 @@ void main() {
     // float be = 0.25 * smoothstep(0.0, 6.0, 32.0 - worldPos.y);
     // float bi = 0.75 * smoothstep(0.0, 80, 10.0 - worldPos.y);
 
-    vec3 be = vec3(factor1);
-    vec3 bi = vec3(factor2);
     vec3 extinction = vec3(exp(-dist * be.r), exp(-dist * be.g), exp(-dist * be.b));
     vec3 inscattering = vec3(exp(-dist * bi.r), exp(-dist * bi.g), exp(-dist * bi.b));
-    vec3 fogColor = vec3(0.7);
-    color.rgb = color.rgb * (1.0 - extinction) + fogColor * inscattering; 
+    // color.rgb = color.rgb * (1.0 - extinction) + fog_color * inscattering; 
 
+    // color.rgb = color.rgb - vec3(0.6, 0.2, 0.1) * dist * .05;
+
+    color.rgb = color.rgb * max(vec3((30 - dist) / 30, (80 - dist) / 80, (90 - dist) / 90), vec3(0));
 
     color = vec4(color.rgb + texture(bloom, fragTexcoord).rgb, 1);
     color = vec4(gammacorrect(tonemap(color.rgb)), 1.0);

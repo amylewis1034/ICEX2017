@@ -7,7 +7,8 @@
 					0, 0, 1, 0, 
 					0.05, 0.05, 0.05]},
 				{"name": "Camera", "args": ["fps"]},
-				{"name": "PlayerInput", "args": [4.0, 0.001]}
+				// {"name": "PlayerInput", "args": [10.0, 0.001]}
+				{"name": "PRMInput", "args": [10.0, "path.txt", true]}
 			]
 		},
 		{
@@ -16,7 +17,7 @@
 				{"name": "Transform", "args": [
 					0, 0, 0, 
 					0, 1, 0, 0,
-					50, 6, 50]},
+					50, 5, 50]},
 				{"name": "Heightmap", "args": ["heightmaps/basic.png"]},
 				{"name": "Texture", "args": ["textures/plasticbag.jpg"]},
 				{"name": "Material", "args": [
@@ -44,18 +45,17 @@
             "tag": "manoel",
             "components": [
                 {"name": "Transform", "args": [
-                    0.0, 0.0, 0.0,
-                    90, 0, 0, 1,
+                    0.0, 6.0, -15.0,
+                    0, 0, 0, 1,
                     0.1, 0.1, 0.1
                 ]},
-                {"name": "Mesh", "args": ["ManoelPRMsCombined.obj"]},
+                {"name": "Mesh", "args": ["ManoelPRMsCombined2.obj"]},
                 {"name": "Texture", "args": ["ManoelPRMsCombined.jpg"]}
             ]
         }
 	],
 
-	// "MainLight": {"pos": [200.0, 100.0, -380.0], "color": [1, 1, 1]},
-	"MainLight": {"pos": [200.0, 100.0, -380.0], "color": [0.12, 0.24, 0.24]},
+	"MainLight": {"pos": [50.0, 50.0, -50.0], "color": [0.24, 0.48, 0.48]},
 	
 	"PointLights": [
 		// {"pos": [-105.0, 2.0, 8.0], "color": [0.35, 0.61, 0.80], "a": 1.0, "b": 1.0, "c": 1.0},

@@ -124,7 +124,7 @@ void World::update(float dt) {
     static float gametime = 0.0f;
     gametime += dt;
 
-    GameObject *player = this->getGameObjectWithComponent<PlayerInput>();
+    GameObject *player = this->getGameObjectWithComponent<Camera>();
     Transform *tPlayer = player->getComponent<Transform>();
     glm::vec3 playerPos = tPlayer->getPosition();
 
@@ -218,6 +218,10 @@ std::vector<GameObject *> World::getGameObjectsByTag(const std::string &tag) con
 
 void World::setMainLight(glm::vec3 pos, glm::vec3 color) {
 	mainlight = { pos, color };
+}
+
+void World::setMainLightColor(const glm::vec3 &color) {
+	mainlight.color = color;
 }
 
 void World::addPointLight(glm::vec3 pos, glm::vec3 color, float a, float b, float c) {

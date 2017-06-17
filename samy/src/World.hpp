@@ -54,6 +54,7 @@ public:
 	}
 
 	void setMainLight(glm::vec3 pos, glm::vec3 color);
+	void setMainLightColor(const glm::vec3 &color);
 	void addPointLight(glm::vec3 pos, glm::vec3 color, float a, float b, float c);
 	void scaleLightIntensity(float scale);
 	void setLightUniforms(GLShaderProgram &program) const;

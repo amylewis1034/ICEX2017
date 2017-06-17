@@ -102,6 +102,20 @@ static Component *parsePlayerInput(Value &args) {
     return (Component *) playerInput;
 }
 
+static Component *parsePRMInput(Value &args) {
+    PRMInput *prmInput = nullptr;
+
+	assert(args.Size() >= 2 && args[0].IsFloat() && args[1].IsString());
+	if (args.Size() == 2) {
+		prmInput = new PRMInput(args[0].GetFloat(), args[1].GetString());
+	}
+	else {
+		prmInput = new PRMInput(args[0].GetFloat(), args[1].GetString(), args[2].GetBool());
+	}
+
+    return (Component *) prmInput;
+}
+
 static Component *parseMaterial(Value &args) {
 	Material *material;
 
@@ -179,6 +193,7 @@ const static std::map<std::string, std::function<Component *(Value &args)>> cmap
 	{"Collider", parseCollider},
     {"Heightmap", parseHeightmap},
     {"PlayerInput", parsePlayerInput},
+	{"PRMInput", parsePRMInput},
 	{"Material", parseMaterial},
     {"Mesh", parseMesh},
 	{"Shader", parseShader},

@@ -17,23 +17,11 @@ public:
     GLuint getBloomFBO() const;
     GLuint getFBO() const;
 
-    void setGamma(float gamma);
-    void setExposure(float exposure);
-    void setFogDensity(float fogDensity);
-    void setTen(float ten);
-    void setFactor1(float factor1);
-    void setFactor2(float factor2);
-    float getGamma() const;
-    float getExposure() const;
-    float getFogDensity() const;
-    float getTen() const;
-    float getFactor1() const;
-    float getFactor2() const;
+    float gamma, exposure;
+    glm::vec3 fog_color, be, bi;
 private:
     GLFramebuffer postprocessFBO, bloomFBO[2];
     GLShaderProgram quadShader, bloomShader, blurShader;
-
-    float gamma, exposure, fogDensity, ten, factor1, factor2;
 };
 
 #endif
