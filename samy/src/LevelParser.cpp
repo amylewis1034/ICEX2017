@@ -144,6 +144,14 @@ static Component *parseMesh(Value &args) {
     return (Component *) mesh;
 }
 
+static Component *parseParticle(Value &args) {
+	Particle *particle;
+
+	particle = new Particle();
+
+	return (Component *) particle;
+}
+
 static Component *parseShader(Value &args) {
 	Shader *shader;
 
@@ -196,6 +204,7 @@ const static std::map<std::string, std::function<Component *(Value &args)>> cmap
 	{"PRMInput", parsePRMInput},
 	{"Material", parseMaterial},
     {"Mesh", parseMesh},
+	{"Particle", parseParticle},
 	{"Shader", parseShader},
     {"Skybox", parseSkybox},
 	{"Texture", parseTexture}

@@ -9,6 +9,7 @@
 #include <Renderers/DeferredShadowRenderer.hpp>
 #include <Renderers/ForwardRenderer.hpp>
 #include <Renderers/PostprocessRenderer.hpp>
+#include <Renderers/ParticleRenderer.hpp>
 
 #include <Components/Heightmap.hpp>
 #include <Components/Skybox.hpp>
@@ -16,6 +17,7 @@
 #include <Components/Mesh.hpp>
 #include <Components/Camera.hpp>
 #include <Components/Shader.hpp>
+#include <Components/Particle.hpp>
 #include <Components/PlayerInput.hpp>
 #include <Components/Material.hpp>
 #include <Components/Texture.hpp>
@@ -68,6 +70,8 @@ World::~World() {
     }
 
 	delete renderer;
+	delete postrenderer;
+	delete particlerenderer;
 }
 
 void World::init() {
@@ -118,6 +122,8 @@ void World::init() {
 
 	postrenderer = new PostprocessRenderer();
 	// postrenderer = nullptr;
+
+	particlerenderer = new ParticleRenderer();
 }
 
 void World::update(float dt) {
@@ -135,7 +141,6 @@ void World::update(float dt) {
     for (GameObject *g : deleteQueue) {
         removeGameObjectFromVector(g, gameobjects);
         removeGameObjectFromVector(g, renderables);
-        removeGameObjectFromVector(g, collidable);
     }
 }
 
@@ -165,6 +170,7 @@ void World::render(float dt) {
 
 void World::render(const glm::mat4 &projection, const glm::mat4 &view, const glm::vec3 &eye) {
     renderer->render(projection, view, eye, *this);
+	particlerenderer->render(projection, view, eye, *this);
     postrenderer->render(projection, view, eye, *this);
 }
 
@@ -173,7 +179,6 @@ void World::addGameObject(GameObject *gameobject) {
 
     if (gameobject->hasComponent<Mesh>()) {
         renderables.push_back(gameobject);
-        quadTreeRenderable.addGameObject(gameobject);
     }
 
     if (gameobject->hasComponent<Heightmap>()) {
@@ -181,13 +186,13 @@ void World::addGameObject(GameObject *gameobject) {
         heightMapComponent = gameobject;
     }
 
-    if (gameobject->hasComponent<Texture>()) {
-        textured.push_back(gameobject);
-    }
-
     if (gameobject->hasComponent<Camera>()) {
         camera = gameobject;
     }
+	
+	if (gameobject->hasComponent<Particle>()) {
+		particleSystems.push_back(gameobject);
+	}
 }
 
 void World::removeGameObject(GameObject *gameobject) {
@@ -324,4 +329,8 @@ Renderer *World::getPostrenderer() const {
 
 const std::vector<GameObject *> World::getRenderables(const glm::mat4 &projection, const glm::mat4 &view) {
 	return renderables;
+}
+
+const std::vector<GameObject *> World::getParticleSystems() {
+	return particleSystems;
 }

@@ -68,13 +68,14 @@ void DebugUI::render(float dt, World *world) {
 	/* Adjust postprocessing values */
 	{
 		PostprocessRenderer *pr = dynamic_cast<PostprocessRenderer *>(world->getPostrenderer());
-
-		ImGui::SliderFloat("Gamma", &pr->gamma, 0.0f, 5.0f);
-		ImGui::SliderFloat("Exposure", &pr->exposure, 0.0f, 10.0f);
-		ImGui::SliderFloat3("Fog Color", glm::value_ptr(pr->fog_color), 0.0f, 1.0f);
-		ImGui::SliderFloat3("Fog Extinction", glm::value_ptr(pr->be), 0.0f, 0.1f);
-		ImGui::SliderFloat3("Fog Inscattering", glm::value_ptr(pr->bi), 0.0f, 0.1f);
-
+		if (pr != nullptr) {
+			ImGui::SliderFloat("Gamma", &pr->gamma, 0.0f, 5.0f);
+			ImGui::SliderFloat("Exposure", &pr->exposure, 0.0f, 10.0f);
+			ImGui::SliderFloat3("Fog Color", glm::value_ptr(pr->fog_color), 0.0f, 1.0f);
+			ImGui::SliderFloat3("Fog Extinction", glm::value_ptr(pr->be), 0.0f, 0.1f);
+			ImGui::SliderFloat3("Fog Inscattering", glm::value_ptr(pr->bi), 0.0f, 0.1f);
+		}
+		
 		// float gamma = pr->getGamma(), exposure = pr->getExposure(), fogDensity = pr->getFogDensity(), 
 		// 	ten = pr->getTen(), factor1 = pr->getFactor1(), factor2 = pr->getFactor2();
 		// ImGui::SliderFloat("Gamma", &gamma, 0.0f, 5.0f);

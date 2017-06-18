@@ -12,6 +12,7 @@
 #include <Components/Texture.hpp>
 #include <Components/Material.hpp>
 #include <Components/Mesh.hpp>
+#include <Components/Particle.hpp>
 #include <Components/PlayerInput.hpp>
 #include <Components/PRMInput.hpp>
 #include <Components/Shader.hpp>

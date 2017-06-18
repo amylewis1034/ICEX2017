@@ -7,8 +7,8 @@
 					0, 0, 1, 0, 
 					0.05, 0.05, 0.05]},
 				{"name": "Camera", "args": ["fps"]},
-				// {"name": "PlayerInput", "args": [10.0, 0.001]}
-				{"name": "PRMInput", "args": [10.0, "path.txt", true]}
+				{"name": "PlayerInput", "args": [10.0, 0.001]}
+			//	{"name": "PRMInput", "args": [10.0, "path.txt", true]}
 			]
 		},
 		{
@@ -17,7 +17,7 @@
 				{"name": "Transform", "args": [
 					0, 0, 0, 
 					0, 1, 0, 0,
-					50, 5, 50]},
+					400, 5, 400]},
 				{"name": "Heightmap", "args": ["heightmaps/basic.png"]},
 				{"name": "Texture", "args": ["textures/plasticbag.jpg"]},
 				{"name": "Material", "args": [
@@ -27,6 +27,17 @@
 					20,
 					1.0
 				]}
+			]
+		},
+		{
+			"tag": "particles",
+			"components": [
+				{"name": "Transform", "args": [
+					0, 0, 0,
+					0, 1, 0, 0,
+					1, 1, 1
+				]},
+				{"name": "Particle", "args": []}
 			]
 		},
         // {

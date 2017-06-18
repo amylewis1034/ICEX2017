@@ -9,8 +9,6 @@
 #include <Graphics/GLShaderProgram.hpp>
 #include <Components/Texture.hpp>
 
-#include "QuadTree/Node.hpp"
-#include "QuadTree/ViewFrustrum.hpp"
 #include <Renderers/Renderer.hpp>
 
 class World {
@@ -66,15 +64,14 @@ public:
 	const Renderer *getRenderer() const;
 	Renderer *getPostrenderer() const;
 	const std::vector<GameObject *> getRenderables(const glm::mat4 &projection, const glm::mat4 &view);
+	const std::vector<GameObject *> getParticleSystems();
 
 private:
     std::vector<GameObject *> gameobjects;
-    // std::vector<GameObject *> renderable;
-    std::vector<GameObject*> renderables;
-	std::vector<GameObject *> collidable;
-    std::vector<GameObject *> textured;
+    std::vector<GameObject *> renderables;
+	std::vector<GameObject *> particleSystems;
 
-	Renderer *renderer, *postrenderer;
+	Renderer *renderer, *postrenderer, *particlerenderer;
 
     GameObject *camera;
 
@@ -84,12 +81,6 @@ private:
     Shader *defaultShader;
     Material *defaultMaterial;
 	Texture *defaultTexture;
-
-    Node quadTreeRenderable; // for view frustrum, will have ltrees
-                        // meshes, and collidables?
-    Node quadTreeCollidables; // for collision: will only have 
-                                  // collidable stuff
-    ViewFrustrum frustrum;
 
     GameObject *heightMapComponent;
 };
