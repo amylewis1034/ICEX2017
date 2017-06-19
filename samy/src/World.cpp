@@ -75,11 +75,9 @@ World::~World() {
 }
 
 void World::init() {
-    int i = 0;
 	// srand(time(NULL));
     for (GameObject *g : gameobjects) {
         g->init();
-        i++;
     }
 
 	GameObject *terrain = this->getGameObjectWithComponent<Heightmap>();

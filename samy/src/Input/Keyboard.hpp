@@ -15,11 +15,14 @@ public:
     static int getKeyDown(int key);
 
     static int getKeyUp(int key);
+
+    static bool getKeyToggle(int key);
     
     static void setKeyStatus(int key, int action);
 
 private:
     static int keys[GLFW_KEY_LAST];
+    static bool key_toggles[GLFW_KEY_LAST];
 };
 
 #endif

@@ -22,3 +22,4 @@
     * more flexible and automated placement
     * console to adjust parameters on the fly (imgui has widget for this)
 - [ ] Port all Eigen code to GLM
+- [ ] Clang format
