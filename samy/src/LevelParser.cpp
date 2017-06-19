@@ -147,7 +147,7 @@ static Component *parseMesh(Value &args) {
 static Component *parseParticle(Value &args) {
 	Particle *particle;
 
-	particle = new Particle();
+	particle = new Particle(args[0].GetFloat(), args[1].GetFloat(), args[2].GetFloat(), args[3].GetFloat(), args[4].GetFloat(), args[5].GetFloat());
 
 	return (Component *) particle;
 }

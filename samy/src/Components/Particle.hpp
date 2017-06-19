@@ -15,7 +15,7 @@ struct particle_t {
 
 class Particle : public Component {
 public:
-    Particle();
+    Particle(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
     virtual ~Particle();
 
     virtual void init();
@@ -35,6 +35,8 @@ public:
 
     GLuint pointsBuffer;
     GLuint colorBuffer;
+
+    float minX, maxX, minY, maxY, minZ, maxZ;
 };
 
 #endif
