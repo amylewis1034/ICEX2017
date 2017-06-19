@@ -80,6 +80,13 @@ void World::init() {
         g->init();
     }
 
+	for (GameObject *g : gameobjects) {
+		if (g->hasComponent<Camera>()) {
+			this->camera = g;
+			break;
+		}
+	}
+
 	GameObject *terrain = this->getGameObjectWithComponent<Heightmap>();
 	if (terrain != nullptr) {
 		Heightmap *h = terrain->getComponent<Heightmap>();
@@ -148,18 +155,11 @@ void World::render(float dt) {
 	const float ttime = 2.0f;
 	gametime += dt;
 
-    Camera *camera;
-    Transform *camPosTransform;
-    for (GameObject *g : gameobjects) {
-        if (g->hasComponent<Camera>()) {
-            camera = g->getComponent<Camera>();
-            camPosTransform = g->getComponent<Transform>();
-            break;
-        }
-    }
+	Camera *cam = camera->getComponent<Camera>();
+	Transform *camPosTransform = camera->getComponent<Transform>();
 
-    glm::mat4 projection = camera->getProjection();
-    glm::mat4 view = camera->getView();
+    glm::mat4 projection = cam->getProjection();
+    glm::mat4 view = cam->getView();
     
     glm::vec3 eye = camPosTransform->getPosition();
 
@@ -182,10 +182,6 @@ void World::addGameObject(GameObject *gameobject) {
     if (gameobject->hasComponent<Heightmap>()) {
         renderables.push_back(gameobject);
         heightMapComponent = gameobject;
-    }
-
-    if (gameobject->hasComponent<Camera>()) {
-        camera = gameobject;
     }
 	
 	if (gameobject->hasComponent<Particle>()) {
