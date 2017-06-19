@@ -1,14 +1,23 @@
 {
 	"GameObjects": [
 		{
-			"tag": "camera",
+			"tag": "cameraPlayer",
 			"components": [
 				{"name": "Transform", "args": [0.0, 10.0, 0.0, 
 					0, 0, 1, 0, 
 					0.05, 0.05, 0.05]},
 				{"name": "Camera", "args": ["fps"]},
 				{"name": "PlayerInput", "args": [10.0, 0.001]}
-			//	{"name": "PRMInput", "args": [10.0, "path.txt", true]}
+			]
+		},
+		{
+			"tag": "cameraPRM",
+			"components": [
+				{"name": "Transform", "args": [0.0, 10.0, 0.0, 
+					0, 0, 1, 0, 
+					0.05, 0.05, 0.05]},
+				{"name": "Camera", "args": ["fps"]},
+				{"name": "PRMInput", "args": [10.0, "path.txt", true]}
 			]
 		},
 		{

@@ -136,6 +136,13 @@ void World::update(float dt) {
     gametime += dt;
 
     GameObject *player = this->getGameObjectWithComponent<Camera>();
+	
+	if (Keyboard::getKeyToggle(GLFW_KEY_P)) {
+		player = this->getGameObjectWithComponent<PRMInput>();
+	}
+
+	camera = player;
+
     Transform *tPlayer = player->getComponent<Transform>();
     glm::vec3 playerPos = tPlayer->getPosition();
 
