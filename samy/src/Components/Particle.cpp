@@ -18,7 +18,7 @@ void Particle::init() {
     partColors.resize(numP);
 
     for (int i = 0; i < numP; ++i) {
-        partPositions[i] = vec3(randFloat(-150, 50), randFloat(10, 35), randFloat(-150, 50));
+        partPositions[i] = vec3(randFloat(-150, 50), randFloat(10, 35), randFloat(-100, 100));
         partColors[i] = vec4(0.2f, 0.2f, 0.6f, 0.2f);
     }
 
@@ -50,7 +50,7 @@ void Particle::init() {
 }
 
 void Particle::rebirth(int idx) {
-    partPositions[idx] = vec3(randFloat(-100, -60), randFloat(10, 35), randFloat(-150, 50));
+    partPositions[idx] = vec3(randFloat(-100, -60), randFloat(10, 35), randFloat(-100, 100));
 }
 
 void Particle::update(float dt) {
@@ -60,7 +60,7 @@ void Particle::update(float dt) {
         particles[idx].partVel = vec3(2 * dt, cos(pTime), 1);
         partPositions[idx] += particles[idx].partVel * dt;
 
-        if(partPositions[idx].x > 100 || partPositions[idx].z > 100 || partPositions[idx].x < -150 || partPositions[idx].z < -150) {
+        if(partPositions[idx].x > 100 ||  partPositions[idx].x < -150 || partPositions[idx].y < 2 || partPositions[idx].y > 50 ||partPositions[idx].z < -150 || partPositions[idx].z > 100 ) {
             rebirth(idx);
         }
     }
