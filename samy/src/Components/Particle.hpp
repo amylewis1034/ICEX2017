@@ -15,14 +15,15 @@ struct particle_t {
 
 class Particle : public Component {
 public:
-    Particle(float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
+    Particle(float numP, float minX, float maxX, float minY, float maxY, float minZ, float maxZ, float r, float g, float b, float a);
+    Particle(float numP, float minX, float maxX, float minY, float maxY, float minZ, float maxZ);
     virtual ~Particle();
 
     virtual void init();
     virtual void update(float dt);
 
     GLuint VAO;
-    int numP = 300;
+    float numP = 300;
     
  private:
     std::vector<particle_t> particles;
@@ -36,7 +37,7 @@ public:
     GLuint pointsBuffer;
     GLuint colorBuffer;
 
-    float minX, maxX, minY, maxY, minZ, maxZ;
+    float minX, maxX, minY, maxY, minZ, maxZ, r, g, b, a;
 };
 
 #endif
