@@ -134,12 +134,12 @@ void Particle::update(float dt) {
         }
         else {
             for (int g = 0; g < 6; g++) {
-                particles[idx + g].partVel = vec3(1, 10 / randFloat(2,4), 1);
+                particles[idx + g].partVel = vec3(2 * dt, 10 / randFloat(4,6), 1);
 
                 partPositions[idx + g] += particles[idx].partVel * dt;
 
                 if(partPositions[idx + g].x < minX ||  partPositions[idx + g].x > maxX || partPositions[idx + g].y > maxY ||partPositions[idx + g].z < minZ || partPositions[idx + g].z > maxZ ) {
-                    rebirth(idx);
+                    rebirth(idx + 0);
                     rebirth(idx + 1);
                     rebirth(idx + 2);
                     rebirth(idx + 3);

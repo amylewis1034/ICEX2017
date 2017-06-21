@@ -23,7 +23,7 @@ public:
     virtual void update(float dt);
 
     GLuint VAO;
-    float numP = 300;
+    float numP;
     
  private:
     std::vector<particle_t> particles;

@@ -57,7 +57,7 @@
 					0, 1, 0, 0,
 					1, 1, 1
 				]},
-				{"name": "Particle", "args": [180, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
+				{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
 			]
 		},
         // {
@@ -82,6 +82,28 @@
                 ]},
                 {"name": "Mesh", "args": ["ManoelPRMsCombined2.obj"]},
                 {"name": "Texture", "args": ["ManoelPRMsCombined.jpg"]}
+            ]
+        },
+		{
+            "tag": "seaweed",
+            "components": [
+                {"name": "Transform", "args": [
+                    20.0, 2.0, -15.0,
+                    0, 0, 0, 1,
+                    2, 2, 2
+                ]},
+                {"name": "Mesh", "args": ["seaweed.obj"]}
+            ]
+        },
+		{
+            "tag": "seaweed",
+            "components": [
+                {"name": "Transform", "args": [
+                    -30.0, 2.0, -25.0,
+                    0, 0, 0, 1,
+                    2, 2, 2
+                ]},
+                {"name": "Mesh", "args": ["seaweed.obj"]}
             ]
         }
 	],
