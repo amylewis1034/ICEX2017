@@ -138,7 +138,10 @@ void World::update(float dt) {
     GameObject *player = this->getGameObjectWithComponent<Camera>();
 	
 	if (Keyboard::getKeyToggle(GLFW_KEY_P)) {
-		player = this->getGameObjectWithComponent<PRMInput>();
+		GameObject *tmp = this->getGameObjectWithComponent<PRMInput>();
+		if (tmp) {
+			player = tmp;
+		}
 	}
 
 	camera = player;

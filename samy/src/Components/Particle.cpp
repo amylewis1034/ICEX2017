@@ -139,12 +139,7 @@ void Particle::update(float dt) {
                 partPositions[idx + g] += particles[idx].partVel * dt;
 
                 if(partPositions[idx + g].x < minX ||  partPositions[idx + g].x > maxX || partPositions[idx + g].y > maxY ||partPositions[idx + g].z < minZ || partPositions[idx + g].z > maxZ ) {
-                    rebirth(idx + 0);
-                    rebirth(idx + 1);
-                    rebirth(idx + 2);
-                    rebirth(idx + 3);
-                    rebirth(idx + 4);
-                    rebirth(idx + 5);
+                    rebirth(idx);
                     g = 6;
                 }
             }
@@ -155,9 +150,11 @@ void Particle::update(float dt) {
     //update the GPU data
     glBindBuffer(GL_ARRAY_BUFFER, pointsBuffer);
     glBufferData(GL_ARRAY_BUFFER, numP * 3 * sizeof(float), NULL, GL_STREAM_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * numP * 3, partPositions.data());
+    // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * numP * 3, partPositions.data());
+    glBufferData(GL_ARRAY_BUFFER, numP * 3 * sizeof(float), partPositions.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
     glBufferData(GL_ARRAY_BUFFER, numP * 4 * sizeof(float), NULL, GL_STREAM_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * numP * 4, partColors.data());
+    // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(float) * numP * 4, partColors.data());
+    glBufferData(GL_ARRAY_BUFFER, numP * 4 * sizeof(float), partColors.data(), GL_STREAM_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

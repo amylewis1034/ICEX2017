@@ -55,7 +55,7 @@ void PRMThirds::init() {
     glBindTexture(GL_TEXTURE_2D, depthRenderBuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, depthRenderBuffer);
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, actualWidth, actualHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, actualWidth, actualHeight, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -73,6 +73,8 @@ void PRMThirds::init() {
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         std::cout << "framebuffer error" << std::endl;
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     std::cout << "initialized PRMThirds" << std::endl;
 }
