@@ -25,6 +25,8 @@
 #include <PRM/PRMAlg.h>
 #include <PRM/ImageProcessor.h>
 
+#include "opencv2/highgui.hpp"
+
 using namespace std;
 // using namespace Eigen;
 
@@ -67,8 +69,22 @@ void PRMThirds::init() {
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, actualWidth, actualHeight);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthRenderBuffer);
 
-    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
-    glDrawBuffers(1, DrawBuffers);
+    // GLuint texture;
+	// glGenTextures(1, &texture);
+
+	// glBindTexture(GL_TEXTURE_2D, texture);
+	// glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT, actualWidth, actualHeight, 0, GL_DEPTH_COMPONENT, GL_FLOAT, nullptr);
+
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+	// glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	// glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, texture, 0);
+
+    // GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    // glDrawBuffers(1, DrawBuffers);
 
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         std::cout << "framebuffer error" << std::endl;
@@ -80,6 +96,10 @@ void PRMThirds::init() {
 }
 
 void PRMThirds::update(float dt) {
+
+}
+
+void PRMThirds::postrender() {
     Eigen::Vector3f p, d;
     p = curNode->getPosition();
     d = curNode->getDirection();
@@ -90,7 +110,7 @@ void PRMThirds::update(float dt) {
 
     transform->setPosition(camPos);
     transform->setForward(camDir);
-
+    
     glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
     glBlitFramebuffer(
@@ -98,9 +118,23 @@ void PRMThirds::update(float dt) {
         0, 0, actualWidth, actualHeight,
         GL_COLOR_BUFFER_BIT, GL_NEAREST
     );
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+   
+    
+    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    // glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
+    // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    // glBlitFramebuffer(
+    //     0, 0, actualWidth, actualHeight,
+    //     0, 0, actualWidth, actualHeight,
+    //     GL_COLOR_BUFFER_BIT, GL_NEAREST
+    // );
+    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     cv::Mat ocvImg = ocvImgFromGlTex(renderTexture);
+    // cv::namedWindow("TESTING");
+    // cv::imshow("TESTING", ocvImg);
 
     double nodeWeight = std::abs(detectThirds(ocvImg) - 0.66666666);
     if (generatingRootNode && genThirds) {

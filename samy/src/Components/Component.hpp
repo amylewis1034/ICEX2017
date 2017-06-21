@@ -10,6 +10,7 @@ public:
 
     virtual void init();
     virtual void update(float dt);
+    virtual void postrender();
 
     void setGameObject(GameObject *gameobject);
 

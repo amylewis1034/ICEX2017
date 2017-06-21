@@ -11,7 +11,7 @@
 class DeferredShadowRenderer : public Renderer {
 public:
     DeferredShadowRenderer();
-    ~DeferredShadowRenderer();
+    virtual ~DeferredShadowRenderer();
 
     virtual void render(const glm::mat4 &projection, const glm::mat4 &view, const glm::vec3 &eye, World &world);
 

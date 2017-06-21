@@ -174,6 +174,10 @@ void World::render(float dt) {
     glm::vec3 eye = camPosTransform->getPosition();
 
 	this->render(projection, view, eye);
+
+	for (GameObject *g : gameobjects) {
+		g->postrender();
+	}
 }
 
 void World::render(const glm::mat4 &projection, const glm::mat4 &view, const glm::vec3 &eye) {

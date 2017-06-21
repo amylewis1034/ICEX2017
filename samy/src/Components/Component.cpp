@@ -17,6 +17,10 @@ void Component::update(float dt) {
 
 }
 
+void Component::postrender() {
+    
+}
+
 void Component::setGameObject(GameObject *gameobject) {
     this->gameobject = gameobject;
 }

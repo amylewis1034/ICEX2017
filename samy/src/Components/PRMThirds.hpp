@@ -15,6 +15,7 @@ public:
 
     void init();
     void update(float dt);
+    void postrender();
 
 private:
     void setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir);

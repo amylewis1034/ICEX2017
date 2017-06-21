@@ -9,7 +9,7 @@
 class ParticleRenderer : public Renderer {
 public:
     ParticleRenderer();
-    ~ParticleRenderer();
+    virtual ~ParticleRenderer();
 
     virtual void render(const glm::mat4 &projection, const glm::mat4 &view, const glm::vec3 &eye, World &world);
 

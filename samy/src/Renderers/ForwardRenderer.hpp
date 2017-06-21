@@ -11,7 +11,7 @@
 class ForwardRenderer : public Renderer {
 public:
     ForwardRenderer();
-    ~ForwardRenderer();
+    virtual ~ForwardRenderer();
 
     virtual void render(const glm::mat4 &projection, const glm::mat4 &view, const glm::vec3 &eye, World &world);
 

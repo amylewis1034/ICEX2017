@@ -21,8 +21,16 @@ Mat ocvImgFromGlTex(GLuint glTexID) {
 	static unsigned char* gl_texture_bytes = (unsigned char*) malloc(sizeof(unsigned char)*gl_texture_width*gl_texture_height*3);
 	glGetTexImage(GL_TEXTURE_2D, 0 /* mipmap level */, GL_BGR, GL_UNSIGNED_BYTE, gl_texture_bytes);
 
-	Mat temp;
+    Mat temp;
 	flip(Mat(gl_texture_height, gl_texture_width, CV_8UC3, gl_texture_bytes), temp, FLIP_ON_X_AXIS);
+
+    //  Mat img(gl_texture_height,gl_texture_width, CV_8UC3);
+    // glPixelStorei(GL_PACK_ALIGNMENT, (img.step & 3) ? 1 : 4);
+    // glPixelStorei(GL_PACK_ROW_LENGTH, (img.step / img.elemSize()));
+    // glReadPixels(0, 0, img.cols, img.rows, GL_BGR, GL_UNSIGNED_BYTE, img.data);
+    //flip(img, flipped, 0);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
 	return temp;
 }
@@ -96,7 +104,7 @@ double detectThirds(Mat src) {
       /// Show in a window
    	namedWindow("Thirds", CV_WINDOW_AUTOSIZE);
    	imshow("Thirds", drawing);
-    cv::waitKey(1);
+    // cv::waitKey(1);
     // imwrite("../resources/test.jpg", drawing);
    	return yThirds;
    }

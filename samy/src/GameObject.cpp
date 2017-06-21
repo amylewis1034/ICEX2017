@@ -36,6 +36,12 @@ void GameObject::update(float dt) {
     }
 }
 
+void GameObject::postrender() {
+    for (Component *c : components) {
+        c->postrender();
+    }
+}
+
 void GameObject::setTag(std::string newTag) {
     this->tag = newTag;
 }
