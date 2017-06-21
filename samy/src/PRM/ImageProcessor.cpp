@@ -96,6 +96,7 @@ double detectThirds(Mat src) {
       /// Show in a window
    	namedWindow("Thirds", CV_WINDOW_AUTOSIZE);
    	imshow("Thirds", drawing);
+    cv::waitKey(1);
     // imwrite("../resources/test.jpg", drawing);
    	return yThirds;
    }
