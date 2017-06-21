@@ -33,7 +33,7 @@ static Component *parseTransform(Value &args) {
     if (args.Size() >= 3)
         transform->translate(parseVec3(args, 0));
     if (args.Size() >= 7)
-        transform->rotate(glm::degrees(args[3].GetFloat()), parseVec3(args, 4));
+        transform->rotate(glm::radians(args[3].GetFloat()), parseVec3(args, 4));
     if (args.Size() >= 10)
         transform->scale(parseVec3(args, 7));
         
@@ -105,15 +105,18 @@ static Component *parsePlayerInput(Value &args) {
 static Component *parsePRMInput(Value &args) {
     PRMInput *prmInput = nullptr;
 
-	assert(args.Size() >= 2 && args[0].IsFloat() && args[1].IsString());
-	if (args.Size() == 2) {
-		prmInput = new PRMInput(args[0].GetFloat(), args[1].GetString());
-	}
-	else {
-		prmInput = new PRMInput(args[0].GetFloat(), args[1].GetString(), args[2].GetBool());
-	}
+	assert(args.Size() == 2 && args[0].IsFloat() && args[1].IsString());
+	prmInput = new PRMInput(args[0].GetFloat(), args[1].GetString());
 
     return (Component *) prmInput;
+}
+
+static Component *parsePRMThirds(Value &args) {
+    PRMThirds *prmThirds = nullptr;
+
+	prmThirds = new PRMThirds();
+
+    return (Component *) prmThirds;
 }
 
 static Component *parseMaterial(Value &args) {
@@ -211,6 +214,7 @@ const static std::map<std::string, std::function<Component *(Value &args)>> cmap
     {"Heightmap", parseHeightmap},
     {"PlayerInput", parsePlayerInput},
 	{"PRMInput", parsePRMInput},
+	{"PRMThirds", parsePRMThirds},
 	{"Material", parseMaterial},
     {"Mesh", parseMesh},
 	{"Particle", parseParticle},

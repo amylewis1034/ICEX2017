@@ -28,12 +28,11 @@ PRMInput::PRMInput(const std::string pathfile) :
     splineNum(450 / totalPathLen)
     {}
 
-PRMInput::PRMInput(float speed, const std::string pathfile, bool generatePath) :
+PRMInput::PRMInput(float speed, const std::string pathfile) :
 	speed(speed),
     pathfile(pathfile),
     totalPathLen(12),
-    splineNum(450 / totalPathLen),
-    generatePath(generatePath)
+    splineNum(450 / totalPathLen)
 	{}
 
 PRMInput::~PRMInput() {}
@@ -42,26 +41,17 @@ void PRMInput::init() {
     transform = gameobject->getComponent<Transform>();
     assert(transform != nullptr);
 
-    if (generatePath) {
-        cout << "Generating path" << endl;
-    }
-
     initCamPath();
 }
 
 void PRMInput::update(float dt) {
     static int curIter = 0;
 
-    // float move_speed = dt * speed;
-    // glm::vec3 delta = glm::vec3(0.0f);
-
     curIter = ((curIter + 1) % camPosVec.size());
     setCamPos6dof(camPosVec[curIter], camDirVec[curIter]);
 
     transform->setPosition(camPos);
     transform->setForward(camDir);
-
-    // transform->translate(delta);
 }
 
 float PRMInput::getSpeed() const {
@@ -80,6 +70,7 @@ void PRMInput::initCamPath() {
    else {
       fileLocation = string(RESOURCE_PATH "path.txt");
    }
+   cout << "Opening path " << fileLocation << endl;
    ifstream pathFile(fileLocation);
    if (!pathFile.is_open()) {
       std::cerr << "Cannot open path input file" << std::endl;

@@ -6,7 +6,7 @@
 using namespace glm;
 using namespace std;
 
-Seaweed::Seaweed():
+Seaweed::Seaweed()
 {}
 
 Seaweed::~Seaweed() {}

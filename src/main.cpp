@@ -1322,16 +1322,16 @@ static void renderThirds() {
    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
    // Clear framebuffer.
-   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
    //draw textured quad
-   tex_prog->bind();
-   glActiveTexture(GL_TEXTURE0);
-   glBindTexture(GL_TEXTURE_2D, renderTexture);
-   glUniform1i(tex_prog->getUniform("texBuf"), 0);
+//    tex_prog->bind();
+//    glActiveTexture(GL_TEXTURE0);
+//    glBindTexture(GL_TEXTURE_2D, renderTexture);
+//    glUniform1i(tex_prog->getUniform("texBuf"), 0);
 
-   glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-   glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, myFrame);
+//    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//    glGetTexImage(GL_TEXTURE_2D, 0, GL_RGBA, GL_UNSIGNED_BYTE, myFrame);
 
    // OpenCV Image Processing
    cv::Mat ocvImg = ocvImgFromGlTex(renderTexture);
@@ -1371,12 +1371,12 @@ static void renderThirds() {
       }
    }
 
-   glEnableVertexAttribArray(0);
-   glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
-   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
-   glDrawArrays(GL_TRIANGLES, 0, 6);
-   glDisableVertexAttribArray(0);
-   tex_prog->unbind();
+//    glEnableVertexAttribArray(0);
+//    glBindBuffer(GL_ARRAY_BUFFER, quad_vertexbuffer);
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void *) 0);
+//    glDrawArrays(GL_TRIANGLES, 0, 6);
+//    glDisableVertexAttribArray(0);
+//    tex_prog->unbind();
 }
 
 static void renderNormals() {

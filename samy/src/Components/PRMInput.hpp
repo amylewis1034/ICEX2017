@@ -12,7 +12,7 @@
 class PRMInput : public Component {
 public:
     PRMInput(const std::string pathfile);
-	PRMInput(float speed, const std::string pathfile, bool generatePath = false);
+	PRMInput(float speed, const std::string pathfile);
     ~PRMInput();
 
     void init();
@@ -30,7 +30,6 @@ private:
 
     int totalPathLen;
     int splineNum;
-    bool generatePath;
 
     std::string pathfile;
     int pathLength;

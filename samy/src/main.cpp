@@ -33,10 +33,18 @@ bool load_icon(GLFWimage *image, const char *path);
 GLFWwindow *window;
 World *world;
 
-void init() {
+void init(int argc, char **argv) {
     world = new World();
 
-    LevelParser::ParseWorld(world, "../src/world.json");
+    if (argc > 1) {
+        for (int i = 1; i < argc; i++) {
+            std::string worldfile = std::string(RESOURCE_PATH) + std::string(argv[i]);
+            LevelParser::ParseWorld(world, worldfile);
+        }
+    }
+    else {
+        LevelParser::ParseWorld(world, RESOURCE_PATH "world.json");
+    }
 
     world->init();
 }
@@ -66,7 +74,7 @@ int main(int argc, char **argv) {
     // Enabling this will mess up skybox
     // glEnable(GL_CULL_FACE);
 
-    init();
+    init(argc, argv);
     GLfloat deltaTime;
     GLfloat lastFrame = 0.0f;
     const float tick_rate = 1.0f / 60.0f;

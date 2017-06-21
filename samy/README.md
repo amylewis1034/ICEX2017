@@ -1,5 +1,14 @@
 # ICEX 2017 Underwater Visualization
 
+## Code Overview
+The project uses an entity component style engine. Each GameObject is essentially a collection of Components which define the behavior of the GameObject. For example, the GameObject that represents a controllable character might contain a Transform component to store orientation and position, a Camera component that handles providing relevant view transformations during rendering, and a PlayerInput component so that the player can be controlled via mouse and keyboard.
+
+The World class holds all of the GameObjects and handles initializing and updating all GameObjects. It also contains the render loop, which gets relevant camera information and then hands off rendering the scene to a Renderer.
+
+To make it easier to create the GameObjects and add them to the World, json configuration files can be parsed and loaded. The syntax is simple and involves defining all the desired GameObjects along with their Components. Check out world.json for a basic example. By default, the executable will load world.json. If command line arguments are passed they will all be interpreted as configuration files to load. The paths passed are expected to be relevant to the resources directory.
+
+To work with PRM paths, one can attach both a PlayerInput and a PRMInput to the player GameObject and then use the 'p' key to toggle between the two. To generate the path, use the renderthirds.json file (Make sure the scene is the same. Also maybe disable postprocessing step?).
+
 ### References
 * [Learn OpenGL](https://learnopengl.com/)
 * [Unity Engine](https://unity3d.com/)

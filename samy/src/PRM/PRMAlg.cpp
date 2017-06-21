@@ -4,6 +4,7 @@
 #include <time.h>
 #include "PRMAlg.h"
 #include "Utilities.h"
+#include <icex_common.hpp>
 
 bool genThirds = false, genNorms = false, genCombo = false, playPaths = false;
 
@@ -65,7 +66,7 @@ PRMNode *generatePRMNode() {
 			genThirds ? currentNode->getWeight() > weightThresh 
 				: currentNode->getWeight() < weightThresh);
 	}
-	
+
 	++iteration;
 	PRMNode *newNode = new PRMNode(roadMap.at(nodeNdx));
 	roadMap.push_back(newNode);
@@ -107,7 +108,7 @@ PRMNode *generatePRMNode() {
 		roadMap.clear();
 
 		// Write path to file
-		std::ofstream outfile("resources/path.txt");
+		std::ofstream outfile(RESOURCE_PATH "path_test.txt");
 		if (outfile.is_open()) {
 			outfile << path.size() << std::endl;
 			for (int i = 0; i < path.size(); i++) {
