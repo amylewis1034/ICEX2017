@@ -78,8 +78,10 @@ double detectThirds(Mat src) {
 
    // Draw polygonal contour + bonding rects + circles
    Mat drawing = Mat::zeros(threshold_output.size(), CV_8UC3);
+   Mat drawingOut = Mat::zeros(threshold_output.size(), CV_8UC3);
    // src.copyTo(drawing);
    src_gray.copyTo(drawing);
+   src_gray.copyTo(drawingOut);
 
    // draw lines on the thirds
    line(drawing, Point(picWidth / 3, 0), Point(picWidth / 3, picHeight), Scalar(192, 192, 192), 1, 8, 0);
@@ -100,10 +102,11 @@ double detectThirds(Mat src) {
 
       // rule of thirds using y position of top left corner
       double yThirds = 1.0 - (double) bigRect.tl().y / picHeight;
-
+     
       /// Show in a window
-   	namedWindow("Thirds", CV_WINDOW_AUTOSIZE);
-   	imshow("Thirds", drawing);
+   	namedWindow("Thirds", CV_WINDOW_NORMAL);
+    cv::resize(drawing, drawingOut, Size(0,0), 0.5, 0.5, INTER_LINEAR);
+   	imshow("Thirds", drawingOut);
     // cv::waitKey(1);
     // imwrite("../resources/test.jpg", drawing);
    	return yThirds;

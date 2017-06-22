@@ -75,7 +75,7 @@ World::~World() {
 }
 
 void World::init() {
-	// srand(time(NULL));
+	srand(time(NULL));
     for (GameObject *g : gameobjects) {
         g->init();
     }
