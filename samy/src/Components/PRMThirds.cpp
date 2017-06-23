@@ -99,7 +99,7 @@ void PRMThirds::update(float dt) {
 
 }
 
-void PRMThirds::postrender() {
+void PRMThirds::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
     Eigen::Vector3f p, d;
     p = curNode->getPosition();
     d = curNode->getDirection();

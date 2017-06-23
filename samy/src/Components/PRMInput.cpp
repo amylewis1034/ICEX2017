@@ -4,6 +4,8 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <GL/glew.h>
 
 #include <Eigen/Dense>
 
@@ -16,6 +18,7 @@
 
 #include "PRMInput.hpp"
 #include "Transform.hpp"
+#include <Input/Keyboard.hpp>
 #include <GameObject.hpp>
 
 using namespace std;
@@ -41,7 +44,17 @@ void PRMInput::init() {
     transform = gameobject->getComponent<Transform>();
     assert(transform != nullptr);
 
+    simpleShader.linkProgram(SHADER_PATH "simple.vert", SHADER_PATH "simple.frag");
+
     initCamPath();
+
+    pathsVertArrayObj.bind();
+    glEnableVertexAttribArray(0);
+    pathsVertBufObj.loadData(GL_ARRAY_BUFFER, camPosVec.size() * sizeof(glm::vec3), camPosVec.data(), GL_STATIC_DRAW);
+    pathsVertArrayObj.addAttribute(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (GLvoid *)0);
+    
+    pathsVertArrayObj.unbind();
+    pathsVertBufObj.unbind();
 }
 
 void PRMInput::update(float dt) {
@@ -138,6 +151,23 @@ void PRMInput::initCamPath() {
 
    // Set camera to first position in path
    setCamPos6dof(camPosVec[0], camDirVec[0]);
+}
+
+void PRMInput::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
+    if (Keyboard::getKeyToggle(GLFW_KEY_L)) {
+        simpleShader.bind();
+        static glm::mat4 model;
+        glUniformMatrix4fv(simpleShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(simpleShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(simpleShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+
+        pathsVertArrayObj.bind();
+        glLineWidth(4);
+        glDrawArrays(GL_LINE_STRIP, 0, camPosVec.size());
+        pathsVertArrayObj.unbind();
+
+        simpleShader.unbind();
+    }
 }
 
 void PRMInput::setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir) {

@@ -43,7 +43,7 @@ public:
 
     void init();
     void update(float dt);
-    void postrender();
+    void postrender(const glm::mat4 &projection, const glm::mat4 &view);
     void setTag(std::string newTag);
     const std::string &getTag() const;
 

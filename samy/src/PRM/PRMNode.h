@@ -28,6 +28,13 @@ public:
 	void setNdx(int index) {ndx = index;}
 	double getWeight() {return weight;}
 	void setWeight(double nodeWeight) {weight = nodeWeight;}
+	Eigen::Vector3f calcFreeDirection(float theta, int pathLength);
+	Eigen::Vector3f calcFreePosition(float height, int pathLength);
+	float getCamTheta() { return camTheta; }
+	float getCamPhi() { return camPhi; }
+
+	static Eigen::Vector3f centerWorld;
+	static Eigen::Vector3f constVelMults;
 
 private:
 	Eigen::Vector3f position;
@@ -36,6 +43,9 @@ private:
 	int pathLength;
 	int ndx;
 	double weight;
+	float camTheta;
+	float camPhi;
+	float robotTheta;
 };
 
 #endif

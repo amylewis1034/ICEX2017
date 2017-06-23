@@ -15,7 +15,7 @@ public:
 
     void init();
     void update(float dt);
-    void postrender();
+    void postrender(const glm::mat4 &projection, const glm::mat4 &view);
 
 private:
     void setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir);

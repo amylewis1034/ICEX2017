@@ -9,6 +9,9 @@ const float initalTheta = -M_PI_4 / 2;
 const float posDelta = (2 * M_PI) / totalPathLen;
 const float offset = M_PI;
 const double radius = 26;
+Eigen::Vector3f PRMNode::centerWorld = Eigen::Vector3f(6, 0, -1);
+Eigen::Vector3f PRMNode::constVelMults = Eigen::Vector3f(1.0, 1.0, 0.8);
+const float robotVelocity = 1.632f;
 
 // Calculate the position of the node based on how far it is along circle
 Eigen::Vector3f calcPosition(float height, int pathLength) {
@@ -16,9 +19,31 @@ Eigen::Vector3f calcPosition(float height, int pathLength) {
 
    double curRadius = randRangef(radius - 1, radius + 1);
    return Eigen::Vector3f(
-   	1.0 * curRadius * cos(posTheta) + 6, 
-   	height, 
-   	0.8 * curRadius * sin(posTheta) - 1);
+   	PRMNode::constVelMults[0] * curRadius * cos(posTheta) + PRMNode::centerWorld[0], 
+   	PRMNode::constVelMults[1] * height + PRMNode::centerWorld[1], 
+   	PRMNode::constVelMults[2] * curRadius * sin(posTheta) + PRMNode::centerWorld[2]);
+}
+
+Eigen::Vector3f PRMNode::calcFreePosition(float height, int pathLength) {
+   double posTheta = pathLength * posDelta;
+   float posX, posY, posZ;
+
+   if (getParent() == NULL) {
+	   posX = 0; 
+	   posY = 6;
+	   posZ = -10;
+   }
+   else {
+	posX = getParent()->getPosition()[0];
+	posY = getParent()->getPosition()[1];
+	posZ = getParent()->getPosition()[2];
+   }
+
+   double curRadius = randRangef(radius - 1, radius + 1);
+   return Eigen::Vector3f(
+   	posX + robotVelocity * cos(getCamTheta()), 
+   	posY + randRangef(-1, 1), //check to see if going through ground 
+   	posZ + robotVelocity * sin(getCamTheta()));
 }
 
 // Calculate the direction the node should point to look at center of circle 
@@ -29,19 +54,44 @@ Eigen::Vector3f calcDirection(float theta, int pathLength) {
 	return Eigen::Vector3f(1.0 * cos(offset + dirTheta), theta, 0.8 * -sin(dirTheta));
 }
 
+Eigen::Vector3f PRMNode::calcFreeDirection(float theta, int pathLength) {
+	float randTheta = randRangef(0.0872665f, 0.261799f);
+	float randPhi = randRangef(0.0872665f, 0.261799f);
+
+	float curTheta, curPhi;
+	if (getParent() == NULL) {
+		curTheta = M_PI + randTheta;
+		curPhi = randPhi;
+	}
+	else {
+		curTheta = getParent()->getCamTheta() + randTheta;
+		curPhi = getParent()->getCamPhi() + randPhi;
+	}
+
+	float camX = cos(curPhi) * cos(curTheta);
+	float camY = sin(curPhi);
+	float camZ = cos(curPhi) * cos(M_PI/2 - curTheta);
+
+	return Eigen::Vector3f( camX, camY, camZ );
+}
+
 PRMNode::PRMNode() {
 	parent = NULL;
 	pathLength = 1;
 	weight = 0;
+	//Maybe start towards to wreck
+	camPhi = 0;
+	camTheta = M_PI;
+	robotTheta = randRangef(0.0f, M_PI);
 
 	// Strange bug where first time rand() is called, we always get the same 
 	// value so we call it once before we actully use it
 	randRangef(4.0, 16.0); 
-	position = calcPosition(randRangef(4.0, 12.0), pathLength - 1);
-	direction = calcDirection(
+	position = calcFreePosition(randRangef(4.0, 12.0), pathLength - 1);
+	direction = calcFreeDirection(
 		randRangef(
 			initalTheta - 3 * thetaMaxDelta, 
-			initalTheta + 3 * thetaMaxDelta), 
+			initalTheta + 3 * thetaMaxDelta), //random pitch
 		pathLength - 1);
 }
 
@@ -60,8 +110,8 @@ PRMNode::PRMNode(PRMNode *withinDelta) {
 		height = randRangef(parentH - heightMaxDelta, parentH + heightMaxDelta);
 	}
 
-	position = calcPosition(height, pathLength - 1);
-	direction = calcDirection(
+	position = calcFreePosition(height, pathLength - 1);
+	direction = calcFreeDirection(
 		randRangef(parentT - thetaMaxDelta, parentT + thetaMaxDelta), 
 		pathLength - 1);
 }

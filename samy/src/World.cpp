@@ -176,7 +176,7 @@ void World::render(float dt) {
 	this->render(projection, view, eye);
 
 	for (GameObject *g : gameobjects) {
-		g->postrender();
+		g->postrender(projection, view);
 	}
 }
 

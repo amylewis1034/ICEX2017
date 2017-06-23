@@ -36,9 +36,9 @@ void GameObject::update(float dt) {
     }
 }
 
-void GameObject::postrender() {
+void GameObject::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
     for (Component *c : components) {
-        c->postrender();
+        c->postrender(projection, view);
     }
 }
 

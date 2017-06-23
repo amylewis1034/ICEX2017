@@ -17,7 +17,7 @@ void Component::update(float dt) {
 
 }
 
-void Component::postrender() {
+void Component::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
     
 }
 

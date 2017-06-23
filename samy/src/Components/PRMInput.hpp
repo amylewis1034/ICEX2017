@@ -5,6 +5,9 @@
 #include <vector>
 
 #include <glm/glm.hpp>
+#include <Graphics/GLShaderProgram.hpp>
+#include <Graphics/GLVertexArrayObject.hpp>
+#include <Graphics/GLBuffer.hpp>
 
 #include "Component.hpp"
 #include "Transform.hpp"
@@ -21,6 +24,8 @@ public:
 	float getSpeed() const;
 
 	void setSpeed(float speed);
+
+    void postrender(const glm::mat4 &projection, const glm::mat4 &view);
 private:
     void initCamPath();
     void setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir);
@@ -35,6 +40,11 @@ private:
     int pathLength;
     glm::vec3 camPos, camDir;
     std::vector<glm::vec3> camPosVec, camDirVec;
+    GLShaderProgram simpleShader;
+
+    // VAO and VBO for circular path
+    GLVertexArrayObject pathsVertArrayObj;
+    GLBuffer pathsVertBufObj;
 };
 
 #endif
