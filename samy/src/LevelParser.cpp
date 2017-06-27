@@ -114,9 +114,19 @@ static Component *parsePRMInput(Value &args) {
 static Component *parsePRMThirds(Value &args) {
     PRMThirds *prmThirds = nullptr;
 
-	prmThirds = new PRMThirds();
+	assert(args.Size() == 1 && args[0].IsInt());
+	prmThirds = new PRMThirds(args[0].GetInt());
 
     return (Component *) prmThirds;
+}
+
+static Component *parsePRMNorms(Value &args) {
+    PRMNorms *prmNorms = nullptr;
+
+	assert(args.Size() == 1 && args[0].IsInt());
+	prmNorms = new PRMNorms(args[0].GetInt());
+
+    return (Component *) prmNorms;
 }
 
 static Component *parseMaterial(Value &args) {
@@ -215,6 +225,7 @@ const static std::map<std::string, std::function<Component *(Value &args)>> cmap
     {"PlayerInput", parsePlayerInput},
 	{"PRMInput", parsePRMInput},
 	{"PRMThirds", parsePRMThirds},
+	{"PRMNorms", parsePRMNorms},
 	{"Material", parseMaterial},
     {"Mesh", parseMesh},
 	{"Particle", parseParticle},

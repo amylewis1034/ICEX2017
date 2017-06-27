@@ -15,7 +15,7 @@
 
 #include <cassert>
 
-#include "PRMThirds.hpp"
+#include "PRMNorms.hpp"
 #include "Transform.hpp"
 #include <GameObject.hpp>
 
@@ -29,19 +29,19 @@ using namespace std;
 
 extern GLFWwindow *window;
 
-const double weightThreshThirds = 0.04;
+const double weightThreshNorm = 0.25;
 
-PRMThirds::PRMThirds(int numNodes) :
+PRMNorms::PRMNorms(int numNodes) :
     numNodes(numNodes)
     {}
 
-PRMThirds::~PRMThirds() {}
+PRMNorms::~PRMNorms() {}
 
-void PRMThirds::init() {
+void PRMNorms::init() {
     transform = gameobject->getComponent<Transform>();
     assert(transform != nullptr);
 
-    genThirds = true;
+    genThirds = false;
 
     curNode = generateRootPRMNode(numNodes);
     // bestRootWeight = genThirds ? 1 : 0;
@@ -91,53 +91,34 @@ void PRMThirds::init() {
 
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-    std::cout << "initialized PRMThirds" << std::endl;
+    std::cout << "initialized PRMNorms" << std::endl;
 }
 
-void PRMThirds::update(float dt) {
+void PRMNorms::update(float dt) {
 
 }
 
-void PRMThirds::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
-    glm::vec3 p, d;
-    p = curNode->getPosition();
-    d = curNode->getDirection();
-    setCamPos6dof(
-        glm::vec3(p[0], p[1], p[2]),
-        glm::vec3(d[0], d[1], d[2])
-    );
+void PRMNorms::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
+    // Set the camera position & direction based on current node
+    setCamPos6dof(curNode->getPosition(), curNode->getDirection());
 
-    transform->setPosition(camPos);
-    transform->setForward(camDir);
-    
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
-    glBlitFramebuffer(
-        0, 0, actualWidth, actualHeight,
-        0, 0, actualWidth, actualHeight,
-        GL_COLOR_BUFFER_BIT, GL_NEAREST
-    );
-     glBindFramebuffer(GL_FRAMEBUFFER, 0);
-   
-    
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // Get current frame buffer size.
+    // Important for retina displays!
+    glfwGetFramebufferSize(window, &actualWidth, &actualHeight);
+    glViewport(0, 0, actualWidth, actualHeight);
 
-    // glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-    // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    // glBlitFramebuffer(
-    //     0, 0, actualWidth, actualHeight,
-    //     0, 0, actualWidth, actualHeight,
-    //     GL_COLOR_BUFFER_BIT, GL_NEAREST
-    // );
-    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    // Write to the framebuffer so we can transfer the image to OpenCV
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer); // This goes with writeToTexture call
+
+    // Clear framebuffer.
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    float aspect = actualWidth/(float)actualHeight;
 
     cv::Mat ocvImg = ocvImgFromGlTex(renderTexture);
-    // cv::namedWindow("TESTING");
-    // cv::imshow("TESTING", ocvImg);
+    double nodeWeight = detectNormals(ocvImg);
 
-    double nodeWeight = std::abs(detectThirds(ocvImg) - 0.66666666);
-    if (generatingRootNode && genThirds) {
-        if (nodeWeight < bestRootWeight) {
+    if (generatingRootNode) {
+        if (nodeWeight > bestRootWeight) {
             bestRootNode = curNode;
             bestRootWeight = nodeWeight;
         }
@@ -149,29 +130,22 @@ void PRMThirds::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
             setRootPRMNode(bestRootNode);
             generatingRootNode = false;
             bestRootNode->setWeight(bestRootWeight);
-            if (genThirds && bestRootWeight < weightThreshThirds) {
+            if (genNorms && bestRootWeight > weightThreshNorm) {
                 highWeightNodes.push_back(bestRootNode->getNdx());
             }
-            if (genThirds) {
-                curNode = generatePRMNode(numNodes);
-            }
-        }
-    }
-    else if (generatingRootNode) {
-        curNode->setWeight(nodeWeight);
-    }
-    else {
-        curNode->setWeight(nodeWeight);
-        if (genThirds && nodeWeight < weightThreshThirds) {
-            highWeightNodes.push_back(curNode->getNdx());
-        }
-        if (genThirds) {
             curNode = generatePRMNode(numNodes);
         }
     }
+    else {
+        curNode->setWeight(nodeWeight);
+        if (genNorms && nodeWeight > weightThreshNorm) {
+            highWeightNodes.push_back(curNode->getNdx());
+        }
+        curNode = generatePRMNode(numNodes);
+    }
 }
 
-void PRMThirds::setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir) {
+void PRMNorms::setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir) {
     camPos = pos;
     camDir = dir;
 }

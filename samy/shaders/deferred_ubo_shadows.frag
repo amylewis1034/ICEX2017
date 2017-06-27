@@ -77,24 +77,26 @@ void main()
 {
 	vec3 position = texture(gPosition, fragTexcoord).rgb;
     vec3 normal = texture(gNormal, fragTexcoord).rgb;
-    vec4 albedo = texture(gAlbedoSpecular, fragTexcoord);
-	
+	vec4 albedo = texture(gAlbedoSpecular, fragTexcoord);
+
 	vec3 light = normalize(lightPos - position);
 	vec3 view = normalize(eye - position);
 
 	vec3 ambient = lightInt * albedo.rgb;
 	vec3 diffuse = lightInt * max(dot(normal, light), 0) * albedo.rgb;
-	
+
 	// Using Blinn-Torrance
 	vec3 h = normalize(0.5 * (view + light));
 	float vdotr = max(dot(normal, h), 0);
-	
+
 	vec3 specular = pow(vdotr, albedo.a) * lightInt * albedo.rgb;
 
 
 	color = vec4((1.0 - shadow((ls * vec4(position, 1.0)).xyz)) * (ambient + diffuse + specular), 1.0);
-	// color = vec4(ambient + (1.0 - shadow((ls * vec4(position, 1.0)).xyz)) * (diffuse + specular), 1.0);
-	
+	color = vec4(ambient + (1.0 - shadow((ls * vec4(position, 1.0)).xyz)) * (diffuse + specular), 1.0);
+
+	//color = vec4(normal, 1.0);
+
 	for (int i = 0; i < num_pointlights; i++)
 		color += vec4(calcPointLight(pointlights[i], position, normal, albedo), 0);
 }

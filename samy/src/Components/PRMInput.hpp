@@ -33,7 +33,6 @@ private:
     Transform *transform;
     float speed;
 
-    int totalPathLen;
     int splineNum;
 
     std::string pathfile;

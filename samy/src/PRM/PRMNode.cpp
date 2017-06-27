@@ -6,26 +6,25 @@
 const float heightMaxDelta = 2.5;
 const float thetaMaxDelta = M_PI / 24;
 const float initalTheta = -M_PI_4 / 2;
-const float posDelta = (2 * M_PI) / totalPathLen;
 const float offset = M_PI;
 const double radius = 26;
-Eigen::Vector3f PRMNode::centerWorld = Eigen::Vector3f(6, 0, -1);
-Eigen::Vector3f PRMNode::constVelMults = Eigen::Vector3f(1.0, 1.0, 0.8);
+glm::vec3 PRMNode::centerWorld = glm::vec3(6, 0, -1);
+glm::vec3 PRMNode::constVelMults = glm::vec3(1.0, 1.0, 0.8);
 const float robotVelocity = 1.632f;
 
 // Calculate the position of the node based on how far it is along circle
-Eigen::Vector3f calcPosition(float height, int pathLength) {
-   double posTheta = pathLength * posDelta;
+glm::vec3 calcPosition(float height, int pathLength, int numNodes) {
+   double posTheta = pathLength * (2 * M_PI) / 20;
 
    double curRadius = randRangef(radius - 1, radius + 1);
-   return Eigen::Vector3f(
+   return glm::vec3(
    	PRMNode::constVelMults[0] * curRadius * cos(posTheta) + PRMNode::centerWorld[0], 
    	PRMNode::constVelMults[1] * height + PRMNode::centerWorld[1], 
    	PRMNode::constVelMults[2] * curRadius * sin(posTheta) + PRMNode::centerWorld[2]);
 }
 
-Eigen::Vector3f PRMNode::calcFreePosition(float height, int pathLength) {
-   double posTheta = pathLength * posDelta;
+glm::vec3 PRMNode::calcFreePosition(float height, int pathLength) {
+   double posTheta = pathLength * (2 * M_PI) / 12;
    float posX, posY, posZ;
 
    if (getParent() == NULL) {
@@ -40,7 +39,7 @@ Eigen::Vector3f PRMNode::calcFreePosition(float height, int pathLength) {
    }
 
    double curRadius = randRangef(radius - 1, radius + 1);
-   return Eigen::Vector3f(
+   return glm::vec3(
    	posX + robotVelocity * cos(getCamTheta()), 
    	posY + randRangef(-1, 1), //check to see if going through ground 
    	posZ + robotVelocity * sin(getCamTheta()));
@@ -48,13 +47,13 @@ Eigen::Vector3f PRMNode::calcFreePosition(float height, int pathLength) {
 
 // Calculate the direction the node should point to look at center of circle 
 // based how far it is along circle
-Eigen::Vector3f calcDirection(float theta, int pathLength) {
-	double dirTheta = pathLength * posDelta;
+glm::vec3 calcDirection(float theta, int pathLength) {
+	double dirTheta = pathLength * (2 * M_PI) / 20;
 
-	return Eigen::Vector3f(1.0 * cos(offset + dirTheta), theta, 0.8 * -sin(dirTheta));
+	return glm::vec3(1.0 * cos(offset + dirTheta), theta, 0.8 * -sin(dirTheta));
 }
 
-Eigen::Vector3f PRMNode::calcFreeDirection(float theta, int pathLength) {
+glm::vec3 PRMNode::calcFreeDirection(float theta, int pathLength) {
 	float randTheta = randRangef(0.0872665f, 0.261799f);
 	float randPhi = randRangef(0.0872665f, 0.261799f);
 
@@ -72,7 +71,7 @@ Eigen::Vector3f PRMNode::calcFreeDirection(float theta, int pathLength) {
 	float camY = sin(curPhi);
 	float camZ = cos(curPhi) * cos(M_PI/2 - curTheta);
 
-	return Eigen::Vector3f( camX, camY, camZ );
+	return glm::vec3( camX, camY, camZ );
 }
 
 PRMNode::PRMNode() {

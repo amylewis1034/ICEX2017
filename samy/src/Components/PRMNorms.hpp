@@ -1,5 +1,5 @@
-#ifndef PRMTHIRDS_HPP
-#define PRMTHIRDS_HPP
+#ifndef PRMNORMS_HPP
+#define PRMNORMS_HPP
 
 #include <GL/glew.h>
 
@@ -8,10 +8,10 @@
 
 #include <PRM/PRMNode.h>
 
-class PRMThirds : public Component {
+class PRMNorms : public Component {
 public:
-    PRMThirds(int numNodes);
-    ~PRMThirds();
+    PRMNorms(int numNodes);
+    ~PRMNorms();
 
     void init();
     void update(float dt);
@@ -27,7 +27,7 @@ private:
     double bestRootWeight = 0.0;
     int rootIter = 0;
     bool generatingRootNode = true;
-    bool genThirds = true;
+    bool genThirds = false;
 
     int numNodes;
 

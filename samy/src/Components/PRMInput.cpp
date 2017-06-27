@@ -7,8 +7,6 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <GL/glew.h>
 
-#include <Eigen/Dense>
-
 #include <iostream>
 #include <string>
 #include <vector>
@@ -22,20 +20,17 @@
 #include <GameObject.hpp>
 
 using namespace std;
-// using namespace Eigen;
 
 PRMInput::PRMInput(const std::string pathfile) :
     speed(10.0f),
     pathfile(pathfile),
-    totalPathLen(12),
-    splineNum(450 / totalPathLen)
+    splineNum(450)
     {}
 
 PRMInput::PRMInput(float speed, const std::string pathfile) :
 	speed(speed),
     pathfile(pathfile),
-    totalPathLen(12),
-    splineNum(450 / totalPathLen)
+    splineNum(450)
 	{}
 
 PRMInput::~PRMInput() {}
@@ -93,15 +88,15 @@ void PRMInput::initCamPath() {
    pathFile >> pathLength;
 
    // Initalize temporary position & direction vectors from nodes in file
-   vector<Eigen::Vector3f> tempPosVec;
-   vector<Eigen::Vector3f> tempDirVec;
+   vector<glm::vec3> tempPosVec;
+   vector<glm::vec3> tempDirVec;
 
    float pX, pY, pZ, dX, dY, dZ;
    for (int i = 0; i < pathLength; i++) {
       pathFile >> pX >> pY >> pZ >> dX >> dY >> dZ;
 
-      tempPosVec.push_back(Eigen::Vector3f(pX, pY, pZ));
-      tempDirVec.push_back(Eigen::Vector3f(dX, dY, dZ));
+      tempPosVec.push_back(glm::vec3(pX, pY, pZ));
+      tempDirVec.push_back(glm::vec3(dX, dY, dZ));
    }
    // Push first and second node onto path again to create a complete spline
    tempPosVec.push_back(tempPosVec[0]);
@@ -120,26 +115,24 @@ void PRMInput::initCamPath() {
       << ", algTime: " << algTime << endl;
 
    // Spline variables, based on Sueda's animation assignment 1
-   Eigen::MatrixXf Gpos(3,4); // 3 by 4 matrix
-   Eigen::MatrixXf Gdir(3,4); // 3 by 4 matrix
-   Eigen::Matrix4f B;      // 4 by 4 matrix
-   Eigen::Vector4f uVec;   // 4 by 1 vector
-   Eigen::Vector3f p;      // 3 by 1 vector
-   B << 0, -1, 2, -1, 2 ,0, -5, 3, 0, 1, 4, -3, 0, 0, -1, 1;
-   B = 0.5 * B;
+   glm::mat4x3 Gpos; // 3 by 4 matrix
+   glm::mat4x3 Gdir; // 3 by 4 matrix
+   glm::mat4 B = glm::mat4(0.0f, 1.0f, 0.0f, 0.0f, -0.5f, 0.0f, 0.5f, 0.0f, 1.0f, -2.5, 2.0f, -0.5f, -0.5f, 1.5f, -1.5f, 0.5f); // 4 by 4 matrix  
+   glm::vec4 uVec;   // 4 by 1 vector
+   glm::vec3 p;      // 3 by 1 vector]
 
    // Generate position and directions using Catmull-Rom splines
    for (int j = 0; j < pathLength; j++) {
-      Gpos << tempPosVec[j % pathLength], 
-         tempPosVec[(j+1) % pathLength], 
-         tempPosVec[(j+2) % pathLength], 
-         tempPosVec[(j+3) % pathLength];
-      Gdir << tempDirVec[j % pathLength], 
-         tempDirVec[(j+1) % pathLength], 
-         tempDirVec[(j+2) % pathLength], 
-         tempDirVec[(j+3) % pathLength];  
-      for (float u = 0; u < 1; u += 1.0 / splineNum) {
-         uVec << 1, u, u*u, u*u*u;
+      Gpos[0] = tempPosVec[j % pathLength]; 
+      Gpos[1] = tempPosVec[(j+1) % pathLength];
+      Gpos[2] = tempPosVec[(j+2) % pathLength];
+      Gpos[3] = tempPosVec[(j+3) % pathLength];
+      Gdir[0] = tempDirVec[j % pathLength]; 
+      Gdir[1] = tempDirVec[(j+1) % pathLength];
+      Gdir[2] = tempDirVec[(j+2) % pathLength]; 
+      Gdir[3] = tempDirVec[(j+3) % pathLength];  
+      for (float u = 0; u < 1; u += (float)pathLength / splineNum) {
+         uVec = glm::vec4(1, u, u*u, u*u*u);
       
          auto pvec = Gpos * B * uVec;
          auto dvec = Gdir * B * uVec;

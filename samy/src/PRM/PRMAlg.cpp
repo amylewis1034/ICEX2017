@@ -5,6 +5,7 @@
 #include "PRMAlg.h"
 #include "Utilities.h"
 #include <icex_common.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 bool genThirds = false, genNorms = false, genCombo = false, playPaths = false;
 
@@ -19,7 +20,7 @@ double threshDelta = 0.01;
 time_t t = clock();
 bool debug = true;
 
-PRMNode *generateRootPRMNode() {
+PRMNode *generateRootPRMNode(int numNodes) {
 	roadMap.clear();
 	PRMNode *rootNode(new PRMNode());
 
@@ -31,7 +32,7 @@ void setRootPRMNode(PRMNode *rootNode) {
 	rootNode->setNdx(roadMap.size() - 1);
 }
 
-PRMNode *generatePRMNode() {
+PRMNode *generatePRMNode(int numNodes) {
 	int nodeNdx = -1;
 
 	int iterMod = iteration % 4;
@@ -73,7 +74,8 @@ PRMNode *generatePRMNode() {
 	newNode->setNdx(roadMap.size() - 1);
 
 	// We have a complete path!
-	if (newNode->getPathLength() == totalPathLen) {
+	std::cout << "length: " << newNode->getPathLength() << std::endl;
+	if (newNode->getPathLength() == numNodes) {
 		int roadMapSize = roadMap.size();
 
 		if (debug) {
@@ -112,8 +114,8 @@ PRMNode *generatePRMNode() {
 		if (outfile.is_open()) {
 			outfile << path.size() << std::endl;
 			for (int i = 0; i < path.size(); i++) {
-				outfile << path.at(i)->getPosition().transpose() << " " 
-					<< path.at(i)->getDirection().transpose() << std::endl;
+				outfile << path[i]->getPosition()[0] << " " << path[i]->getPosition()[1] << " " << path[i]->getPosition()[2] << " " 
+						<< path[i]->getDirection()[0] << " " << path[i]->getDirection()[1] << " " << path[i]->getDirection()[2] << std::endl;
 			}
 			// Write road map size, average node weight in path, 
 			// and time to generate path to file

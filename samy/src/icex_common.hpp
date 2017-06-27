@@ -15,6 +15,7 @@
 #include <Components/Particle.hpp>
 #include <Components/PlayerInput.hpp>
 #include <Components/PRMInput.hpp>
+#include <Components/PRMNorms.hpp>
 #include <Components/PRMThirds.hpp>
 #include <Components/Shader.hpp>
 #include <Components/Skybox.hpp>
