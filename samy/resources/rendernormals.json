@@ -8,7 +8,7 @@
 					0, 0, 1, 0, 
 					0.05, 0.05, 0.05]},
 				{"name": "Camera", "args": ["fps"]},
-				{"name": "PRMThirds", "args": [12]}
+				{"name": "PRMNorms", "args": [12]}
 			]
 		},
 		{
@@ -69,6 +69,6 @@
 	],
 
 	"RenderSettings": {
-		"genThirds": true
+		"genNormals": true
 	}
 }

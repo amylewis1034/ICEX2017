@@ -10,6 +10,7 @@
 #include <Components/Texture.hpp>
 
 #include <Renderers/Renderer.hpp>
+#include <Renderers/RenderSettings.hpp>
 
 class World {
 public:
@@ -54,6 +55,7 @@ public:
 	void setMainLight(glm::vec3 pos, glm::vec3 color);
 	void setMainLightColor(const glm::vec3 &color);
 	void addPointLight(glm::vec3 pos, glm::vec3 color, float a, float b, float c);
+	void addRenderSetting(RenderSettings renderSettings);
 	void scaleLightIntensity(float scale);
 	void setLightUniforms(GLShaderProgram &program) const;
 	void setLightUBO(GLShaderProgram &program) const;
@@ -65,6 +67,7 @@ public:
 	Renderer *getPostrenderer() const;
 	const std::vector<GameObject *> getRenderables(const glm::mat4 &projection, const glm::mat4 &view);
 	const std::vector<GameObject *> getParticleSystems();
+	const RenderSettings &getRenderSetting() const;
 
 private:
     std::vector<GameObject *> gameobjects;
@@ -83,6 +86,7 @@ private:
 	Texture *defaultTexture;
 
     GameObject *heightMapComponent;
+	RenderSettings renderSettings;
 };
 
 #endif

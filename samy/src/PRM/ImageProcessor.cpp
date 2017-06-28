@@ -36,13 +36,17 @@ Mat ocvImgFromGlTex(GLuint glTexID) {
 }
 
 double detectNormals(Mat src) {
-   Mat dst;
-   inRange(src, Scalar(102,0,0), Scalar(255,255,255), dst);
+    Mat dst;
+    inRange(src, Scalar(102,0,0), Scalar(255,255,255), dst);
+    
+    Mat dstOut;
+    inRange(src, Scalar(102,0,0), Scalar(255,255,255), dstOut);
+    
+    namedWindow("Normals", CV_WINDOW_NORMAL);
+    cv::resize(dst, dstOut, Size(0,0), 0.5, 0.5, INTER_LINEAR);
+    imshow("Normals", dstOut);
 
-   // namedWindow("Normals", CV_WINDOW_AUTOSIZE);
-   // imshow("Normals", dst);
-
-   return (float)countNonZero(dst) / (dst.size().height * dst.size().width);
+    return (float)countNonZero(dst) / (dst.size().height * dst.size().width);
 }
 
 double detectThirds(Mat src) {

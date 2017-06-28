@@ -99,13 +99,8 @@ void PRMThirds::update(float dt) {
 }
 
 void PRMThirds::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
-    glm::vec3 p, d;
-    p = curNode->getPosition();
-    d = curNode->getDirection();
-    setCamPos6dof(
-        glm::vec3(p[0], p[1], p[2]),
-        glm::vec3(d[0], d[1], d[2])
-    );
+    // Set the camera position & direction based on current node
+    setCamPos6dof(curNode->getPosition(), curNode->getDirection());
 
     transform->setPosition(camPos);
     transform->setForward(camDir);
@@ -119,23 +114,9 @@ void PRMThirds::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
     );
      glBindFramebuffer(GL_FRAMEBUFFER, 0);
    
-    
-    // glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // glBindFramebuffer(GL_READ_FRAMEBUFFER, framebuffer);
-    // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    // glBlitFramebuffer(
-    //     0, 0, actualWidth, actualHeight,
-    //     0, 0, actualWidth, actualHeight,
-    //     GL_COLOR_BUFFER_BIT, GL_NEAREST
-    // );
-    // glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
     cv::Mat ocvImg = ocvImgFromGlTex(renderTexture);
-    // cv::namedWindow("TESTING");
-    // cv::imshow("TESTING", ocvImg);
-
     double nodeWeight = std::abs(detectThirds(ocvImg) - 0.66666666);
+
     if (generatingRootNode && genThirds) {
         if (nodeWeight < bestRootWeight) {
             bestRootNode = curNode;

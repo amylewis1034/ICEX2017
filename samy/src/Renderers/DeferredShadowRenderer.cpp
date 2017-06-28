@@ -364,6 +364,10 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glBindTexture(GL_TEXTURE_2D, lightFBO.getTexture(0));
     glUniform1i(dirlightShader.uniformLocation("shadowMap"), 3);
 
+    glUniformMatrix4fv(dirlightShader.uniformLocation("geomView"), 1, GL_FALSE, glm::value_ptr(view));    
+    glUniform1i(dirlightShader.uniformLocation("genNormals"), world.getRenderSetting().genNormals) ;
+    glUniform1i(dirlightShader.uniformLocation("genThirds"), world.getRenderSetting().genThirds);
+
     GLQuad::draw();
 
     gBuffer.unbindTextures();

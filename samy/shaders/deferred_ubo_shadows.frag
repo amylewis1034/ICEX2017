@@ -95,8 +95,6 @@ void main()
 	color = vec4((1.0 - shadow((ls * vec4(position, 1.0)).xyz)) * (ambient + diffuse + specular), 1.0);
 	color = vec4(ambient + (1.0 - shadow((ls * vec4(position, 1.0)).xyz)) * (diffuse + specular), 1.0);
 
-	//color = vec4(normal, 1.0);
-
 	for (int i = 0; i < num_pointlights; i++)
 		color += vec4(calcPointLight(pointlights[i], position, normal, albedo), 0);
 }

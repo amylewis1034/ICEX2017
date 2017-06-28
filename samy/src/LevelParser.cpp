@@ -359,4 +359,24 @@ void LevelParser::ParseWorld(World *world, const std::string &filename) {
 			);
 		}
 	}
+
+	if (document.HasMember("RenderSettings")) {
+		assert(document["RenderSettings"].IsObject());
+
+		RenderSettings renderSettings;
+
+		for (auto &setting : document["RenderSettings"].GetObject()) {
+			std::string name {setting.name.GetString(), setting.name.GetStringLength()};
+
+			if (name.compare("genNormals") == 0) {
+				renderSettings.genNormals = setting.value.GetBool();
+			}
+
+			if (name.compare("genThirds") == 0) {
+				renderSettings.genThirds = setting.value.GetBool();
+			}
+		}
+
+		world->addRenderSetting(renderSettings);
+	}
 }

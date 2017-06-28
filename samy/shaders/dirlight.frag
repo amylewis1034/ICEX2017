@@ -16,6 +16,10 @@ uniform vec3 dirlightColor;
 uniform mat4 ls;
 uniform sampler2D shadowMap;
 
+uniform mat4 geomView;
+uniform bool genNormals;
+uniform bool genThirds;
+
 out vec4 color;
 
 float shadow(vec3 lsPosition) {
@@ -49,6 +53,11 @@ void main() {
     vec3 position = texture(gPosition, fragTexcoord).rgb;
     vec3 normal = texture(gNormal, fragTexcoord).rgb;
     vec4 albedo = texture(gAlbedoSpecular, fragTexcoord);
+
+	if (genNormals) {
+		color = vec4((geomView * vec4(normal, 0)).xyz, 1);
+		return;
+	}
 	
 	vec3 light = normalize(dirlightPos - position);
 	vec3 view = normalize(eye - position);

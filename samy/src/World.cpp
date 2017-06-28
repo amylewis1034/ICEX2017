@@ -243,6 +243,10 @@ void World::addPointLight(glm::vec3 pos, glm::vec3 color, float a, float b, floa
 	pointlights.push_back(p);
 }
 
+void World::addRenderSetting(RenderSettings renderSettings) {
+	this->renderSettings = renderSettings;
+}
+
 void World::scaleLightIntensity(float scale) {
 	for (pointlight &p : pointlights) {
 		p.color *= scale;
@@ -341,4 +345,8 @@ const std::vector<GameObject *> World::getRenderables(const glm::mat4 &projectio
 
 const std::vector<GameObject *> World::getParticleSystems() {
 	return particleSystems;
+}
+
+const RenderSettings &World::getRenderSetting() const {
+	return renderSettings;
 }

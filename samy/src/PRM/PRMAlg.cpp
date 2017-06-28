@@ -74,7 +74,6 @@ PRMNode *generatePRMNode(int numNodes) {
 	newNode->setNdx(roadMap.size() - 1);
 
 	// We have a complete path!
-	std::cout << "length: " << newNode->getPathLength() << std::endl;
 	if (newNode->getPathLength() == numNodes) {
 		int roadMapSize = roadMap.size();
 

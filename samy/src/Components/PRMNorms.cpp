@@ -41,7 +41,7 @@ void PRMNorms::init() {
     transform = gameobject->getComponent<Transform>();
     assert(transform != nullptr);
 
-    genThirds = false;
+    genNorms = true;
 
     curNode = generateRootPRMNode(numNodes);
     // bestRootWeight = genThirds ? 1 : 0;
@@ -102,23 +102,27 @@ void PRMNorms::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
     // Set the camera position & direction based on current node
     setCamPos6dof(curNode->getPosition(), curNode->getDirection());
 
-    // Get current frame buffer size.
-    // Important for retina displays!
-    glfwGetFramebufferSize(window, &actualWidth, &actualHeight);
-    glViewport(0, 0, actualWidth, actualHeight);
+    transform->setPosition(camPos);
+    transform->setForward(camDir);
 
-    // Write to the framebuffer so we can transfer the image to OpenCV
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer); // This goes with writeToTexture call
-
-    // Clear framebuffer.
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    float aspect = actualWidth/(float)actualHeight;
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+    glBlitFramebuffer(
+        0, 0, actualWidth, actualHeight,
+        0, 0, actualWidth, actualHeight,
+        GL_COLOR_BUFFER_BIT, GL_NEAREST
+    );
+     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     cv::Mat ocvImg = ocvImgFromGlTex(renderTexture);
-    double nodeWeight = detectNormals(ocvImg);
+    
+    double nodeWeight;
+    if (genNorms) {
+        nodeWeight = detectNormals(ocvImg);
+    } 
 
-    if (generatingRootNode) {
-        if (nodeWeight > bestRootWeight) {
+    if (generatingRootNode && genNorms) {
+        if (nodeWeight > bestRootWeight || bestRootNode == NULL) {
             bestRootNode = curNode;
             bestRootWeight = nodeWeight;
         }
@@ -133,15 +137,22 @@ void PRMNorms::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
             if (genNorms && bestRootWeight > weightThreshNorm) {
                 highWeightNodes.push_back(bestRootNode->getNdx());
             }
-            curNode = generatePRMNode(numNodes);
+            if (genNorms) {
+                curNode = generatePRMNode(numNodes);
+            }
         }
+    }
+    else if (generatingRootNode) {
+        curNode->setWeight(nodeWeight);
     }
     else {
         curNode->setWeight(nodeWeight);
         if (genNorms && nodeWeight > weightThreshNorm) {
             highWeightNodes.push_back(curNode->getNdx());
         }
-        curNode = generatePRMNode(numNodes);
+        if (genNorms) {
+            curNode = generatePRMNode(numNodes);
+        }
     }
 }
 

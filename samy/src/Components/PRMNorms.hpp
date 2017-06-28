@@ -27,7 +27,7 @@ private:
     double bestRootWeight = 0.0;
     int rootIter = 0;
     bool generatingRootNode = true;
-    bool genThirds = false;
+    bool genNorms = true;
 
     int numNodes;
 
