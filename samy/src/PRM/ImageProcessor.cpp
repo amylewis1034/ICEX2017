@@ -96,8 +96,8 @@ double detectThirds(Mat src) {
    //MAKE AREA INSTEAD
    int biggestBox = 0, biggestI = -1;
    for (int i = 0; i< contours.size(); i++) {
-      if (boundRect[i].width > biggestBox) {
-         biggestBox = boundRect[i].width;
+      if (boundRect[i].width * boundRect[i].height > biggestBox) {
+         biggestBox = boundRect[i].width * boundRect[i].height;
          biggestI = i;
       }
    }
