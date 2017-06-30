@@ -30,8 +30,16 @@ public:
 	glm::vec3 calcFreePosition(float height, int pathLength);
 	float getCamTheta() { return camTheta; }
 	float getCamPhi() { return camPhi; }
+	static void setCenterOfWorld(glm::vec3 centerPos);
+	static void setUpperRightOfBB(glm::vec3 upperRightPos);
+	static void setLowerLeftOfBB(glm::vec3 lowerLeftPos);
+	static glm::vec3 getCenterOfWorld();
+	static glm::vec3 getUpperRightOfBB();
+	static glm::vec3 getLowerLeftOfBB();
 
-	static glm::vec3 centerWorld;
+	static glm::vec3 centerOfWorld;
+	static glm::vec3 upperRightOfBB;
+	static glm::vec3 lowerLeftOfBB;	
 	static glm::vec3 constVelMults;
 
 private:

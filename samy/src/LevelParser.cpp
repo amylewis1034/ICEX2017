@@ -73,6 +73,9 @@ static Component *parseCollider(Value &args) {
 			parseVec3(args, 3)
 		);
 	}
+	else if (args.Size() == 1) {
+		collider = new Collider(rpath + args[0].GetString());
+	}
 	else {
 		collider = new Collider();
 	}

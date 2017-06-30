@@ -13,6 +13,7 @@ public:
 	Collider();
 	Collider(glm::vec3 min, glm::vec3 max);
 	Collider(const Mesh &mesh);
+	Collider(const std::string &meshname);
 	~Collider();
 
 	void init();
@@ -23,6 +24,9 @@ public:
 
     void setMinOrig(glm::vec3 min);
     void setMaxOrig(glm::vec3 max);
+
+	glm::vec3 getMin();
+	glm::vec3 getMax();
 
 // private:
 	glm::vec3 min, max;

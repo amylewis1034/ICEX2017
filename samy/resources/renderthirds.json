@@ -50,7 +50,8 @@
                     0.1, 0.1, 0.1
                 ]},
                 {"name": "Mesh", "args": ["ManoelPRMsCombined2.obj"]},
-                {"name": "Texture", "args": ["ManoelPRMsCombined.jpg"]}
+                {"name": "Texture", "args": ["ManoelPRMsCombined.jpg"]},
+				{"name": "Collider", "args": []}
             ]
         }
 	],

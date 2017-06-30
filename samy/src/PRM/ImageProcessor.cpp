@@ -93,7 +93,7 @@ double detectThirds(Mat src) {
    line(drawing, Point(0, picHeight / 3), Point(picWidth, picHeight / 3), Scalar(192, 192, 192), 1, 8, 0);
    line(drawing, Point(0, picHeight / 3 * 2), Point(picWidth, picHeight / 3 * 2), Scalar(192, 192, 192), 1, 8, 0);
 
-   //MAKE AREA INSTEAD
+   //Size based off area instead of width
    int biggestBox = 0, biggestI = -1;
    for (int i = 0; i< contours.size(); i++) {
       if (boundRect[i].width * boundRect[i].height > biggestBox) {

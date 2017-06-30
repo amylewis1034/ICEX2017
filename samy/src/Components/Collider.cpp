@@ -20,6 +20,13 @@ Collider::Collider(const Mesh &mesh) :
 	mesh.getCollider(*this);
 }
 
+Collider::Collider(const std::string &meshname) :
+	collided(false)
+{
+	Mesh mesh {meshname};
+	mesh.getCollider(*this);
+}
+
 Collider::~Collider() {}
 
 void Collider::init() {
@@ -77,4 +84,12 @@ void Collider::setMinOrig(glm::vec3 min) {
 
 void Collider::setMaxOrig(glm::vec3 max) {
 	this->maxOrig = max;
+}
+
+glm::vec3 Collider::getMin() {
+	return this->min;
+}
+
+glm::vec3 Collider::getMax() {
+	return this->max;
 }

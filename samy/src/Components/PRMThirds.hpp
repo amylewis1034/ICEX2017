@@ -5,6 +5,7 @@
 
 #include "Component.hpp"
 #include "Transform.hpp"
+#include "Collider.hpp"
 
 #include <PRM/PRMNode.h>
 
@@ -21,6 +22,7 @@ private:
     void setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir);
 
     Transform *transform;
+    Collider *collider;
     glm::vec3 camPos, camDir;
 
     PRMNode *curNode, *bestRootNode = nullptr;

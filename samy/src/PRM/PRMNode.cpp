@@ -8,9 +8,11 @@ const float thetaMaxDelta = M_PI / 24;
 const float initalTheta = -M_PI_4 / 2;
 const float offset = M_PI;
 const double radius = 26;
-glm::vec3 PRMNode::centerWorld = glm::vec3(6, 0, -1);
-glm::vec3 PRMNode::constVelMults = glm::vec3(1.0, 1.0, 0.8);
 const float robotVelocity = 1.632f;
+glm::vec3 PRMNode::centerOfWorld;
+glm::vec3 PRMNode::upperRightOfBB;
+glm::vec3 PRMNode::lowerLeftOfBB;	
+glm::vec3 PRMNode::constVelMults = glm::vec3(1.0, 1.0, 0.8);
 
 // Calculate the position of the node based on how far it is along circle
 glm::vec3 calcPosition(float height, int pathLength, int numNodes) {
@@ -18,9 +20,9 @@ glm::vec3 calcPosition(float height, int pathLength, int numNodes) {
 
    double curRadius = randRangef(radius - 1, radius + 1);
    return glm::vec3(
-   	PRMNode::constVelMults[0] * curRadius * cos(posTheta) + PRMNode::centerWorld[0], 
-   	PRMNode::constVelMults[1] * height + PRMNode::centerWorld[1], 
-   	PRMNode::constVelMults[2] * curRadius * sin(posTheta) + PRMNode::centerWorld[2]);
+   	PRMNode::constVelMults[0] * curRadius * cos(posTheta) + PRMNode::getCenterOfWorld()[0], 
+   	PRMNode::constVelMults[1] * height + PRMNode::getCenterOfWorld()[1], 
+   	PRMNode::constVelMults[2] * curRadius * sin(posTheta) + PRMNode::getCenterOfWorld()[2]);
 }
 
 glm::vec3 PRMNode::calcFreePosition(float height, int pathLength) {
@@ -28,9 +30,9 @@ glm::vec3 PRMNode::calcFreePosition(float height, int pathLength) {
    float posX, posY, posZ;
 
    if (getParent() == NULL) {
-	   posX = 0; 
-	   posY = 6;
-	   posZ = -10;
+	   posX = PRMNode::getCenterOfWorld()[0]; 
+	   posY = PRMNode::getCenterOfWorld()[1];
+	   posZ = PRMNode::getCenterOfWorld()[2];
    }
    else {
 	posX = getParent()->getPosition()[0];
@@ -38,6 +40,7 @@ glm::vec3 PRMNode::calcFreePosition(float height, int pathLength) {
 	posZ = getParent()->getPosition()[2];
    }
 
+   //LOOOPPPPP
    double curRadius = randRangef(radius - 1, radius + 1);
    return glm::vec3(
    	posX + robotVelocity * cos(getCamTheta()), 
@@ -113,4 +116,28 @@ PRMNode::PRMNode(PRMNode *withinDelta) {
 	direction = calcFreeDirection(
 		randRangef(parentT - thetaMaxDelta, parentT + thetaMaxDelta), 
 		pathLength - 1);
+}
+
+void PRMNode::setCenterOfWorld(glm::vec3 centerPos) {
+	PRMNode::centerOfWorld = centerPos;
+}
+
+void PRMNode::setUpperRightOfBB(glm::vec3 upperRightPos) {
+	PRMNode::upperRightOfBB = upperRightPos;
+}
+
+void PRMNode::setLowerLeftOfBB(glm::vec3 lowerLeftPos) {
+	PRMNode::lowerLeftOfBB = lowerLeftPos;
+}
+
+glm::vec3 PRMNode::getCenterOfWorld() {
+	return PRMNode::centerOfWorld;
+}
+
+glm::vec3 PRMNode::getUpperRightOfBB() {
+	return PRMNode::upperRightOfBB;
+}
+
+glm::vec3 PRMNode::getLowerLeftOfBB() {
+	return PRMNode::lowerLeftOfBB;
 }

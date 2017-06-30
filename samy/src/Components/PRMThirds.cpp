@@ -25,9 +25,12 @@
 
 #include "opencv2/highgui.hpp"
 
+#include <World.hpp>
+
 using namespace std;
 
 extern GLFWwindow *window;
+extern World *world;
 
 const double weightThreshThirds = 0.04;
 
@@ -38,10 +41,25 @@ PRMThirds::PRMThirds(int numNodes) :
 PRMThirds::~PRMThirds() {}
 
 void PRMThirds::init() {
-    transform = gameobject->getComponent<Transform>();
-    assert(transform != nullptr);
-
     genThirds = true;
+
+    transform = gameobject->getComponent<Transform>();
+    // collider = gameobject->getComponent<Collider>();
+
+    assert(transform != nullptr);
+    // assert(collider != nullptr);
+
+    GameObject *target = world->getGameObjectByTag("manoel");
+    assert(target != nullptr);
+    Transform *targetTransform = target->getComponent<Transform>();
+    Collider *targetCollider = target->getComponent<Collider>();
+
+    assert(targetTransform != nullptr);
+    assert(targetCollider != nullptr);
+
+    PRMNode::setCenterOfWorld(targetTransform->getPosition());
+    PRMNode::setLowerLeftOfBB(targetCollider->getMin());
+    PRMNode::setUpperRightOfBB(targetCollider->getMax());
 
     curNode = generateRootPRMNode(numNodes);
     // bestRootWeight = genThirds ? 1 : 0;
