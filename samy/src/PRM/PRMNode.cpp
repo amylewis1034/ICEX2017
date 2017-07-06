@@ -18,8 +18,8 @@ glm::vec3 PRMNode::lowerLeftOfBB;
 glm::vec3 PRMNode::constVelMults = glm::vec3(1.0, 1.0, 0.8);
 
 // Calculate the position of the node based on how far it is along circle
-glm::vec3 calcPosition(float height, int pathLength) {
-   double posTheta = pathLength * ((2 * M_PI) / 12); //FIX 12
+glm::vec3 calcPosition(float height, int pathLength, int numNodes) {
+   double posTheta = pathLength * ((2 * M_PI) / numNodes);
 
    double curRadius = randRangef(radius - 1, radius + 1);
    return glm::vec3(
@@ -30,14 +30,14 @@ glm::vec3 calcPosition(float height, int pathLength) {
 
 // Calculate the direction the node should point to look at center of circle 
 // based how far it is along circle
-glm::vec3 calcDirection(float theta, int pathLength) {
-	double dirTheta = pathLength * ((2 * M_PI) / 12);
+glm::vec3 calcDirection(float theta, int pathLength, int numNodes) {
+	double dirTheta = pathLength * ((2 * M_PI) / numNodes);
 
 	return glm::vec3(1.0 * cos(offset + dirTheta), theta, 0.8 * -sin(dirTheta));
 }
 
-glm::vec3 PRMNode::calcFreePosition(float height, int pathLength) {
-   double posTheta = pathLength * (2 * M_PI) / 12;
+glm::vec3 PRMNode::calcFreePosition(float height, int pathLength, int numNodes) {
+   double posTheta = pathLength * (2 * M_PI) / numNodes;
    float posX, posY, posZ;
 
    if (getParent() == NULL) {
@@ -80,7 +80,7 @@ glm::vec3 PRMNode::calcFreeDirection(float theta, int pathLength) {
 	return glm::vec3( camX, camY, camZ );
 }
 
-PRMNode::PRMNode() {
+PRMNode::PRMNode(int numNodes) {
 	parent = NULL;
 	pathLength = 1;
 	weight = 0;
@@ -93,15 +93,16 @@ PRMNode::PRMNode() {
 	// value so we call it once before we actully use it
 	randRangef(4.0, 16.0); 
 	if (world->getRenderSetting().isKatie == true) {
-		position = calcPosition(randRangef(4.0, 12.0), pathLength - 1);
+		position = calcPosition(randRangef(4.0, 12.0), pathLength - 1, numNodes);
 		direction = calcDirection(
 			randRangef(
 				initalTheta - 3 * thetaMaxDelta, 
 				initalTheta + 3 * thetaMaxDelta), //random pitch
-			pathLength - 1);
+			pathLength - 1,
+			numNodes);
 	}
 	else {
-		position = calcFreePosition(randRangef(4.0, 12.0), pathLength - 1);
+		position = calcFreePosition(randRangef(4.0, 12.0), pathLength - 1, numNodes);
 		direction = calcFreeDirection(
 			randRangef(
 				initalTheta - 3 * thetaMaxDelta, 
@@ -110,7 +111,7 @@ PRMNode::PRMNode() {
 	}
 }
 
-PRMNode::PRMNode(PRMNode *withinDelta) {
+PRMNode::PRMNode(int numNodes, PRMNode *withinDelta) {
 	weight = 0;
 	parent = withinDelta;
 	pathLength = withinDelta->getPathLength() + 1;
@@ -126,13 +127,16 @@ PRMNode::PRMNode(PRMNode *withinDelta) {
 	}
 
 	if (world->getRenderSetting().isKatie == true) {
-		position = calcPosition(height, pathLength - 1);
+		position = calcPosition(height, pathLength - 1, numNodes);
 		direction = calcDirection(
-			randRangef(parentT - thetaMaxDelta, parentT + thetaMaxDelta), 
-			pathLength - 1);
+			randRangef(
+				parentT - thetaMaxDelta, 
+				parentT + thetaMaxDelta), 
+			pathLength - 1,
+			numNodes);
 	}
 	else {
-		position = calcFreePosition(height, pathLength - 1);
+		position = calcFreePosition(height, pathLength - 1, numNodes);
 		direction = calcFreeDirection(
 			randRangef(parentT - thetaMaxDelta, parentT + thetaMaxDelta), 
 			pathLength - 1);

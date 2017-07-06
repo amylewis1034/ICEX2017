@@ -22,7 +22,7 @@ bool debug = true;
 
 PRMNode *generateRootPRMNode(int numNodes) {
 	roadMap.clear();
-	PRMNode *rootNode(new PRMNode());
+	PRMNode *rootNode(new PRMNode(numNodes));
 
 	return rootNode;
 }
@@ -69,7 +69,7 @@ PRMNode *generatePRMNode(int numNodes) {
 	}
 
 	++iteration;
-	PRMNode *newNode = new PRMNode(roadMap.at(nodeNdx));
+	PRMNode *newNode = new PRMNode(numNodes, roadMap.at(nodeNdx));
 	roadMap.push_back(newNode);
 	newNode->setNdx(roadMap.size() - 1);
 

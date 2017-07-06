@@ -13,8 +13,8 @@ const int minHeight = 0, maxHeight = 14;
 class PRMNode {
 
 public:
-	PRMNode();
-	PRMNode(PRMNode *withinDelta);
+	PRMNode(int numNodes);
+	PRMNode(int numNodes, PRMNode *withinDelta);
 
 	glm::vec3 getPosition() {return position;}
 	glm::vec3 getDirection() {return direction;}
@@ -27,7 +27,7 @@ public:
 	double getWeight() {return weight;}
 	void setWeight(double nodeWeight) {weight = nodeWeight;}
 	glm::vec3 calcFreeDirection(float theta, int pathLength);
-	glm::vec3 calcFreePosition(float height, int pathLength);
+	glm::vec3 calcFreePosition(float height, int pathLength, int numNodes);
 	float getCamTheta() { return camTheta; }
 	float getCamPhi() { return camPhi; }
 	static void setCenterOfWorld(glm::vec3 centerPos);
