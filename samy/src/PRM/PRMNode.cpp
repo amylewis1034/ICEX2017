@@ -2,6 +2,9 @@
 #include "Utilities.h"
 #include <stddef.h>
 #include <iostream>
+#include <World.hpp>
+
+extern World *world;
 
 const float heightMaxDelta = 2.5;
 const float thetaMaxDelta = M_PI / 24;
@@ -15,14 +18,22 @@ glm::vec3 PRMNode::lowerLeftOfBB;
 glm::vec3 PRMNode::constVelMults = glm::vec3(1.0, 1.0, 0.8);
 
 // Calculate the position of the node based on how far it is along circle
-glm::vec3 calcPosition(float height, int pathLength, int numNodes) {
-   double posTheta = pathLength * (2 * M_PI) / 20;
+glm::vec3 calcPosition(float height, int pathLength) {
+   double posTheta = pathLength * ((2 * M_PI) / 12); //FIX 12
 
    double curRadius = randRangef(radius - 1, radius + 1);
    return glm::vec3(
-   	PRMNode::constVelMults[0] * curRadius * cos(posTheta) + PRMNode::getCenterOfWorld()[0], 
-   	PRMNode::constVelMults[1] * height + PRMNode::getCenterOfWorld()[1], 
-   	PRMNode::constVelMults[2] * curRadius * sin(posTheta) + PRMNode::getCenterOfWorld()[2]);
+			1.0 * curRadius * cos(posTheta) + 6, 
+			height, 
+			0.8 * curRadius * sin(posTheta) - 1);
+}
+
+// Calculate the direction the node should point to look at center of circle 
+// based how far it is along circle
+glm::vec3 calcDirection(float theta, int pathLength) {
+	double dirTheta = pathLength * ((2 * M_PI) / 12);
+
+	return glm::vec3(1.0 * cos(offset + dirTheta), theta, 0.8 * -sin(dirTheta));
 }
 
 glm::vec3 PRMNode::calcFreePosition(float height, int pathLength) {
@@ -46,14 +57,6 @@ glm::vec3 PRMNode::calcFreePosition(float height, int pathLength) {
    	posX + robotVelocity * cos(getCamTheta()), 
    	posY + randRangef(-1, 1), //check to see if going through ground 
    	posZ + robotVelocity * sin(getCamTheta()));
-}
-
-// Calculate the direction the node should point to look at center of circle 
-// based how far it is along circle
-glm::vec3 calcDirection(float theta, int pathLength) {
-	double dirTheta = pathLength * (2 * M_PI) / 20;
-
-	return glm::vec3(1.0 * cos(offset + dirTheta), theta, 0.8 * -sin(dirTheta));
 }
 
 glm::vec3 PRMNode::calcFreeDirection(float theta, int pathLength) {
@@ -89,12 +92,22 @@ PRMNode::PRMNode() {
 	// Strange bug where first time rand() is called, we always get the same 
 	// value so we call it once before we actully use it
 	randRangef(4.0, 16.0); 
-	position = calcFreePosition(randRangef(4.0, 12.0), pathLength - 1);
-	direction = calcFreeDirection(
-		randRangef(
-			initalTheta - 3 * thetaMaxDelta, 
-			initalTheta + 3 * thetaMaxDelta), //random pitch
-		pathLength - 1);
+	if (world->getRenderSetting().isKatie == true) {
+		position = calcPosition(randRangef(4.0, 12.0), pathLength - 1);
+		direction = calcDirection(
+			randRangef(
+				initalTheta - 3 * thetaMaxDelta, 
+				initalTheta + 3 * thetaMaxDelta), //random pitch
+			pathLength - 1);
+	}
+	else {
+		position = calcFreePosition(randRangef(4.0, 12.0), pathLength - 1);
+		direction = calcFreeDirection(
+			randRangef(
+				initalTheta - 3 * thetaMaxDelta, 
+				initalTheta + 3 * thetaMaxDelta), //random pitch
+			pathLength - 1);
+	}
 }
 
 PRMNode::PRMNode(PRMNode *withinDelta) {
@@ -112,10 +125,18 @@ PRMNode::PRMNode(PRMNode *withinDelta) {
 		height = randRangef(parentH - heightMaxDelta, parentH + heightMaxDelta);
 	}
 
-	position = calcFreePosition(height, pathLength - 1);
-	direction = calcFreeDirection(
-		randRangef(parentT - thetaMaxDelta, parentT + thetaMaxDelta), 
-		pathLength - 1);
+	if (world->getRenderSetting().isKatie == true) {
+		position = calcPosition(height, pathLength - 1);
+		direction = calcDirection(
+			randRangef(parentT - thetaMaxDelta, parentT + thetaMaxDelta), 
+			pathLength - 1);
+	}
+	else {
+		position = calcFreePosition(height, pathLength - 1);
+		direction = calcFreeDirection(
+			randRangef(parentT - thetaMaxDelta, parentT + thetaMaxDelta), 
+			pathLength - 1);
+	}
 }
 
 void PRMNode::setCenterOfWorld(glm::vec3 centerPos) {

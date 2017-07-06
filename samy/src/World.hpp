@@ -68,6 +68,7 @@ public:
 	const std::vector<GameObject *> getRenderables(const glm::mat4 &projection, const glm::mat4 &view);
 	const std::vector<GameObject *> getParticleSystems();
 	const RenderSettings &getRenderSetting() const;
+	void setKatieRenderSetting(bool setting);
 
 private:
     std::vector<GameObject *> gameobjects;

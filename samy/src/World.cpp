@@ -350,3 +350,7 @@ const std::vector<GameObject *> World::getParticleSystems() {
 const RenderSettings &World::getRenderSetting() const {
 	return renderSettings;
 }
+
+void World::setKatieRenderSetting(bool setting) {
+	renderSettings.isKatie = setting;
+}

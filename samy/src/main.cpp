@@ -37,13 +37,24 @@ void init(int argc, char **argv) {
     world = new World();
 
     if (argc > 1) {
-        for (int i = 1; i < argc; i++) {
-            std::string worldfile = std::string(RESOURCE_PATH) + std::string(argv[i]);
-            LevelParser::ParseWorld(world, worldfile);
+        if (strcmp(argv[argc - 1], "katie") == 0) {
+            for (int i = 1; i < argc - 1; i++) {
+                std::string worldfile = std::string(RESOURCE_PATH) + std::string(argv[i]);
+                LevelParser::ParseWorld(world, worldfile);
+            }
+            world->setKatieRenderSetting(true);
+        }
+        else {
+            for (int i = 1; i < argc; i++) {
+                std::string worldfile = std::string(RESOURCE_PATH) + std::string(argv[i]);
+                LevelParser::ParseWorld(world, worldfile);
+            }
+             world->setKatieRenderSetting(false);
         }
     }
     else {
         LevelParser::ParseWorld(world, RESOURCE_PATH "world.json");
+        world->setKatieRenderSetting(false);
     }
 
     world->init();
