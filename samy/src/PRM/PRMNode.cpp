@@ -20,12 +20,11 @@ glm::vec3 PRMNode::constVelMults = glm::vec3(1.0, 1.0, 0.8);
 // Calculate the position of the node based on how far it is along circle
 glm::vec3 calcPosition(float height, int pathLength, int numNodes) {
    double posTheta = pathLength * ((2 * M_PI) / numNodes);
-
    double curRadius = randRangef(radius - 1, radius + 1);
    return glm::vec3(
-			1.0 * curRadius * cos(posTheta) + 6, 
-			height, 
-			0.8 * curRadius * sin(posTheta) - 1);
+			PRMNode::constVelMults[0] * curRadius * cos(posTheta) + PRMNode::getCenterOfWorld()[0], 
+			PRMNode::constVelMults[1] * height,
+			PRMNode::constVelMults[2] * curRadius * sin(posTheta) + PRMNode::getCenterOfWorld()[2]);
 }
 
 // Calculate the direction the node should point to look at center of circle 
@@ -33,7 +32,7 @@ glm::vec3 calcPosition(float height, int pathLength, int numNodes) {
 glm::vec3 calcDirection(float theta, int pathLength, int numNodes) {
 	double dirTheta = pathLength * ((2 * M_PI) / numNodes);
 
-	return glm::vec3(1.0 * cos(offset + dirTheta), theta, 0.8 * -sin(dirTheta));
+	return glm::vec3(PRMNode::constVelMults[0] * cos(offset + dirTheta), PRMNode::constVelMults[1] * theta, PRMNode::constVelMults[2] * -sin(dirTheta));
 }
 
 glm::vec3 PRMNode::calcFreePosition(float height, int pathLength, int numNodes) {

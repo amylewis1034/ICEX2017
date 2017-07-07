@@ -134,7 +134,6 @@ void PRMThirds::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
    
     cv::Mat ocvImg = ocvImgFromGlTex(renderTexture);
     double nodeWeight = std::abs(detectThirds(ocvImg) - 0.66666666);
-
     if (generatingRootNode && genThirds) {
         if (nodeWeight < bestRootWeight) {
             bestRootNode = curNode;
