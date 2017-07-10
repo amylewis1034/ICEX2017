@@ -7,7 +7,6 @@
 extern World *world;
 
 const float heightMaxDelta = 2.5;
-const float thetaMaxDelta = M_PI / 24;
 const float initalTheta = -M_PI_4 / 2;
 const float offset = M_PI;
 const double radius = 26;
@@ -23,7 +22,7 @@ glm::vec3 calcPosition(float height, int pathLength, int numNodes) {
    double curRadius = randRangef(radius - 1, radius + 1);
    return glm::vec3(
 			PRMNode::constVelMults[0] * curRadius * cos(posTheta) + PRMNode::getCenterOfWorld()[0], 
-			PRMNode::constVelMults[1] * height,
+			PRMNode::constVelMults[1] * height + PRMNode::getCenterOfWorld()[1],
 			PRMNode::constVelMults[2] * curRadius * sin(posTheta) + PRMNode::getCenterOfWorld()[2]);
 }
 
@@ -80,6 +79,7 @@ glm::vec3 PRMNode::calcFreeDirection(float theta, int pathLength) {
 }
 
 PRMNode::PRMNode(int numNodes) {
+	float thetaMaxDelta = M_PI / (2 * numNodes);
 	parent = NULL;
 	pathLength = 1;
 	weight = 0;
@@ -101,7 +101,7 @@ PRMNode::PRMNode(int numNodes) {
 			numNodes);
 	}
 	else {
-		position = calcFreePosition(randRangef(4.0, 12.0), pathLength - 1, numNodes);
+		position = calcFreePosition(randRangef(2.0, 10.0), pathLength - 1, numNodes);
 		direction = calcFreeDirection(
 			randRangef(
 				initalTheta - 3 * thetaMaxDelta, 
@@ -111,6 +111,7 @@ PRMNode::PRMNode(int numNodes) {
 }
 
 PRMNode::PRMNode(int numNodes, PRMNode *withinDelta) {
+	float thetaMaxDelta = M_PI / (2 * numNodes);
 	weight = 0;
 	parent = withinDelta;
 	pathLength = withinDelta->getPathLength() + 1;
@@ -121,9 +122,7 @@ PRMNode::PRMNode(int numNodes, PRMNode *withinDelta) {
 
 	double height = -1;
 	// Get a height above the seafloor and below our max height
-	while (height < minHeight || height > maxHeight) {
-		height = randRangef(parentH - heightMaxDelta, parentH + heightMaxDelta);
-	}
+	height = glm::clamp(randRangef(parentH - heightMaxDelta, parentH + heightMaxDelta), minHeight + PRMNode::getCenterOfWorld()[1], maxHeight + PRMNode::getCenterOfWorld()[1]);
 
 	if (world->getRenderSetting().isKatie == true) {
 		position = calcPosition(height, pathLength - 1, numNodes);

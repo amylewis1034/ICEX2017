@@ -6,6 +6,7 @@
 #include "Utilities.h"
 #include <icex_common.hpp>
 #include <glm/gtx/string_cast.hpp>
+#include <algorithm>
 
 bool genThirds = false, genNorms = false, genCombo = false, playPaths = false;
 
