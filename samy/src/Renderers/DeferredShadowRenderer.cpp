@@ -147,7 +147,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     shadowmapShader.bind();
     
     const glm::vec3 &lightPos = world.getMainlightPosition();
-    glm::mat4 lp = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 30.0f);
+    glm::mat4 lp = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
     glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(lp));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(lv));
