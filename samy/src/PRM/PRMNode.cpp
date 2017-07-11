@@ -37,6 +37,7 @@ glm::vec3 calcDirection(float theta, int pathLength, int numNodes) {
 glm::vec3 PRMNode::calcFreePosition(float height, int pathLength, int numNodes) {
    double posTheta = pathLength * (2 * M_PI) / numNodes;
    float posX, posY, posZ;
+   glm::vec3 output;
 
    if (getParent() == NULL) {
 	   posX = PRMNode::getCenterOfWorld()[0]; 
@@ -51,10 +52,11 @@ glm::vec3 PRMNode::calcFreePosition(float height, int pathLength, int numNodes) 
 
    //LOOOPPPPP
    double curRadius = randRangef(radius - 1, radius + 1);
-   return glm::vec3(
-   	posX + robotVelocity * cos(getCamTheta()), 
-   	posY + randRangef(-1, 1), //check to see if going through ground 
-   	posZ + robotVelocity * sin(getCamTheta()));
+   output = glm::vec3(posX + robotVelocity * cos(getCamTheta()), 
+			posY + randRangef(-1, 1), //check to see if going through ground 
+			posZ + robotVelocity * sin(getCamTheta()));
+
+   return output;
 }
 
 glm::vec3 PRMNode::calcFreeDirection(float theta, int pathLength) {
