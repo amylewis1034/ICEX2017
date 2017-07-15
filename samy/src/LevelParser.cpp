@@ -132,6 +132,15 @@ static Component *parsePRMNorms(Value &args) {
     return (Component *) prmNorms;
 }
 
+static Component *parsePRMCombo(Value &args) {
+    PRMCombo *prmCombo = nullptr;
+
+	assert(args.Size() == 1 && args[0].IsInt());
+	prmCombo = new PRMCombo(args[0].GetInt());
+
+    return (Component *) prmCombo;
+}
+
 static Component *parseMaterial(Value &args) {
 	Material *material;
 
@@ -229,6 +238,7 @@ const static std::map<std::string, std::function<Component *(Value &args)>> cmap
 	{"PRMInput", parsePRMInput},
 	{"PRMThirds", parsePRMThirds},
 	{"PRMNorms", parsePRMNorms},
+	{"PRMCombo", parsePRMCombo},
 	{"Material", parseMaterial},
     {"Mesh", parseMesh},
 	{"Particle", parseParticle},

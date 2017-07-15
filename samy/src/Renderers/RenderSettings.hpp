@@ -5,6 +5,7 @@ class RenderSettings {
 public:
     bool genThirds = false;
     bool genNormals = false;
+    bool genCombo = false;
     bool isKatie = false;
 };
 
