@@ -102,19 +102,20 @@ double detectThirds(Mat src) {
       }
    }
    if (biggestI != -1) {
-      Rect bigRect = boundRect[biggestI];
-      rectangle(drawing, bigRect.tl(), bigRect.br(), Scalar(255, 255, 255), 2, 8, 0);
+        Rect bigRect = boundRect[biggestI];
+        rectangle(drawing, bigRect.tl(), bigRect.br(), Scalar(255, 255, 255), 2, 8, 0);
 
-      // rule of thirds using y position of top left corner
-      double yThirds = 1.0 - (double) bigRect.tl().y / picHeight;
-     
-      /// Show in a window
-   	namedWindow("Thirds", CV_WINDOW_NORMAL);
-    cv::resize(drawing, drawingOut, Size(0,0), 0.5, 0.5, INTER_LINEAR);
-   	imshow("Thirds", drawingOut);
-    // cv::waitKey(1);
-    // imwrite("../resources/test.jpg", drawing);
-   	return yThirds;
+        // rule of thirds using y position of top left corner
+        // double yThirds = 1.0 - (double) bigRect.tl().y / picHeight;
+        double yThirds = (double) bigRect.tl().y / picHeight;
+
+        /// Show in a window
+        namedWindow("Thirds", CV_WINDOW_NORMAL);
+        cv::resize(drawing, drawingOut, Size(0,0), 0.5, 0.5, INTER_LINEAR);
+        imshow("Thirds", drawingOut);
+        // cv::waitKey(1);
+        // imwrite("../resources/test.jpg", drawing);
+        return yThirds;
    }
 
    return -1; // TODO: Error check this

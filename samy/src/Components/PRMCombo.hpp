@@ -16,6 +16,8 @@ public:
 
     void init();
     void update(float dt);
+    void thirdsRender(const glm::mat4 &projection, const glm::mat4 &view);
+    void normsRender(const glm::mat4 &projection, const glm::mat4 &view);    
     void postrender(const glm::mat4 &projection, const glm::mat4 &view);
 
 private:
@@ -30,6 +32,8 @@ private:
     int rootIter = 0;
     bool generatingRootNode = true;
     bool genCombo = true;
+    bool genThirds = false;
+    bool genNorms = false;
 
     int numNodes;
 

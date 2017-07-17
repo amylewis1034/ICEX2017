@@ -114,7 +114,60 @@ void PRMCombo::update(float dt) {
 
 }
 
-void PRMCombo::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
+void PRMCombo::thirdsRender(const glm::mat4 &projection, const glm::mat4 &view) {
+   // Set the camera position & direction based on current node
+    setCamPos6dof(curNode->getPosition(), curNode->getDirection());
+
+    transform->setPosition(camPos);
+    transform->setForward(camDir);
+    
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, framebuffer);
+    glBlitFramebuffer(
+        0, 0, actualWidth, actualHeight,
+        0, 0, actualWidth, actualHeight,
+        GL_COLOR_BUFFER_BIT, GL_NEAREST
+    );
+     glBindFramebuffer(GL_FRAMEBUFFER, 0);
+   
+    cv::Mat ocvImg = ocvImgFromGlTex(renderTexture);
+    double nodeWeight = std::abs(detectThirds(ocvImg) - 0.66666666);
+    if (generatingRootNode && genThirds) {
+        if (nodeWeight < bestRootWeight) {
+            bestRootNode = curNode;
+            bestRootWeight = nodeWeight;
+        }
+        if (rootIter < 200) {
+            curNode = generateRootPRMNode(numNodes);
+            rootIter++;
+        }
+        else {
+            setRootPRMNode(bestRootNode);
+            generatingRootNode = false;
+            bestRootNode->setWeight(bestRootWeight);
+            if (genThirds && bestRootWeight < weightThreshThirds) {
+                highWeightNodes.push_back(bestRootNode->getNdx());
+            }
+            if (genThirds) {
+                curNode = generatePRMNode(numNodes);
+            }
+        }
+    }
+    else if (generatingRootNode) {
+        curNode->setWeight(nodeWeight);
+    }
+    else {
+        curNode->setWeight(nodeWeight);
+        if (genThirds && nodeWeight < weightThreshThirds) {
+            highWeightNodes.push_back(curNode->getNdx());
+        }
+        if (genThirds) {
+            curNode = generatePRMNode(numNodes);
+        }
+    }
+}
+
+void PRMCombo::normsRender(const glm::mat4 &projection, const glm::mat4 &view) {
     // Set the camera position & direction based on current node
     setCamPos6dof(curNode->getPosition(), curNode->getDirection());
 
@@ -163,6 +216,11 @@ void PRMCombo::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
         }
         curNode = generatePRMNode(numNodes);
     }
+}
+
+void PRMCombo::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
+    PRMCombo::thirdsRender(projection, view);
+    PRMCombo::normsRender(projection, view);
 }
 
 void PRMCombo::setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir) {
