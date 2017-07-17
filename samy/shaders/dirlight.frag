@@ -19,6 +19,7 @@ uniform sampler2D shadowMap;
 uniform mat4 geomView;
 uniform bool genNormals;
 uniform bool genThirds;
+uniform bool genCombo;
 
 out vec4 color;
 
@@ -54,7 +55,7 @@ void main() {
     vec3 normal = texture(gNormal, fragTexcoord).rgb;
     vec4 albedo = texture(gAlbedoSpecular, fragTexcoord);
 
-	if (genNormals) {
+	if (genNormals || genCombo) {
 		color = vec4((geomView * vec4(normal, 0)).xyz, 1);
 		return;
 	}

@@ -388,6 +388,10 @@ void LevelParser::ParseWorld(World *world, const std::string &filename) {
 			if (name.compare("genThirds") == 0) {
 				renderSettings.genThirds = setting.value.GetBool();
 			}
+
+			if (name.compare("genCombo") == 0) {
+				renderSettings.genCombo = setting.value.GetBool();
+			}
 		}
 
 		world->addRenderSetting(renderSettings);

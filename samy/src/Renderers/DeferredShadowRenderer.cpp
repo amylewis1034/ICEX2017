@@ -367,6 +367,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glUniformMatrix4fv(dirlightShader.uniformLocation("geomView"), 1, GL_FALSE, glm::value_ptr(view));    
     glUniform1i(dirlightShader.uniformLocation("genNormals"), world.getRenderSetting().genNormals) ;
     glUniform1i(dirlightShader.uniformLocation("genThirds"), world.getRenderSetting().genThirds);
+    glUniform1i(dirlightShader.uniformLocation("genCombo"), world.getRenderSetting().genCombo);
 
     GLQuad::draw();
 
