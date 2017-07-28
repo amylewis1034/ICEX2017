@@ -25,6 +25,7 @@ private:
     GLFramebuffer gBuffer, lightFBO;
     GLTexture defaultTexture;
     GLShaderProgram deferredShader, shadowmapShader, quadShader, dirlightShader, pointlightShader, lightStencilShader;
+    GLShaderProgram causticShader;
 };
 
 #endif

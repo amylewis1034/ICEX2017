@@ -118,6 +118,13 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
     dirlightShader.linkProgram(SHADER_PATH "textured_quad.vert", SHADER_PATH "dirlight.frag");
     pointlightShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "pointlight.frag");
     lightStencilShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "empty.frag");
+
+    causticShader.linkProgram(
+        SHADER_PATH "lightz.vert",
+        SHADER_PATH "lightz.frag",
+        SHADER_PATH "lightz.geom"
+    );
+
     /* Initialize quad and sphere*/
     GLQuad::init();
     GLSphere::init();
@@ -374,6 +381,48 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glActiveTexture(GL_TEXTURE3);
     glBindTexture(GL_TEXTURE_2D, 0);
     dirlightShader.unbind();
+
+    // Caustics
+    glEnable(GL_BLEND);
+    causticShader.bind();
+
+    glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(lp));
+    glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(lv));
+    
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, lightFBO.getTexture(0));
+    glUniform1i(causticShader.uniformLocation("shadowMap"), 0);
+
+    glUniform3fv(causticShader.uniformLocation("lightPos"), 1, glm::value_ptr(dirlightPos));
+    
+    float time = glfwGetTime();
+    glUniform1f(causticShader.uniformLocation("time"), time);
+
+    static bool first = true;
+    static GLVertexArrayObject gridvao;
+    if (first) {
+        first = false;
+
+        static glm::vec4 grid[200][200];
+        for (int i = 0; i < 200; i++) {
+            for (int j = 0; j < 200; j++) {
+                grid[i][j] = glm::vec4(
+                    (i - 100) / 20.0f,
+                    -1,
+                    (j - 100) / 20.0f,
+                    1
+                );
+            }
+        }
+        static GLBuffer gridbuf;
+        gridbuf.loadData(GL_ARRAY_BUFFER, 200 * 200 * sizeof(glm::vec4), grid, GL_STATIC_DRAW);
+        gridvao.addAttribute(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+    }
+
+    gridvao.bind();
+    glDrawArrays(GL_POINTS, 0, 200 * 200);
+    gridvao.unbind();
+    causticShader.unbind();
 
     glEnable(GL_CULL_FACE);
     glDisable(GL_BLEND);
