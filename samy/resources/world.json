@@ -22,46 +22,46 @@
 				{"name": "PRMInput", "args": [10.0, "path_test.txt"]}
 			]
 		},
-		{
-			"tag": "terrain",
-			"components": [
-				{"name": "Transform", "args": [
-					0, 0, 0, 
-					0, 1, 0, 0,
-					400, 5, 400]},
-				{"name": "Heightmap", "args": ["heightmaps/basic.png"]},
-				{"name": "Texture", "args": ["textures/plasticbag.jpg"]},
-				{"name": "Material", "args": [
-					0.05, 0.05, 0.05,
-					0.1, 0.08, 0.05,
-					0.05, 0.05, 0.05,
-					20,
-					1.0
-				]}
-			]
-		},
-		{
-			"tag": "particlesCurrent",
-			"components": [
-				{"name": "Transform", "args": [
-					0, 0, 0,
-					0, 1, 0, 0,
-					1, 1, 1
-				]},
-				{"name": "Particle", "args": [300, -150.0, 50.0, 2.0, 35.0, -100.0, 100.0,  0.2, 0.2, 0.6, 0.2]}
-			]
-		},
-		{
-			"tag": "particlesBubble",
-			"components": [
-				{"name": "Transform", "args": [
-					0, 0, 0,
-					0, 1, 0, 0,
-					1, 1, 1
-				]},
-				{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
-			]
-		},
+		// {
+		// 	"tag": "terrain",
+		// 	"components": [
+		// 		{"name": "Transform", "args": [
+		// 			0, 0, 0, 
+		// 			0, 1, 0, 0,
+		// 			400, 5, 400]},
+		// 		{"name": "Heightmap", "args": ["heightmaps/basic.png"]},
+		// 		{"name": "Texture", "args": ["textures/plasticbag.jpg"]},
+		// 		{"name": "Material", "args": [
+		// 			0.05, 0.05, 0.05,
+		// 			0.1, 0.08, 0.05,
+		// 			0.05, 0.05, 0.05,
+		// 			20,
+		// 			1.0
+		// 		]}
+		// 	]
+		// },
+		// {
+		// 	"tag": "particlesCurrent",
+		// 	"components": [
+		// 		{"name": "Transform", "args": [
+		// 			0, 0, 0,
+		// 			0, 1, 0, 0,
+		// 			1, 1, 1
+		// 		]},
+		// 		{"name": "Particle", "args": [300, -150.0, 50.0, 2.0, 35.0, -100.0, 100.0,  0.2, 0.2, 0.6, 0.2]}
+		// 	]
+		// },
+		// {
+		// 	"tag": "particlesBubble",
+		// 	"components": [
+		// 		{"name": "Transform", "args": [
+		// 			0, 0, 0,
+		// 			0, 1, 0, 0,
+		// 			1, 1, 1
+		// 		]},
+		// 		{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
+		// 	]
+		// },
         // {
         //     "tag": "chimney",
         //     "components": [
@@ -79,38 +79,71 @@
             "components": [
                 {"name": "Transform", "args": [
                     0.0, 6.0, -15.0,
-                    30, 0, 1, 0,
+                    60, 1, 0, 0,
                     0.1, 0.1, 0.1
                 ]},
                 {"name": "Mesh", "args": ["ManoelPRMsCombined2.obj"]},
                 {"name": "Texture", "args": ["ManoelPRMsCombined.jpg"]}
             ]
         },
+		// {
+        //     "tag": "seaweed",
+        //     "components": [
+        //         {"name": "Transform", "args": [
+        //             20.0, 2.0, -15.0,
+        //             0, 0, 0, 1,
+        //             2, 2, 2
+        //         ]},
+        //         {"name": "Mesh", "args": ["seaweed.obj"]}
+        //     ]
+        // },
+		// {
+        //     "tag": "seaweed",
+        //     "components": [
+        //         {"name": "Transform", "args": [
+        //             -30.0, 2.0, -25.0,
+        //             0, 0, 0, 1,
+        //             2, 2, 2
+        //         ]},
+        //         {"name": "Mesh", "args": ["seaweed.obj"]}
+        //     ]
+		// },
+		// {
+        //     "tag": "light",
+        //     "components": [
+        //         {"name": "Transform", "args": [
+        //             0, 10, 0,
+        //             0, 0, 0, 1,
+        //             1, 1, 1
+        //         ]},
+        //         {"name": "Mesh", "args": ["objs/sphere.obj"]}
+        //     ]
+		// },
 		{
-            "tag": "seaweed",
+            "tag": "bunny",
             "components": [
                 {"name": "Transform", "args": [
-                    20.0, 2.0, -15.0,
+                    10, 10, -10,
                     0, 0, 0, 1,
-                    2, 2, 2
+                    1, 1, 1
                 ]},
-                {"name": "Mesh", "args": ["seaweed.obj"]}
+                {"name": "Mesh", "args": ["objs/bunny.obj"]}
             ]
-        },
+		},
 		{
-            "tag": "seaweed",
-            "components": [
-                {"name": "Transform", "args": [
-                    -30.0, 2.0, -25.0,
-                    0, 0, 0, 1,
-                    2, 2, 2
-                ]},
-                {"name": "Mesh", "args": ["seaweed.obj"]}
-            ]
-        }
+			"tag": "thewall",
+			"components": [
+				{"name": "Transform", "args": [
+					0, 0, -20,
+					0, 0, 0, 1,
+					50, 50, 1
+				]},
+				{"name": "Mesh", "args": ["objs/cube.obj"]}
+			]
+		}
 	],
 
-	"MainLight": {"pos": [10.0, 10.0, -10.0], "color": [0.24, 0.48, 0.48]},
+	"MainLight": {"pos": [0.0, 10.0, 0.0], "color": [0.24, 0.48, 0.48]},
 	
 	"PointLights": [
 		// {"pos": [-105.0, 2.0, 8.0], "color": [0.35, 0.61, 0.80], "a": 1.0, "b": 1.0, "c": 1.0},

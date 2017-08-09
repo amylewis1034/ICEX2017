@@ -149,13 +149,13 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glClear(GL_DEPTH_BUFFER_BIT);
     glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
-    glCullFace(GL_FRONT);
+    // glCullFace(GL_FRONT);
 
     shadowmapShader.bind();
     
     const glm::vec3 &lightPos = world.getMainlightPosition();
-    glm::mat4 lp = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 100.0f);
-    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    glm::mat4 lp = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 20.0f);
+    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0.0f, 10.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(lp));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(lv));
 	for (GameObject *g : world.getRenderables(projection, view)) {
@@ -383,17 +383,21 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     dirlightShader.unbind();
 
     // Caustics
+    glDisable(GL_CULL_FACE);
     glEnable(GL_BLEND);
+    glEnable(GL_DEPTH_TEST);
     causticShader.bind();
 
-    glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(lp));
-    glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(lv));
+    glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(causticShader.uniformLocation("lp"), 1, GL_FALSE, glm::value_ptr(lp));
+    glUniformMatrix4fv(causticShader.uniformLocation("lv"), 1, GL_FALSE, glm::value_ptr(lv));
     
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, lightFBO.getTexture(0));
     glUniform1i(causticShader.uniformLocation("shadowMap"), 0);
 
-    glUniform3fv(causticShader.uniformLocation("lightPos"), 1, glm::value_ptr(dirlightPos));
+    glUniform3fv(causticShader.uniformLocation("lightPos"), 1, glm::value_ptr(lightPos));
     
     float time = glfwGetTime();
     glUniform1f(causticShader.uniformLocation("time"), time);
@@ -408,8 +412,8 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
             for (int j = 0; j < 200; j++) {
                 grid[i][j] = glm::vec4(
                     (i - 100) / 20.0f,
-                    -1,
                     (j - 100) / 20.0f,
+                    -5,
                     1
                 );
             }
