@@ -7,7 +7,7 @@
 class Camera : public Component {
 public:
     Camera();
-    Camera(float fov, float aspect, float near, float far);
+    Camera(float fov, float near, float far, bool isFirstPerson);
 
     void init();
     void update(float dt);

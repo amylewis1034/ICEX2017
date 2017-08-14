@@ -7,7 +7,7 @@
 					0.0, 10.0, 15.0, 
 					0, 0, 1, 0, 
 					0.05, 0.05, 0.05]},
-				{"name": "Camera", "args": ["fps"]},
+				{"name": "Camera", "args": [45, 0.1, 100, true]},
 				{"name": "PlayerInput", "args": [10.0, 0.001]}
 			]
 		},
@@ -18,7 +18,7 @@
 					0.0, 10.0, 15.0, 
 					0, 0, 1, 0, 
 					0.05, 0.05, 0.05]},
-				{"name": "Camera", "args": ["fps"]},
+				{"name": "Camera", "args": [45, 0.1, 100, true]},
 				{"name": "PRMInput", "args": [10.0, "path_test.txt"]}
 			]
 		},

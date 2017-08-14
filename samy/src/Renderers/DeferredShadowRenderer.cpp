@@ -23,6 +23,8 @@
 
 extern GLFWwindow *window;
 
+float caustic_smax = 20.0f, caustic_smin = 5.0f;
+
 DeferredShadowRenderer::DeferredShadowRenderer() {
     /* Initialize geometry buffer */
     GLsizei width, height;
@@ -216,11 +218,16 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     // glCullFace(GL_FRONT);
 
     shadowmapShader.bind();
-    
+
+    glm::mat4 inv_view = glm::inverse(view);
+    glm::vec4 frustumCenter = 
+        (inv_view * glm::vec4(0,0,0,1)) + (inv_view * glm::vec4(0,0,-1,0)) * (world.getNear() + world.getFar()) / 2.0f;
+
     const glm::vec3 &lightPos = world.getMainlightPosition();
-    const float lz_near = 0.1f, lz_far = 75.0f;
-    glm::mat4 lp = glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, lz_near, lz_far);
-    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0.0f, 6.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    const float lz_near = 0.1f, lz_far = 75.0f, l_boundary = 50.0f;
+    glm::mat4 lp = glm::ortho(-l_boundary, l_boundary, -l_boundary, l_boundary, lz_near, lz_far);
+    // glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0, 6, 0), glm::vec3(0.0f, 0.0f, -1.0f));
+    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(frustumCenter), glm::vec3(0.0f, 0.0f, -1.0f));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(lp));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(lv));
 	for (GameObject *g : world.getRenderables(projection, view)) {
@@ -484,13 +491,15 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glUniform1f(causticShader.uniformLocation("z_near"), world.getNear());
     glUniform1f(causticShader.uniformLocation("z_far"), world.getFar());
 
+    glUniform1f(causticShader.uniformLocation("smin"), caustic_smin);
+    glUniform1f(causticShader.uniformLocation("smax"), caustic_smax);
     
     float time = glfwGetTime();
     glUniform1f(causticShader.uniformLocation("time"), time);
 
     static bool first = true;
     static GLVertexArrayObject gridvao;
-    const int gridlength = 400;
+    const int gridlength = 800;
     if (first) {
         first = false;
 
@@ -498,9 +507,9 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
         for (int i = 0; i < gridlength; i++) {
             for (int j = 0; j < gridlength; j++) {
                 grid[i][j] = glm::vec4(
-                    (i - gridlength / 2) / 100.0f,
-                    (j - gridlength / 2) / 100.0f,
-                    -5,
+                    ((float)i / gridlength * 2.0f - 1.0f),
+                    ((float)j / gridlength * 2.0f - 1.0f),
+                    -1,
                     1
                 );
             }
@@ -535,7 +544,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 
     /* Gaussian blur */
 	blurShader.bind();
-	const int blurs = 8;
+	const int blurs = 2;
 	for (int i = 0; i < blurs; i++) {
         if (i == blurs - 1) {
             glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);

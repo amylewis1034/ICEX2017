@@ -41,24 +41,18 @@ static Component *parseTransform(Value &args) {
 }
 
 static Component *parseCamera(Value &args) {
-    Camera *camera;
-
+	Camera *camera;
+	
 	if (args.Size() == 4) {
 		camera = new Camera(
 			args[0].GetFloat(),
 			args[1].GetFloat(),
 			args[2].GetFloat(),
-			args[3].GetFloat()
+			args[3].GetBool()
 		);
 	}
 	else {
 		camera = new Camera();
-		if (args.Size() == 1) {
-			auto arg = args.GetArray()[0].GetString();
-			if (!string(arg).compare(string("fps"))) {
-				camera->setFirstPerson();
-			}
-		}
 	}
 
     return (Component *) camera;

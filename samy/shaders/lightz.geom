@@ -18,6 +18,8 @@ uniform sampler2D shadowMap;
 uniform float lz_near, lz_far;
 uniform float z_near, z_far;
 
+uniform float smin, smax;
+
 out float dist_from_surface;
 
 float linearize_depth(float depth, float near, float far) {
@@ -255,11 +257,15 @@ void main() {
     // Intersect the refracted ray with the scene geometry
     vec3 geometry_intersect = intersect_geometry2(rt_o, rt_d, shadowMap);
 
+    // Prevent caustics from appearing at light's far plane
+    vec4 projected_p = lp * lv * vec4(geometry_intersect, 1);
+    vec2 shifted_p = (projected_p.xy + 1.0) * 0.5;
+    if (texture(shadowMap, shifted_p).r > 0.99) {
+        return;
+    }
 
     gl_Position = projection * view * vec4(geometry_intersect, 1);
-    // TODO: scale point size based on distance
-    // gl_PointSize = 10;
-    const int smax = 20, smin = 10;
+    // const int smax = 20, smin = 5;
     float a = smax - lz_far * (smax - smin) / (lz_far - z_near);
     float b = (z_near * lz_far * (smax - smin)) / (lz_far - z_near);
     gl_PointSize = a + b / length(geometry_intersect - eye);

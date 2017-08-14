@@ -16,14 +16,20 @@ Camera::Camera() :
 	offset(0.0f, 0.5f, 1.0f)
     {}
 
-Camera::Camera(float fov, float aspect, float near, float far) :
+Camera::Camera(float fov, float near, float far, bool isFirstPerson) :
     fov(fov),
-    aspect(aspect),
+    aspect((float)WIDTH / HEIGHT),
     near(near),
-    far(far),
-    k(10.0f),
-	offset(0.0f, 0.5f, 1.0f)
-    {}
+    far(far)
+    {
+        if (isFirstPerson) {
+            this->setFirstPerson();
+        }
+        else {
+            this->offset = glm::vec3(0.0f, 0.5f, 1.0f);
+            this->k = 10.0f;
+        }
+    }
 
 void Camera::init() {    
     this->projection = glm::perspective(fov, aspect, near, far);
