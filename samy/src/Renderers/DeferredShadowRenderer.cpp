@@ -107,6 +107,68 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
     }
     lightFBO.unbind();
 
+    for (int i = 0; i < 2; i++) {
+		causticFBO[i].bind();
+		causticFBO[i].attachTexture(
+			GL_COLOR_ATTACHMENT0,
+			GL_RGBA16F,
+			width,
+			height,
+			GL_RGBA,
+			GL_FLOAT,
+            GL_LINEAR,
+            GL_LINEAR,
+            GL_CLAMP_TO_EDGE,
+            GL_CLAMP_TO_EDGE
+		);
+        causticFBO[i].attachTexture(
+            GL_DEPTH_ATTACHMENT,
+            GL_DEPTH_COMPONENT,
+            width,
+            height,
+            GL_DEPTH_COMPONENT,
+            GL_FLOAT,
+            GL_LINEAR,
+            GL_LINEAR,
+            GL_CLAMP_TO_BORDER,
+            GL_CLAMP_TO_BORDER,
+            &borderColor
+        );
+		GLuint causticAtt[] = { GL_COLOR_ATTACHMENT0 };
+		glDrawBuffers(1, causticAtt);
+		causticFBO[i].unbind();
+	}
+
+    // causticFBO.bind();
+    // causticFBO.attachTexture(
+    //     GL_COLOR_ATTACHMENT0,
+    //     GL_RGB16F,
+    //     width,
+    //     height,
+    //     GL_RGB,
+    //     GL_FLOAT
+    // );
+    // causticFBO.attachTexture(
+    //     GL_DEPTH_ATTACHMENT,
+    //     GL_DEPTH_COMPONENT,
+    //     width,
+    //     height,
+    //     GL_DEPTH_COMPONENT,
+    //     GL_FLOAT,
+    //     GL_LINEAR,
+    //     GL_LINEAR,
+    //     GL_CLAMP_TO_BORDER,
+    //     GL_CLAMP_TO_BORDER,
+    //     &borderColor
+    // );
+    // GLuint causticAttachments[] = { GL_COLOR_ATTACHMENT0 };
+    // glDrawBuffers(1, causticAttachments);
+
+    // if (causticFBO.getStatus() != GL_FRAMEBUFFER_COMPLETE) {
+    //     std::cout << "Framebuffer not created successfully" << std::endl;
+    // }
+    // causticFBO.unbind();
+
     /* Initialize default texture */
     defaultTexture.loadTexture(RESOURCE_PATH "textures/default.png");
 
@@ -124,6 +186,8 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
         SHADER_PATH "lightz.frag",
         SHADER_PATH "lightz.geom"
     );
+    
+    blurShader.linkProgram(SHADER_PATH "textured_quad.vert", SHADER_PATH "blend.frag");
 
     /* Initialize quad and sphere*/
     GLQuad::init();
@@ -154,8 +218,9 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     shadowmapShader.bind();
     
     const glm::vec3 &lightPos = world.getMainlightPosition();
-    glm::mat4 lp = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 20.0f);
-    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0.0f, 10.0f, -5.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    const float lz_near = 0.1f, lz_far = 75.0f;
+    glm::mat4 lp = glm::ortho(-25.0f, 25.0f, -25.0f, 25.0f, lz_near, lz_far);
+    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0.0f, 6.0f, 0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(lp));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(lv));
 	for (GameObject *g : world.getRenderables(projection, view)) {
@@ -297,9 +362,6 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
         float maxlight = glm::max(glm::max(p.color.r, p.color.g), p.color.b);
         float radius = (-p.b + glm::sqrt(p.b * p.b - 4 * p.c * (p.a - maxlight * 256.0f / 1.0f))) / (2.0f * p.c);
 
-    //     // std::cout << glm::to_string(p.pos) << " " << glm::to_string(p.color);
-    //     // printf(" %f %f %f %f\n", p.a, p.b, p.c, radius);
-
         glm::mat4 trans, scale, pm;
         trans = glm::translate(trans, p.pos);
         scale = glm::scale(scale, glm::vec3(radius));
@@ -382,10 +444,27 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glBindTexture(GL_TEXTURE_2D, 0);
     dirlightShader.unbind();
 
-    // Caustics
+    /* Caustics */
+    if (GLEW_KHR_debug) {
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Caustics");
+    }
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, nextFBO);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, causticFBO[0].getHandle());
+	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, causticFBO[1].getHandle());
+	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+    causticFBO[1].bind();
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    causticFBO[0].bind();
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
     glDisable(GL_CULL_FACE);
-    glEnable(GL_BLEND);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_PROGRAM_POINT_SIZE);
+
     causticShader.bind();
 
     glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
@@ -398,38 +477,97 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glUniform1i(causticShader.uniformLocation("shadowMap"), 0);
 
     glUniform3fv(causticShader.uniformLocation("lightPos"), 1, glm::value_ptr(lightPos));
+    glUniform3fv(causticShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
+
+    glUniform1f(causticShader.uniformLocation("lz_near"), lz_near);
+    glUniform1f(causticShader.uniformLocation("lz_far"), lz_far);
+    glUniform1f(causticShader.uniformLocation("z_near"), world.getNear());
+    glUniform1f(causticShader.uniformLocation("z_far"), world.getFar());
+
     
     float time = glfwGetTime();
     glUniform1f(causticShader.uniformLocation("time"), time);
 
     static bool first = true;
     static GLVertexArrayObject gridvao;
+    const int gridlength = 400;
     if (first) {
         first = false;
 
-        static glm::vec4 grid[200][200];
-        for (int i = 0; i < 200; i++) {
-            for (int j = 0; j < 200; j++) {
+        static glm::vec4 grid[gridlength][gridlength];
+        for (int i = 0; i < gridlength; i++) {
+            for (int j = 0; j < gridlength; j++) {
                 grid[i][j] = glm::vec4(
-                    (i - 100) / 20.0f,
-                    (j - 100) / 20.0f,
+                    (i - gridlength / 2) / 100.0f,
+                    (j - gridlength / 2) / 100.0f,
                     -5,
                     1
                 );
             }
         }
         static GLBuffer gridbuf;
-        gridbuf.loadData(GL_ARRAY_BUFFER, 200 * 200 * sizeof(glm::vec4), grid, GL_STATIC_DRAW);
+        gridbuf.loadData(GL_ARRAY_BUFFER, gridlength * gridlength * sizeof(glm::vec4), grid, GL_STATIC_DRAW);
         gridvao.addAttribute(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     gridvao.bind();
-    glDrawArrays(GL_POINTS, 0, 200 * 200);
+    glDrawArrays(GL_POINTS, 0, gridlength * gridlength);
     gridvao.unbind();
     causticShader.unbind();
 
+    // causticFBO[0].unbind();
+
+    // glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
+    // glEnable(GL_BLEND);
+    // glDepthMask(GL_FALSE);
+
+    // blurShader.bind();
+    // glUniformMatrix4fv(blurShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));
+    // glUniformMatrix4fv(blurShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(v));
+    // glUniformMatrix4fv(blurShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(m));
+
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, causticFBO[0].getTexture(0));
+    // glUniform1i(blurShader.uniformLocation("texture0"), 0);
+
+    // GLQuad::draw();
+    // blurShader.unbind();
+
+    /* Gaussian blur */
+	blurShader.bind();
+	const int blurs = 8;
+	for (int i = 0; i < blurs; i++) {
+        if (i == blurs - 1) {
+            glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
+            glClear(GL_COLOR_BUFFER_BIT);
+            glEnable(GL_BLEND);
+            glDepthMask(GL_FALSE);
+        }
+        else {
+            causticFBO[i % 2].bind();
+        }
+
+		glUniformMatrix4fv(blurShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));
+		glUniformMatrix4fv(blurShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(v));
+		glUniformMatrix4fv(blurShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(m));
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, causticFBO[(i + 1) % 2].getTexture(0));
+		glUniform1i(blurShader.uniformLocation("color_in"), 0);
+
+		glUniform1i(blurShader.uniformLocation("horizontal"), i % 2);
+
+		GLQuad::draw();
+		causticFBO[i % 2].unbind();
+	}
+	blurShader.unbind();
+
     glEnable(GL_CULL_FACE);
     glDisable(GL_BLEND);
+
+    if (GLEW_KHR_debug) {
+        glPopDebugGroup();
+    }
 
 	/* Draw to textured quad */
 	// {

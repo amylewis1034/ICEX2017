@@ -21,6 +21,9 @@ public:
     void setFirstPerson();
     void setSpringFactor(float k);
 
+    const float getNear() const { return near; }
+    const float getFar() const { return far; }
+
 private:
     float fov, aspect, near, far;
     glm::mat4 projection;

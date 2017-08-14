@@ -354,3 +354,15 @@ const RenderSettings &World::getRenderSetting() const {
 void World::setKatieRenderSetting(bool setting) {
 	renderSettings.isKatie = setting;
 }
+
+const float World::getNear() const {
+	assert(camera && camera->getComponent<Camera>());
+
+	return camera->getComponent<Camera>()->getNear();
+}
+
+const float World::getFar() const {
+	assert(camera && camera->getComponent<Camera>());
+	
+	return camera->getComponent<Camera>()->getFar();
+}
