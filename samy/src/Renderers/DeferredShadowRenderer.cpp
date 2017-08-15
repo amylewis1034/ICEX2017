@@ -524,37 +524,37 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     gridvao.unbind();
     causticShader.unbind();
 
-    // causticFBO[0].unbind();
+    causticFBO[0].unbind();
 
-    // glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
-    // glEnable(GL_BLEND);
-    // glDepthMask(GL_FALSE);
+    glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
 
-    // blurShader.bind();
-    // glUniformMatrix4fv(blurShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));
-    // glUniformMatrix4fv(blurShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(v));
-    // glUniformMatrix4fv(blurShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(m));
+    blurShader.bind();
+    glUniformMatrix4fv(blurShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));
+    glUniformMatrix4fv(blurShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(v));
+    glUniformMatrix4fv(blurShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(m));
 
-    // glActiveTexture(GL_TEXTURE0);
-    // glBindTexture(GL_TEXTURE_2D, causticFBO[0].getTexture(0));
-    // glUniform1i(blurShader.uniformLocation("texture0"), 0);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, causticFBO[0].getTexture(0));
+    glUniform1i(blurShader.uniformLocation("texture0"), 0);
 
-    // GLQuad::draw();
-    // blurShader.unbind();
+    GLQuad::draw();
+    blurShader.unbind();
 
     /* Gaussian blur */
 	blurShader.bind();
 	const int blurs = 2;
 	for (int i = 0; i < blurs; i++) {
-        if (i == blurs - 1) {
-            glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
-            glClear(GL_COLOR_BUFFER_BIT);
-            glEnable(GL_BLEND);
-            glDepthMask(GL_FALSE);
-        }
-        else {
+        // if (i == blurs - 1) {
+        //     glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
+        //     glClear(GL_COLOR_BUFFER_BIT);
+        //     glEnable(GL_BLEND);
+        //     glDepthMask(GL_FALSE);
+        // }
+        // else {
             causticFBO[i % 2].bind();
-        }
+        // }
 
 		glUniformMatrix4fv(blurShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));
 		glUniformMatrix4fv(blurShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(v));
