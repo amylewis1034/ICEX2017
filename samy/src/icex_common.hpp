@@ -38,7 +38,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 /* Game configuration */
-const int WIDTH = 800, HEIGHT = 800;
+const int WIDTH = 1440, HEIGHT = 850;
 
 #define TITLE "PILE OF STAAAAAAAAAAACKS🥞🥞🥞"
 

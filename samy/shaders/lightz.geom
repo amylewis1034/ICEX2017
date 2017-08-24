@@ -20,7 +20,17 @@ uniform float z_near, z_far;
 
 uniform float smin, smax;
 
+uniform float waterHeight;
+uniform int numWaves;
+uniform float amplitude[8];
+uniform float wavelength[8];
+uniform float speed[8];
+uniform vec2 direction[8]; 
+
 out float dist_from_surface;
+out float intensity;
+
+const float pi = 3.14159;
 
 // Simplex 2D noise
 //
@@ -58,21 +68,72 @@ float linearize_depth(float depth, float near, float far) {
     return 2.0 * near * far / (far + near - z * (far - near));
 }
 
-const float amplitude = 0.5, freq = 1;
+/* Gerstner waves */
+float wave(int i, float x, float y) {
+    float frequency = 2 / wavelength[i];
+    float phase = speed[i] * frequency;
+    float theta = dot(direction[i], vec2(x, y));
+    return amplitude[i] * sin(theta * frequency + time * phase);
+}
+
+float waveHeight(float x, float y) {
+    float height = 0.0;
+    for (int i = 0; i < numWaves; ++i)
+        height += wave(i, x, y);
+    return height;
+}
+
+float dWavedx(int i, float x, float y) {
+    float frequency = 2 / wavelength[i];
+    float phase = speed[i] * frequency;
+    float theta = dot(direction[i], vec2(x, y));
+    float A = amplitude[i] * direction[i].x * frequency;
+    return A * cos(theta * frequency + time * phase);
+}
+
+float dWavedy(int i, float x, float y) {
+    float frequency = 2 / wavelength[i];
+    float phase = speed[i] * frequency;
+    float theta = dot(direction[i], vec2(x, y));
+    float A = amplitude[i] * direction[i].y * frequency;
+    return A * cos(theta * frequency + time * phase);
+}
+
+vec3 waveNormal(float x, float y) {
+    float dx = 0.0;
+    float dy = 0.0;
+    for (int i = 0; i < numWaves; ++i) {
+        dx += dWavedx(i, x, y);
+        dy += dWavedy(i, x, y);
+    }
+    vec3 n = vec3(-dx, 1.0, -dy);
+    return normalize(n);
+}
+
 float surface(float x, float z) {
-    return 25 + amplitude * cos(freq * sqrt(x * x + z * z) - 1.5 * time);
+    return waterHeight + waveHeight(x, z);
 }
 
 vec3 surface_gradient(vec3 point) {
-    vec3 gradient;
-    const float h = 1e-2;
-
-    gradient.x = (surface(point.x + h, point.z) - surface(point.x - h, point.z)) / (2 * h);
-    gradient.y = 1.0;
-    gradient.z = (surface(point.x, point.z + h) - surface(point.x, point.z - h)) / (2 * h);
-
-    return gradient;
+    return waveNormal(point.x, point.z);
 }
+
+/* Circular cosing using finite differences */
+// const float amplitude = 0.5, freq = 1;
+// float surface(float x, float z) {
+//     return 25 + amplitude * cos(freq * sqrt(x * x + z * z) - 1.5 * time);
+// }
+
+// vec3 surface_gradient(vec3 point) {
+//     vec3 gradient;
+//     const float h = 1e-2;
+
+//     gradient.x = (surface(point.x + h, point.z) - surface(point.x - h, point.z)) / (2 * h);
+//     gradient.y = 1.0;
+//     gradient.z = (surface(point.x, point.z + h) - surface(point.x, point.z - h)) / (2 * h);
+
+//     return gradient;
+// }
 
 float objective_function(vec3 ri_o, vec3 ri_d, float t) {
     return ri_o.y + t * ri_d.y - surface(ri_o.x + t * ri_d.x, ri_o.z + t * ri_d.z);
@@ -227,7 +288,6 @@ float f(vec3 rt_o, vec3 rt_d, sampler2D shadowMap, float t) {
 }
 
 vec3 intersect_geometry2(vec3 rt_o, vec3 rt_d, sampler2D shadowMap) {
-    const float epsilon = 1e-4;
     const float tolerance = 1e-4;
     const int max_iter = 1000;
     int iter = 0;
@@ -247,9 +307,6 @@ vec3 intersect_geometry2(vec3 rt_o, vec3 rt_d, sampler2D shadowMap) {
 
         float fc = f(rt_o, rt_d, shadowMap, c);
 
-        // if (fc < epsilon || (b - a) / 2 < tolerance) {
-        //     break;
-        // }
         if ((b - a) / 2 < tolerance) {
             break;
         }
@@ -291,27 +348,18 @@ void main() {
     // Get the refracted ray
     vec3 rt_o = ri_o + ri_d * intersect;
 
-    // if (abs(rt_o.y - 25) < amplitude * .9) {
-    //     return;
-    // }
-
     gl_Position = projection * view * vec4(rt_o, 1);
     gl_PointSize = 5;
+    intensity = 1.0;
     EmitVertex();
     EndPrimitive();
     // return;
 
     vec3 surface_normal = normalize(surface_gradient(rt_o));
+
     // Indices of refraction for air and salt water
     const float n_air = 1.0, n_water = 1.34;
-    // Snell's law
-    // float theta_i = arccos(dot(-ri_d, surface_normal));
-    // float theta_r = arcsin(n_air / n_water * sin(theta_i));
     vec3 rt_d = normalize(refract(ri_d, surface_normal, n_air / n_water));
-
-    // gl_Position = projection * view * vec4(rt_o + 5 * rt_d, 1);
-    // EmitVertex();
-    // EndPrimitive();
 
     // Intersect the refracted ray with the scene geometry
     vec3 geometry_intersect = intersect_geometry2(rt_o, rt_d, shadowMap);
@@ -324,11 +372,14 @@ void main() {
     }
 
     gl_Position = projection * view * vec4(geometry_intersect, 1);
+    float dist = length(geometry_intersect - eye);
     // const int smax = 20, smin = 5;
-    float a = smax - lz_far * (smax - smin) / (lz_far - z_near);
-    float b = (z_near * lz_far * (smax - smin)) / (lz_far - z_near);
-    gl_PointSize = a + b / length(geometry_intersect - eye);
-    // float dist = length(geometry_intersect - eye);
+    float a = smax - z_far * (smax - smin) / (z_far - z_near);
+    float b = (z_near * z_far * (smax - smin)) / (z_far - z_near);
+    gl_PointSize = a + b / dist;
+    // intensity = 1 - dist / z_far;
+    intensity = 0.5;
+    // gl_PointSize = smin + (1 - (dist - z_near) / (z_far - z_near)) * (smax - smin);
     // gl_PointSize = mix(smax, smin, dist / (z_far - z_near));
 
     dist_from_surface = 25;

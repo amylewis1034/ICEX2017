@@ -16,14 +16,38 @@
 #include <Components/Texture.hpp>
 #include <icex_common.hpp>
 #include "GLFW/glfw3.h"
+#include "PRM/Utilities.h"
 
 #include <GL/glew.h>
 
 #include <glm/gtx/string_cast.hpp>
 
+#define CAUSTIC_WIDTH 922
+#define CAUSTIC_HEIGHT 544
+#define CAUSTIC_GRIDSIZE 400
+
 extern GLFWwindow *window;
 
-float caustic_smax = 20.0f, caustic_smin = 5.0f;
+float caustic_smax = 10.0f, caustic_smin = 2.0f;
+
+std::string format(const std::string &fmt, ...) {
+    va_list args;
+
+    va_start(args, fmt);
+    char *buffer = NULL;
+    int size = vsnprintf(buffer, 0, fmt.c_str(), args);
+    va_end(args);
+    buffer = new char[size + 1];
+    
+    va_start(args, fmt);
+    vsnprintf(buffer, size + 1, fmt.c_str(), args);
+    va_end(args);
+    std::string str(buffer);
+    delete [] buffer;
+
+    va_end(args);
+    return str;
+}
 
 DeferredShadowRenderer::DeferredShadowRenderer() {
     /* Initialize geometry buffer */
@@ -114,8 +138,8 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
 		causticFBO[i].attachTexture(
 			GL_COLOR_ATTACHMENT0,
 			GL_RGBA16F,
-			width,
-			height,
+			CAUSTIC_WIDTH,
+			CAUSTIC_HEIGHT,
 			GL_RGBA,
 			GL_FLOAT,
             GL_LINEAR,
@@ -126,8 +150,8 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
         causticFBO[i].attachTexture(
             GL_DEPTH_ATTACHMENT,
             GL_DEPTH_COMPONENT,
-            width,
-            height,
+            CAUSTIC_WIDTH,
+            CAUSTIC_HEIGHT,
             GL_DEPTH_COMPONENT,
             GL_FLOAT,
             GL_LINEAR,
@@ -457,10 +481,11 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     }
     glBindFramebuffer(GL_READ_FRAMEBUFFER, nextFBO);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, causticFBO[0].getHandle());
-	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, width, height, 0, 0, CAUSTIC_WIDTH, CAUSTIC_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, causticFBO[1].getHandle());
-	glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+	glBlitFramebuffer(0, 0, width, height, 0, 0, CAUSTIC_WIDTH, CAUSTIC_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
+    glViewport(0, 0, CAUSTIC_WIDTH, CAUSTIC_HEIGHT);
     causticFBO[1].bind();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -493,39 +518,55 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 
     glUniform1f(causticShader.uniformLocation("smin"), caustic_smin);
     glUniform1f(causticShader.uniformLocation("smax"), caustic_smax);
+
+    glUniform1f(causticShader.uniformLocation("waterHeight"), 25.0f);
+    glUniform1i(causticShader.uniformLocation("numWaves"), 4);
+    for (int i = 0; i < 4; ++i) {
+        float amplitude = 0.5f / (i + 1);
+        glUniform1f(causticShader.uniformLocation(format("amplitude[%d]", i).c_str()), amplitude);
+
+        float wavelength = 16 / (i + 1);
+        glUniform1f(causticShader.uniformLocation(format("wavelength[%d]", i).c_str()), wavelength);
+
+        float speed = 1.0f + 2*i;
+        glUniform1f(causticShader.uniformLocation(format("speed[%d]", i).c_str()), speed);
+
+        float angle = randRangef(-M_PI/3, M_PI/3);
+        glUniform2f(causticShader.uniformLocation(format("direction[%d]", i).c_str()), cos(angle), sin(angle));
+    }
     
     float time = glfwGetTime();
     glUniform1f(causticShader.uniformLocation("time"), time);
 
     static bool first = true;
     static GLVertexArrayObject gridvao;
-    const int gridlength = 800;
     if (first) {
         first = false;
 
-        static glm::vec4 grid[gridlength][gridlength];
-        for (int i = 0; i < gridlength; i++) {
-            for (int j = 0; j < gridlength; j++) {
+        static glm::vec4 grid[CAUSTIC_GRIDSIZE][CAUSTIC_GRIDSIZE];
+        for (int i = 0; i < CAUSTIC_GRIDSIZE; i++) {
+            for (int j = 0; j < CAUSTIC_GRIDSIZE; j++) {
                 grid[i][j] = glm::vec4(
-                    ((float)i / gridlength * 2.0f - 1.0f),
-                    ((float)j / gridlength * 2.0f - 1.0f),
+                    ((float)i / CAUSTIC_GRIDSIZE * 2.0f - 1.0f),
+                    ((float)j / CAUSTIC_GRIDSIZE * 2.0f - 1.0f),
                     -1,
                     1
                 );
             }
         }
         static GLBuffer gridbuf;
-        gridbuf.loadData(GL_ARRAY_BUFFER, gridlength * gridlength * sizeof(glm::vec4), grid, GL_STATIC_DRAW);
+        gridbuf.loadData(GL_ARRAY_BUFFER, CAUSTIC_GRIDSIZE * CAUSTIC_GRIDSIZE * sizeof(glm::vec4), grid, GL_STATIC_DRAW);
         gridvao.addAttribute(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
     }
 
     gridvao.bind();
-    glDrawArrays(GL_POINTS, 0, gridlength * gridlength);
+    glDrawArrays(GL_POINTS, 0, CAUSTIC_GRIDSIZE * CAUSTIC_GRIDSIZE);
     gridvao.unbind();
     causticShader.unbind();
 
     causticFBO[0].unbind();
 
+    glViewport(0, 0, width, height);
     glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
