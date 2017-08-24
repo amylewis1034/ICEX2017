@@ -10,7 +10,7 @@
 
 class Heightmap : public Component {
 public:
-    Heightmap();
+    Heightmap(float texture_scale=1.0f);
     ~Heightmap();
 
     void init();
@@ -19,10 +19,14 @@ public:
     void loadFromFile(const std::string &filename);
     void draw();
 
-	float getHeightAt(float x, float z) const;
+    float getHeightAt(float x, float z) const;
+    
+    void setTextureScale(float s) { this->texture_scale = s; }
+    float getTextureScale() const { return this->texture_scale; }
 
 private:
-	int width, height;
+    int width, height;
+    float texture_scale;
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texcoords;

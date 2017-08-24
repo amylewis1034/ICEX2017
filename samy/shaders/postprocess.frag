@@ -40,6 +40,7 @@ vec3 tonemap(vec3 color) {
 
 void main() {
     color = texture(color_in, fragTexcoord);
+
     float curDepth = texture(depth, fragTexcoord).r;
     // Linearize (http://glampert.com/2014/01-26/visualizing-the-depth-buffer/)
     curDepth = 2 * near / (far + near - curDepth * (far - near));

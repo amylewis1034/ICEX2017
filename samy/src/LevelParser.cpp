@@ -80,8 +80,17 @@ static Component *parseCollider(Value &args) {
 static Component *parseHeightmap(Value &args) {
     Heightmap *heightmap = new Heightmap();
 
-	assert(args.Size() == 1 && args[0].IsString());
-    heightmap->loadFromFile(rpath + args.GetArray()[0].GetString());
+	assert(args.Size() == 1 || args.Size() == 2);
+	assert(args[0].IsString());
+
+	if (args.Size() == 2 && args[1].IsFloat()) {
+		heightmap->setTextureScale(args[1].GetFloat());
+	}
+
+	std::cout << heightmap->getTextureScale() << std::endl;
+	
+	heightmap->loadFromFile(rpath + args.GetArray()[0].GetString());
+	
 
     return (Component *) heightmap;
 }

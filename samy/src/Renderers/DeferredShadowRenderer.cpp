@@ -250,8 +250,8 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     const glm::vec3 &lightPos = world.getMainlightPosition();
     const float lz_near = 0.1f, lz_far = 75.0f, l_boundary = 50.0f;
     glm::mat4 lp = glm::ortho(-l_boundary, l_boundary, -l_boundary, l_boundary, lz_near, lz_far);
-    // glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0, 6, 0), glm::vec3(0.0f, 0.0f, -1.0f));
-    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(frustumCenter), glm::vec3(0.0f, 0.0f, -1.0f));
+    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0, 0, 0), glm::vec3(0.0f, 0.0f, -1.0f));
+    // glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(frustumCenter), glm::vec3(0.0f, 0.0f, -1.0f));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(lp));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(lv));
 	for (GameObject *g : world.getRenderables(projection, view)) {

@@ -28,9 +28,9 @@
 				{"name": "Transform", "args": [
 					0, 0, 0, 
 					0, 1, 0, 0,
-					400, 5, 400]},
-				{"name": "Heightmap", "args": ["heightmaps/basic.png"]},
-				{"name": "Texture", "args": ["textures/plasticbag.jpg"]},
+					100, 0, 100]},
+				{"name": "Heightmap", "args": ["heightmaps/flat_terrain.jpg", 5.0]},
+				{"name": "Texture", "args": ["textures/seafloor_colored.png"]},
 				{"name": "Material", "args": [
 					0.05, 0.05, 0.05,
 					0.1, 0.08, 0.05,
@@ -90,12 +90,12 @@
             "tag": "beaufighter",
             "components": [
                 {"name": "Transform", "args": [
-                    0.0, 4.0, -15.0,
+                    0.0, 0.0, -15.0,
                     0, 0, 1, 0,
                     1, 1, 1
                 ]},
-                {"name": "Mesh", "args": ["beaufighter_trimmed.obj"]},
-                {"name": "Texture", "args": ["beaufighter.jpg"]}
+                {"name": "Mesh", "args": ["objs/beaufighter_trimmed.obj"]},
+                {"name": "Texture", "args": ["textures/beaufighter.jpg"]}
             ]
         },
 		// {
@@ -141,17 +141,6 @@
                 ]},
                 {"name": "Mesh", "args": ["objs/bunny.obj"]}
             ]
-		},
-		{
-			"tag": "thewall",
-			"components": [
-				{"name": "Transform", "args": [
-					0, 0, -20,
-					0, 0, 0, 1,
-					50, 50, 1
-				]},
-				{"name": "Mesh", "args": ["objs/cube.obj"]}
-			]
 		}
 	],
 
