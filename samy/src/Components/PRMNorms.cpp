@@ -52,8 +52,14 @@ void PRMNorms::init() {
     GameObject *target = world->getGameObjectByTag("manoel");
     Transform *targetTransform = target->getComponent<Transform>();
     Collider *targetCollider = target->getComponent<Collider>();
+    Mesh *targetMesh = target->getComponent<Mesh>();
 
-    PRMNode::setCenterOfWorld(targetTransform->getPosition());
+    assert(targetTransform != nullptr);
+    assert(targetCollider != nullptr);
+    assert(targetMesh != nullptr);
+
+    PRMNode::setCenterOfWorld(targetMesh->getCenterOfMass() + targetTransform->getPosition());
+    //PRMNode::setCenterOfWorld(targetTransform->getPosition());
     PRMNode::setLowerLeftOfBB(targetCollider->getMin());
     PRMNode::setUpperRightOfBB(targetCollider->getMax());
 
@@ -132,11 +138,13 @@ void PRMNorms::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
     
     double nodeWeight;
     if (genNorms) {
-        nodeWeight = detectNormals(ocvImg);
+      nodeWeight = detectNormals(ocvImg);
     } 
-
-    if (generatingRootNode && genNorms) {
-        if (nodeWeight > bestRootWeight || bestRootNode == NULL) {
+    else {
+        nodeWeight = (1.0 - curNode->getWeight()) + detectNormals(ocvImg);
+    }
+    if (generatingRootNode) {
+        if (nodeWeight > bestRootWeight) {
             bestRootNode = curNode;
             bestRootWeight = nodeWeight;
         }
@@ -149,25 +157,56 @@ void PRMNorms::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
             generatingRootNode = false;
             bestRootNode->setWeight(bestRootWeight);
             if (genNorms && bestRootWeight > weightThreshNorm) {
-                highWeightNodes.push_back(bestRootNode->getNdx());
+            highWeightNodes.push_back(bestRootNode->getNdx());
             }
-            if (genNorms) {
-                curNode = generatePRMNode(numNodes);
-            }
+            curNode = generatePRMNode(numNodes);
         }
-    }
-    else if (generatingRootNode) {
-        curNode->setWeight(nodeWeight);
     }
     else {
         curNode->setWeight(nodeWeight);
         if (genNorms && nodeWeight > weightThreshNorm) {
             highWeightNodes.push_back(curNode->getNdx());
         }
-        if (genNorms) {
-            curNode = generatePRMNode(numNodes);
-        }
+        curNode = generatePRMNode(numNodes);
     }
+
+    // if (genNorms) {
+    //     nodeWeight = detectNormals(ocvImg);
+    // } 
+
+    // if (generatingRootNode && genNorms) {
+    //     if (nodeWeight > bestRootWeight || bestRootNode == NULL) {
+    //         bestRootNode = curNode;
+    //         bestRootWeight = nodeWeight;
+    //     }
+    //     if (rootIter < 200) {
+    //         curNode = generateRootPRMNode(numNodes);
+    //         rootIter++;
+    //     }
+    //     else {
+    //         setRootPRMNode(bestRootNode);
+    //         generatingRootNode = false;
+    //         bestRootNode->setWeight(bestRootWeight);
+    //         if (genNorms && bestRootWeight > weightThreshNorm) {
+    //             highWeightNodes.push_back(bestRootNode->getNdx());
+    //         }
+    //         if (genNorms) {
+    //             curNode = generatePRMNode(numNodes);
+    //         }
+    //     }
+    // }
+    // else if (generatingRootNode) {
+    //     curNode->setWeight(nodeWeight);
+    // }
+    // else {
+    //     curNode->setWeight(nodeWeight);
+    //     if (genNorms && nodeWeight > weightThreshNorm) {
+    //         highWeightNodes.push_back(curNode->getNdx());
+    //     }
+    //     if (genNorms) {
+    //         curNode = generatePRMNode(numNodes);
+    //     }
+    // }
 }
 
 void PRMNorms::setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir) {

@@ -22,8 +22,8 @@ public:
     void update(float dt);
 
 	float getSpeed() const;
-
 	void setSpeed(float speed);
+    void setPathfile(const std::string pathfile);
 
     void postrender(const glm::mat4 &projection, const glm::mat4 &view);
 private:

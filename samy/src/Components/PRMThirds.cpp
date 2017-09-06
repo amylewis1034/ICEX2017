@@ -53,11 +53,15 @@ void PRMThirds::init() {
     assert(target != nullptr);
     Transform *targetTransform = target->getComponent<Transform>();
     Collider *targetCollider = target->getComponent<Collider>();
+    Mesh *targetMesh = target->getComponent<Mesh>();
 
     assert(targetTransform != nullptr);
     assert(targetCollider != nullptr);
+    assert(targetMesh != nullptr);
 
-    PRMNode::setCenterOfWorld(targetTransform->getPosition());
+    PRMNode::setCenterOfWorld(targetMesh->getCenterOfMass() + targetTransform->getPosition());
+    
+    //PRMNode::setCenterOfWorld(targetTransform->getPosition());
     PRMNode::setLowerLeftOfBB(targetCollider->getMin());
     PRMNode::setUpperRightOfBB(targetCollider->getMax());
 

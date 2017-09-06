@@ -100,7 +100,7 @@ PRMNode *generatePRMNode(int numNodes) {
 		std::reverse(path.begin(), path.end());
 
 		avgPathWeight /= path.size();
-		std::cout << avgPathWeight << std::endl;
+		std::cout << "avg path weight: " << avgPathWeight << std::endl;
 
 		if (debug) {
 			std::cout << "\npercent in high weight list: " 
@@ -110,7 +110,7 @@ PRMNode *generatePRMNode(int numNodes) {
 		roadMap.clear();
 
 		// Write path to file
-		std::ofstream outfile(RESOURCE_PATH "path_test.txt");
+		std::ofstream outfile(RESOURCE_PATH "paths/path_test.txt");
 		if (outfile.is_open()) {
 			outfile << path.size() << std::endl;
 			for (int i = 0; i < path.size(); i++) {

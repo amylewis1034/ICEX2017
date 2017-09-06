@@ -99,3 +99,17 @@ void Mesh::getCollider(Collider &collider) const {
 	collider.setMinOrig(min);
 	collider.setMaxOrig(max);
 }
+
+glm::vec3 Mesh::getCenterOfMass() {
+	float xS = 0, yS = 0, zS = 0;
+
+	for (size_t i = 0; i < positions.size(); i += 3) {
+		glm::vec3 *cur = (glm::vec3 *) &positions[i];
+		
+		xS += cur->x;
+		yS += cur->y;
+		zS += cur->z;
+	}
+	glm::vec3 com = glm::vec3(xS / positions.size(), yS / positions.size(), zS / positions.size());
+	return com;
+}

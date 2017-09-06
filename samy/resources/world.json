@@ -19,7 +19,7 @@
 					0, 0, 1, 0, 
 					0.05, 0.05, 0.05]},
 				{"name": "Camera", "args": ["fps"]},
-				{"name": "PRMInput", "args": [10.0, "path_test.txt"]}
+				{"name": "PRMInput", "args": [10.0, "paths/path_test.txt"]}
 			]
 		},
 		{
@@ -74,16 +74,28 @@
         //         {"name": "Texture", "args": ["chimney.jpg"]}
         //     ]
         // },
-        {
+        // {
+        //     "tag": "manoel",
+        //     "components": [
+        //         {"name": "Transform", "args": [
+        //             0.0, 6.0, -15.0,
+        //             30, 0, 1, 0,
+        //             0.1, 0.1, 0.1
+        //         ]},
+        //         {"name": "Mesh", "args": ["ManoelPRMsCombined2.obj"]},
+        //         {"name": "Texture", "args": ["ManoelPRMsCombined.jpg"]}
+        //     ]
+        // },
+		{
             "tag": "manoel",
             "components": [
                 {"name": "Transform", "args": [
-                    0.0, 6.0, -15.0,
-                    30, 0, 1, 0,
-                    0.1, 0.1, 0.1
+                    0.0, 4.0, -15.0,
+                    0, 1, 0, 0,
+                    1, 1, 1
                 ]},
-                {"name": "Mesh", "args": ["ManoelPRMsCombined2.obj"]},
-                {"name": "Texture", "args": ["ManoelPRMsCombined.jpg"]}
+                {"name": "Mesh", "args": ["beaufighter_trimmed.obj"]},
+                {"name": "Texture", "args": ["beaufighter.jpg"]}
             ]
         },
 		{

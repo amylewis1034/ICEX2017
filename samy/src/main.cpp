@@ -44,6 +44,13 @@ void init(int argc, char **argv) {
             }
             world->setKatieRenderSetting(true);
         }
+        else if (strcmp(argv[1], "view") == 0) {
+            LevelParser::ParseWorld(world, RESOURCE_PATH "world.json");
+            world->setKatieRenderSetting(false);
+            GameObject *gameobject = world->getGameObjectWithComponent<PRMInput>();
+            PRMInput *input = gameobject->getComponent<PRMInput>();
+            input->setPathfile(std::string(argv[2]));
+        }
         else {
             for (int i = 1; i < argc; i++) {
                 std::string worldfile = std::string(RESOURCE_PATH) + std::string(argv[i]);

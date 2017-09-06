@@ -54,8 +54,14 @@ void PRMCombo::init() {
     GameObject *target = world->getGameObjectByTag("manoel");
     Transform *targetTransform = target->getComponent<Transform>();
     Collider *targetCollider = target->getComponent<Collider>();
+    Mesh *targetMesh = target->getComponent<Mesh>();
 
-    PRMNode::setCenterOfWorld(targetTransform->getPosition());
+    assert(targetTransform != nullptr);
+    assert(targetCollider != nullptr);
+    assert(targetMesh != nullptr);
+
+    PRMNode::setCenterOfWorld(targetMesh->getCenterOfMass() + targetTransform->getPosition());
+    //PRMNode::setCenterOfWorld(targetTransform->getPosition());
     PRMNode::setLowerLeftOfBB(targetCollider->getMin());
     PRMNode::setUpperRightOfBB(targetCollider->getMax());
 
@@ -132,28 +138,7 @@ void PRMCombo::thirdsRender(const glm::mat4 &projection, const glm::mat4 &view) 
    
     cv::Mat ocvImg = ocvImgFromGlTex(renderTexture);
     double nodeWeight = std::abs(detectThirds(ocvImg) - 0.66666666);
-    if (generatingRootNode && genThirds) {
-        if (nodeWeight < bestRootWeight) {
-            bestRootNode = curNode;
-            bestRootWeight = nodeWeight;
-        }
-        if (rootIter < 200) {
-            curNode = generateRootPRMNode(numNodes);
-            rootIter++;
-        }
-        else {
-            setRootPRMNode(bestRootNode);
-            generatingRootNode = false;
-            bestRootNode->setWeight(bestRootWeight);
-            if (genThirds && bestRootWeight < weightThreshThirds) {
-                highWeightNodes.push_back(bestRootNode->getNdx());
-            }
-            if (genThirds) {
-                curNode = generatePRMNode(numNodes);
-            }
-        }
-    }
-    else if (generatingRootNode) {
+    if (generatingRootNode) {
         curNode->setWeight(nodeWeight);
     }
     else {
@@ -220,7 +205,7 @@ void PRMCombo::normsRender(const glm::mat4 &projection, const glm::mat4 &view) {
 
 void PRMCombo::postrender(const glm::mat4 &projection, const glm::mat4 &view) {
     PRMCombo::thirdsRender(projection, view);
-    PRMCombo::normsRender(projection, view);
+  //  PRMCombo::normsRender(projection, view);    
 }
 
 void PRMCombo::setCamPos6dof(const glm::vec3 pos, const glm::vec3 dir) {

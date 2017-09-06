@@ -31,41 +31,47 @@ glm::vec3 calcPosition(float height, int pathLength, int numNodes) {
 glm::vec3 calcDirection(float theta, int pathLength, int numNodes) {
 	double dirTheta = pathLength * ((2 * M_PI) / numNodes);
 
-	return glm::vec3(PRMNode::constVelMults[0] * cos(offset + dirTheta), PRMNode::constVelMults[1] * theta, PRMNode::constVelMults[2] * -sin(dirTheta));
+	return glm::vec3(PRMNode::constVelMults[0] * cos(offset + dirTheta), PRMNode::constVelMults[1] * dirTheta, PRMNode::constVelMults[2] * -sin(dirTheta));
 }
 
 glm::vec3 PRMNode::calcFreePosition(float height, int pathLength, int numNodes) {
-	double posTheta = pathLength * (2 * M_PI) / numNodes;
+	double posTheta = (pathLength) * ((2 * M_PI) / numNodes );
+	double curRadius = randRangef(radius - 1, radius + 1);
 	float posX, posY, posZ;
+	glm::vec3 output;
 
 	if (getParent() == NULL) {
-		posX = PRMNode::getCenterOfWorld()[0]; 
-		posY = PRMNode::getCenterOfWorld()[1];
-		posZ = PRMNode::getCenterOfWorld()[2];
+		output = glm::vec3(
+			posX = PRMNode::getCenterOfWorld()[0] + curRadius / 2, 
+			posY = PRMNode::getCenterOfWorld()[1] + height,
+			posZ = PRMNode::getCenterOfWorld()[2] + curRadius / 3);
 	}
 	else {
 		posX = getParent()->getPosition()[0];
 		posY = getParent()->getPosition()[1];
 		posZ = getParent()->getPosition()[2];
-	}
+	
 
-	double curRadius = randRangef(radius - 1, radius + 1);
-
-	glm::vec3 output;
 	float distance = -10;
-
-	while (distance < .5 * curRadius || distance > 4 * curRadius) { 
+    float randWidth = randRangef(-3, 3);
+	float randHeight = randRangef(-2, 2);
+	
+//	while (distance < .5 * curRadius || distance > 4 * curRadius) {
 		output = glm::vec3(
-			posX + robotVelocity * cos(getCamTheta()) + randRangef(-10, 10), 
-			posY + randRangef(-1, 1), //check to see if going through ground 
-			posZ + robotVelocity * sin(getCamTheta()) + randRangef(-10, 10));
+			// posX * robotVelocity * cos(posTheta), //can be -9 to 9 if at lowest with parent position
+			// posY + height, //check to see if going through ground
+			// posZ * robotVelocity * sin(posTheta)); //can be -9 to 9 if at lowest with parent position
+			posX + curRadius * tan(M_PI / numNodes) * cos(posTheta + M_PI / 2) + randWidth,
+			posY + randHeight,
+			posZ + curRadius * tan(M_PI / numNodes) * sin(posTheta + M_PI / 2) + randWidth);
 		distance = glm::sqrt((posZ - output.z) * (posZ - output.z) + (posY - output.y) * (posY - output.y) + (posX - output.x) * (posX - output.x));
+	//}
 	}
 
 	return output;
 }
 
-glm::vec3 PRMNode::calcFreeDirection(float theta, int pathLength) {
+glm::vec3 PRMNode::calcFreeDirection(glm::vec3 pos, float theta, int pathLength) {
 	float randTheta = randRangef(0.0872665f, 0.261799f);
 	float randPhi = randRangef(0.0872665f, 0.261799f);
 
@@ -79,11 +85,18 @@ glm::vec3 PRMNode::calcFreeDirection(float theta, int pathLength) {
 		curPhi = getParent()->getCamPhi() + randPhi;
 	}
 
+	camTheta = curTheta;
+	camPhi = curPhi;
+
 	float camX = cos(curPhi) * cos(curTheta);
 	float camY = sin(curPhi);
 	float camZ = cos(curPhi) * cos(M_PI/2 - curTheta);
 
-	return glm::vec3( camX, camY, camZ );
+	glm::vec3 cameraPos = glm::vec3( camX, camY, camZ );
+	glm::vec3 cameraTarget = glm::vec3(PRMNode::getCenterOfWorld()[0] + radius / 2, PRMNode::getCenterOfWorld()[1], PRMNode::getCenterOfWorld()[2] + radius / 3);
+	glm::vec3 cameraDirection = glm::normalize(cameraTarget - pos);
+
+	return cameraDirection;
 }
 
 PRMNode::PRMNode(int numNodes) {
@@ -93,7 +106,7 @@ PRMNode::PRMNode(int numNodes) {
 	weight = 0;
 	//Maybe start towards to wreck
 	camPhi = 0;
-	camTheta = M_PI;
+	camTheta = 2 * M_PI / numNodes;
 	robotTheta = randRangef(0.0f, M_PI);
 
 	// Strange bug where first time rand() is called, we always get the same 
@@ -109,8 +122,8 @@ PRMNode::PRMNode(int numNodes) {
 			numNodes);
 	}
 	else {
-		position = calcFreePosition(randRangef(2.0, 10.0), pathLength - 1, numNodes);
-		direction = calcFreeDirection(
+		position = calcFreePosition(randRangef(4.0, 12.0), pathLength - 1, numNodes);
+		direction = calcFreeDirection(position,
 			randRangef(
 				initalTheta - 3 * thetaMaxDelta, 
 				initalTheta + 3 * thetaMaxDelta), //random pitch
@@ -143,7 +156,7 @@ PRMNode::PRMNode(int numNodes, PRMNode *withinDelta) {
 	}
 	else {
 		position = calcFreePosition(height, pathLength - 1, numNodes);
-		direction = calcFreeDirection(
+		direction = calcFreeDirection(position,
 			randRangef(parentT - thetaMaxDelta, parentT + thetaMaxDelta), 
 			pathLength - 1);
 	}

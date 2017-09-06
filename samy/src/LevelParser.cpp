@@ -328,8 +328,7 @@ void LevelParser::ParseWorld(World *world, const std::string &filename) {
 
 		for (auto &c : document["SharedComponents"].GetObject()) {
 			std::string name {c.name.GetString(), c.name.GetStringLength()};
-			// cout << name <<  endl;
-
+			
 			sharedComponents[name] = &c.value;
 		}
 	}

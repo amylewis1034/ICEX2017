@@ -20,6 +20,8 @@ public:
     void draw() const;
 
     void getCollider(Collider &collider) const;
+    std::vector<float> getPositions() { return positions; }
+    glm::vec3 getCenterOfMass();
 
 private:
     GLuint vao, ebo;

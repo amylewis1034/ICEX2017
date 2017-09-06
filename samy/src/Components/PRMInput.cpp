@@ -70,6 +70,10 @@ void PRMInput::setSpeed(float speed) {
 	this->speed = speed;
 }
 
+void PRMInput::setPathfile(const std::string pathfile) {
+	this->pathfile = pathfile;
+}
+
 void PRMInput::initCamPath() {
    string fileLocation;
    if (this->pathfile.length() > 0) {
