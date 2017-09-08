@@ -49,7 +49,7 @@ void init(int argc, char **argv) {
             world->setKatieRenderSetting(false);
             GameObject *gameobject = world->getGameObjectWithComponent<PRMInput>();
             PRMInput *input = gameobject->getComponent<PRMInput>();
-            input->setPathfile(std::string(argv[2]));
+            input->setPathfile(std::string("paths/") + std::string(argv[2]));
         }
         else {
             for (int i = 1; i < argc; i++) {
