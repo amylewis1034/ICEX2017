@@ -393,7 +393,6 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
         gBuffer.bindTextures();
         glUniform1i(causticShader.uniformLocation("world_positions"), 0);
         
-        glBindBufferBase(GL_UNIFORM_BUFFER, 0, water->uniform_block.getHandle());
         GLuint block_index;
         block_index = glGetUniformBlockIndex(causticShader.getHandle(), "Caustics");
         glUniformBlockBinding(causticShader.getHandle(), block_index, 0);
