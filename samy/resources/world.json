@@ -28,7 +28,7 @@
 				{"name": "Transform", "args": [
 					0, 0, 0, 
 					0, 1, 0, 0,
-					100, 0, 100]},
+					100, 1, 100]},
 				{"name": "Heightmap", "args": ["heightmaps/flat_terrain.jpg", 5.0]},
 				{"name": "Texture", "args": ["textures/seafloor_colored.png"]},
 				{"name": "Material", "args": [
@@ -38,6 +38,18 @@
 					20,
 					1.0
 				]}
+			]
+		},
+		{
+			"tag": "water",
+			"components": [
+				// don't change transform pls
+				{"name": "Transform", "args": [
+					0, 0, 0, 
+					0, 1, 0, 0,
+					1, 1, 1]},
+				{"name": "Texture", "args": ["textures/seafloor_colored.png"]},
+				{"name": "WaterMesh", "args": [16, 16]}
 			]
 		},
 		// {

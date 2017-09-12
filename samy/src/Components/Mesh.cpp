@@ -32,6 +32,12 @@ void Mesh::draw() const {
 	unbind();
 }
 
+void Mesh::draw_instanced(GLsizei num_instances) const {
+	bind();
+	glDrawElementsInstanced(GL_TRIANGLES, count, GL_UNSIGNED_INT, 0, num_instances);
+	unbind();
+}
+
 void Mesh::loadMesh(std::string meshname) {
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;

@@ -22,32 +22,7 @@
 
 #include <glm/gtx/string_cast.hpp>
 
-#define CAUSTIC_WIDTH 922
-#define CAUSTIC_HEIGHT 544
-#define CAUSTIC_GRIDSIZE 400
-
 extern GLFWwindow *window;
-
-float caustic_smax = 10.0f, caustic_smin = 2.0f;
-
-std::string format(const std::string &fmt, ...) {
-    va_list args;
-
-    va_start(args, fmt);
-    char *buffer = NULL;
-    int size = vsnprintf(buffer, 0, fmt.c_str(), args);
-    va_end(args);
-    buffer = new char[size + 1];
-    
-    va_start(args, fmt);
-    vsnprintf(buffer, size + 1, fmt.c_str(), args);
-    va_end(args);
-    std::string str(buffer);
-    delete [] buffer;
-
-    va_end(args);
-    return str;
-}
 
 DeferredShadowRenderer::DeferredShadowRenderer() {
     /* Initialize geometry buffer */
@@ -90,13 +65,6 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
     GLuint att[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
     glDrawBuffers(3, att);
 
-    // gBuffer.attachRenderbuffer(
-    //     GL_DEPTH_ATTACHMENT,
-    //     GL_DEPTH_COMPONENT,
-    //     width,
-    //     height
-    // );
-
     gBuffer.attachTexture(
         GL_DEPTH_STENCIL_ATTACHMENT,
         GL_DEPTH24_STENCIL8,
@@ -133,68 +101,6 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
     }
     lightFBO.unbind();
 
-    for (int i = 0; i < 2; i++) {
-		causticFBO[i].bind();
-		causticFBO[i].attachTexture(
-			GL_COLOR_ATTACHMENT0,
-			GL_RGBA16F,
-			CAUSTIC_WIDTH,
-			CAUSTIC_HEIGHT,
-			GL_RGBA,
-			GL_FLOAT,
-            GL_LINEAR,
-            GL_LINEAR,
-            GL_CLAMP_TO_EDGE,
-            GL_CLAMP_TO_EDGE
-		);
-        causticFBO[i].attachTexture(
-            GL_DEPTH_ATTACHMENT,
-            GL_DEPTH_COMPONENT,
-            CAUSTIC_WIDTH,
-            CAUSTIC_HEIGHT,
-            GL_DEPTH_COMPONENT,
-            GL_FLOAT,
-            GL_LINEAR,
-            GL_LINEAR,
-            GL_CLAMP_TO_BORDER,
-            GL_CLAMP_TO_BORDER,
-            &borderColor
-        );
-		GLuint causticAtt[] = { GL_COLOR_ATTACHMENT0 };
-		glDrawBuffers(1, causticAtt);
-		causticFBO[i].unbind();
-	}
-
-    // causticFBO.bind();
-    // causticFBO.attachTexture(
-    //     GL_COLOR_ATTACHMENT0,
-    //     GL_RGB16F,
-    //     width,
-    //     height,
-    //     GL_RGB,
-    //     GL_FLOAT
-    // );
-    // causticFBO.attachTexture(
-    //     GL_DEPTH_ATTACHMENT,
-    //     GL_DEPTH_COMPONENT,
-    //     width,
-    //     height,
-    //     GL_DEPTH_COMPONENT,
-    //     GL_FLOAT,
-    //     GL_LINEAR,
-    //     GL_LINEAR,
-    //     GL_CLAMP_TO_BORDER,
-    //     GL_CLAMP_TO_BORDER,
-    //     &borderColor
-    // );
-    // GLuint causticAttachments[] = { GL_COLOR_ATTACHMENT0 };
-    // glDrawBuffers(1, causticAttachments);
-
-    // if (causticFBO.getStatus() != GL_FRAMEBUFFER_COMPLETE) {
-    //     std::cout << "Framebuffer not created successfully" << std::endl;
-    // }
-    // causticFBO.unbind();
-
     /* Initialize default texture */
     defaultTexture.loadTexture(RESOURCE_PATH "textures/default.png");
 
@@ -207,13 +113,7 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
     pointlightShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "pointlight.frag");
     lightStencilShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "empty.frag");
 
-    causticShader.linkProgram(
-        SHADER_PATH "lightz.vert",
-        SHADER_PATH "lightz.frag",
-        SHADER_PATH "lightz.geom"
-    );
-    
-    blurShader.linkProgram(SHADER_PATH "textured_quad.vert", SHADER_PATH "blend.frag");
+    causticShader.linkProgram(SHADER_PATH "caustics.vert", SHADER_PATH "caustics.frag");
 
     /* Initialize quad and sphere*/
     GLQuad::init();
@@ -239,19 +139,14 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glClear(GL_DEPTH_BUFFER_BIT);
     glDisable(GL_BLEND);
 	glEnable(GL_CULL_FACE);
-    // glCullFace(GL_FRONT);
+    glCullFace(GL_FRONT);
 
     shadowmapShader.bind();
-
-    glm::mat4 inv_view = glm::inverse(view);
-    glm::vec4 frustumCenter = 
-        (inv_view * glm::vec4(0,0,0,1)) + (inv_view * glm::vec4(0,0,-1,0)) * (world.getNear() + world.getFar()) / 2.0f;
 
     const glm::vec3 &lightPos = world.getMainlightPosition();
     const float lz_near = 0.1f, lz_far = 75.0f, l_boundary = 50.0f;
     glm::mat4 lp = glm::ortho(-l_boundary, l_boundary, -l_boundary, l_boundary, lz_near, lz_far);
     glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0, 0, 0), glm::vec3(0.0f, 0.0f, -1.0f));
-    // glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(frustumCenter), glm::vec3(0.0f, 0.0f, -1.0f));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(lp));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(lv));
 	for (GameObject *g : world.getRenderables(projection, view)) {
@@ -301,19 +196,12 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 	for (GameObject *g : world.getRenderables(projection, view)) {
 		Transform *t = g->getComponent<Transform>();
 		Mesh *mesh = g->getComponent<Mesh>();
-		// Material *m = g->getComponent<Material>();
 		Heightmap *hmap = g->getComponent<Heightmap>();
 		Texture *texture = g->getComponent<Texture>();
-
-		/* Set material properties */
-		// if (m == nullptr) {
-		// 	m = defaultMaterial;
-		// }
-		// m->setUniforms(deferredShader);
+        WaterMesh *water = g->getComponent<WaterMesh>();
 
 		/* Set any textures */
 		if (texture == nullptr) {
-			/* TODO: not sure if default works */
             defaultTexture.bind();
 		}
         else {
@@ -331,6 +219,9 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 		else if (hmap) {
 			hmap->draw();
 		}
+        else if (water) {
+            water->draw();
+        }
 
 	}
     deferredShader.unbind();
@@ -475,189 +366,125 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glBindTexture(GL_TEXTURE_2D, 0);
     dirlightShader.unbind();
 
-    /* Caustics */
+    glEnable(GL_DEPTH_TEST);
+
+    glDisable(GL_BLEND);
+
     if (GLEW_KHR_debug) {
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Caustics");
     }
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, nextFBO);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, causticFBO[0].getHandle());
-	glBlitFramebuffer(0, 0, width, height, 0, 0, CAUSTIC_WIDTH, CAUSTIC_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, causticFBO[1].getHandle());
-	glBlitFramebuffer(0, 0, width, height, 0, 0, CAUSTIC_WIDTH, CAUSTIC_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
 
-    glViewport(0, 0, CAUSTIC_WIDTH, CAUSTIC_HEIGHT);
-    causticFBO[1].bind();
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    causticFBO[0].bind();
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    // glCullFace(GL_BACK);
     glDisable(GL_CULL_FACE);
-    glEnable(GL_DEPTH_TEST);
-    glEnable(GL_PROGRAM_POINT_SIZE);
-
-    causticShader.bind();
-
-    glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-    glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(causticShader.uniformLocation("lp"), 1, GL_FALSE, glm::value_ptr(lp));
-    glUniformMatrix4fv(causticShader.uniformLocation("lv"), 1, GL_FALSE, glm::value_ptr(lv));
-    
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, lightFBO.getTexture(0));
-    glUniform1i(causticShader.uniformLocation("shadowMap"), 0);
-
-    glUniform3fv(causticShader.uniformLocation("lightPos"), 1, glm::value_ptr(lightPos));
-    glUniform3fv(causticShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
-
-    glUniform1f(causticShader.uniformLocation("lz_near"), lz_near);
-    glUniform1f(causticShader.uniformLocation("lz_far"), lz_far);
-    glUniform1f(causticShader.uniformLocation("z_near"), world.getNear());
-    glUniform1f(causticShader.uniformLocation("z_far"), world.getFar());
-
-    glUniform1f(causticShader.uniformLocation("smin"), caustic_smin);
-    glUniform1f(causticShader.uniformLocation("smax"), caustic_smax);
-
-    glUniform1f(causticShader.uniformLocation("waterHeight"), 25.0f);
-    glUniform1i(causticShader.uniformLocation("numWaves"), 4);
-    for (int i = 0; i < 4; ++i) {
-        float amplitude = 0.5f / (i + 1);
-        glUniform1f(causticShader.uniformLocation(format("amplitude[%d]", i).c_str()), amplitude);
-
-        float wavelength = 16 / (i + 1);
-        glUniform1f(causticShader.uniformLocation(format("wavelength[%d]", i).c_str()), wavelength);
-
-        float speed = 1.0f + 2*i;
-        glUniform1f(causticShader.uniformLocation(format("speed[%d]", i).c_str()), speed);
-
-        float angle = randRangef(-M_PI/3, M_PI/3);
-        glUniform2f(causticShader.uniformLocation(format("direction[%d]", i).c_str()), cos(angle), sin(angle));
-    }
-    
-    float time = glfwGetTime();
-    glUniform1f(causticShader.uniformLocation("time"), time);
-
-    static bool first = true;
-    static GLVertexArrayObject gridvao;
-    if (first) {
-        first = false;
-
-        static glm::vec4 grid[CAUSTIC_GRIDSIZE][CAUSTIC_GRIDSIZE];
-        for (int i = 0; i < CAUSTIC_GRIDSIZE; i++) {
-            for (int j = 0; j < CAUSTIC_GRIDSIZE; j++) {
-                grid[i][j] = glm::vec4(
-                    ((float)i / CAUSTIC_GRIDSIZE * 2.0f - 1.0f),
-                    ((float)j / CAUSTIC_GRIDSIZE * 2.0f - 1.0f),
-                    -1,
-                    1
-                );
-            }
-        }
-        static GLBuffer gridbuf;
-        gridbuf.loadData(GL_ARRAY_BUFFER, CAUSTIC_GRIDSIZE * CAUSTIC_GRIDSIZE * sizeof(glm::vec4), grid, GL_STATIC_DRAW);
-        gridvao.addAttribute(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-    }
-
-    gridvao.bind();
-    glDrawArrays(GL_POINTS, 0, CAUSTIC_GRIDSIZE * CAUSTIC_GRIDSIZE);
-    gridvao.unbind();
-    causticShader.unbind();
-
-    causticFBO[0].unbind();
-
-    glViewport(0, 0, width, height);
-    glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
     glEnable(GL_BLEND);
-    glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    blurShader.bind();
-    glUniformMatrix4fv(blurShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));
-    glUniformMatrix4fv(blurShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(v));
-    glUniformMatrix4fv(blurShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(m));
+    GameObject *watermesh = world.getGameObjectWithComponent<WaterMesh>();
+    if (watermesh) {
+        WaterMesh *water = watermesh->getComponent<WaterMesh>();
+        Transform *water_transform = watermesh->getComponent<Transform>();
 
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, causticFBO[0].getTexture(0));
-    glUniform1i(blurShader.uniformLocation("texture0"), 0);
-
-    GLQuad::draw();
-    blurShader.unbind();
-
-    /* Gaussian blur */
-	blurShader.bind();
-	const int blurs = 2;
-	for (int i = 0; i < blurs; i++) {
-        // if (i == blurs - 1) {
-        //     glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
-        //     glClear(GL_COLOR_BUFFER_BIT);
-        //     glEnable(GL_BLEND);
-        //     glDepthMask(GL_FALSE);
-        // }
-        // else {
-            causticFBO[i % 2].bind();
+        // Mesh *cube = nullptr;
+        // if (!cube) {
+        //     cube = new Mesh(RESOURCE_PATH "objs/cube.obj");
         // }
 
-		glUniformMatrix4fv(blurShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));
-		glUniformMatrix4fv(blurShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(v));
-		glUniformMatrix4fv(blurShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(m));
+        causticShader.bind();
+        gBuffer.bindTextures();
+        glUniform1i(causticShader.uniformLocation("world_positions"), 0);
+        
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, water->uniform_block.getHandle());
+        GLuint block_index;
+        block_index = glGetUniformBlockIndex(causticShader.getHandle(), "Caustics");
+        glUniformBlockBinding(causticShader.getHandle(), block_index, 0);
 
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, causticFBO[(i + 1) % 2].getTexture(0));
-		glUniform1i(blurShader.uniformLocation("color_in"), 0);
+        glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
 
-		glUniform1i(blurShader.uniformLocation("horizontal"), i % 2);
+        water->draw_caustics();
+        // cube->draw_instanced(16 * 16);
+        // for (int i = 0; i < water->indices.size() - 2; i++) {
+        //     // i = ((int) (4 * glfwGetTime())) % (water->indices.size() - 2);
+        //     glUniform1uiv(causticShader.uniformLocation("index"), 3, &water->indices[i]);
 
-		GLQuad::draw();
-		causticFBO[i % 2].unbind();
-	}
-	blurShader.unbind();
+        //     glm::mat4 model, t, s;
+        //     BoundingBox &bbox = water->bboxes[i];
+        //     t = glm::translate(t, bbox.center + water_transform->getPosition());
+        //     s = glm::scale(s, bbox.scale * water_transform->getScale());
+        //     model = t * s;         
+        //     glUniformMatrix4fv(causticShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+            
 
-    glEnable(GL_CULL_FACE);
-    glDisable(GL_BLEND);
+        //     // std::cout << "=================" << std::endl;
+        //     // unsigned *indices = &water->indices[i];
+        //     // std::cout << indices[0] << " " << indices[1] << " " << indices[2] << std::endl;
+        //     // glm::vec3 v[3] = {
+        //     //     water->vertices[indices[0]],
+        //     //     water->vertices[indices[1]],
+        //     //     water->vertices[indices[2]]
+        //     // };
+        //     // glm::vec3 n[3] = {
+        //     //     water->normals[indices[0]],
+        //     //     water->normals[indices[1]],
+        //     //     water->normals[indices[2]]
+        //     // };
+        //     // glm::vec3 r[3] = {
+        //     //     water->refracted_rays[indices[0]],
+        //     //     water->refracted_rays[indices[1]],
+        //     //     water->refracted_rays[indices[2]]
+        //     // };
+        //     // glm::vec3 basis_x = glm::normalize(v[1] - v[0]);
+        //     // glm::vec3 basis_y = glm::normalize(
+        //     //     glm::cross(
+        //     //         v[1] - v[0], v[2] - v[0]
+        //     //     )
+        //     // );
+        //     // // glm::vec3 basis_y = glm::normalize(n[0] + n[1] + n[2]);
+        //     // glm::vec3 basis_z = glm::cross(basis_x, basis_y);
+        //     // glm::mat3 cob {basis_x, basis_y, basis_z};
+        //     // cob = glm::transpose(cob);
+
+        //     // std::cout << glm::to_string(basis_x) << std::endl;
+        //     // std::cout << glm::to_string(basis_y) << std::endl;
+        //     // std::cout << glm::to_string(basis_z) << std::endl;
+
+        //     // for (int j = 0; j < 3; j++) {
+        //     //     std::cout << "vertex[" << j << "]: " <<
+        //     //         glm::to_string(v[j]) << " " <<
+        //     //         glm::to_string(n[j]) << " " <<
+        //     //         glm::to_string(r[j]) << " " << std::endl;
+        //     // }
+        //     // v[0] = cob * v[0];
+        //     // v[1] = cob * v[1];
+        //     // v[2] = cob * v[2];
+        //     // r[0] = cob * r[0];
+        //     // r[1] = cob * r[1];
+        //     // r[2] = cob * r[2];
+        //     // r[0] /= r[0].y;
+        //     // r[1] /= r[1].y;
+        //     // r[2] /= r[2].y;
+        //     // for (int j = 0; j < 3; j++) {
+        //     //     std::cout << "vertex[" << j << "]: " <<
+        //     //         glm::to_string(v[j]) << " " <<
+        //     //         glm::to_string(n[j]) << " " <<
+        //     //         glm::to_string(r[j]) << " " << std::endl;
+        //     // }
+
+        //     cube->draw();
+        //     // break;
+        // }
+
+        gBuffer.unbindTextures();
+        causticShader.unbind();
+
+        glDisable(GL_BLEND);
+    }
 
     if (GLEW_KHR_debug) {
         glPopDebugGroup();
     }
 
-	/* Draw to textured quad */
-	// {
-	// 	quadShader.bind();
-	// 	glUniformMatrix4fv(quadShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));
-	// 	glUniformMatrix4fv(quadShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(v));
-	// 	glUniformMatrix4fv(quadShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(m));
-
-	// 	gBuffer.bindTextures();
-	// 	glUniform1i(quadShader.uniformLocation("gPosition"), 0);
-	// 	glUniform1i(quadShader.uniformLocation("gNormal"), 1);
-	// 	glUniform1i(quadShader.uniformLocation("gAlbedoSpecular"), 2);
-
-	// 	/* Set eye */
-	// 	glUniform3fv(quadShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
-
-	// 	/* Set main and point lights */
-	// 	world.setLightUBO(quadShader);
-
-    //     glm::mat4 ls = lp * lv;
-    //     glUniformMatrix4fv(quadShader.uniformLocation("ls"), 1, GL_FALSE, glm::value_ptr(ls));
-    //     glActiveTexture(GL_TEXTURE3);
-    //     glBindTexture(GL_TEXTURE_2D, lightFBO.getTexture(0));
-    //     glUniform1i(quadShader.uniformLocation("shadowMap"), 3);
-
-	// 	GLQuad::draw();
-	// 	gBuffer.unbindTextures();
-    //     glActiveTexture(GL_TEXTURE3);
-    //     glBindTexture(GL_TEXTURE_2D, 0);
-	// 	quadShader.unbind();
-	// }
-
-    glDepthMask(GL_TRUE);
-
-	// glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.getHandle());
-    // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nextFBO);
-	// glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-    // glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
-
-    glEnable(GL_DEPTH_TEST);
+    glDepthMask(GL_TRUE);    
 
     if (GLEW_KHR_debug) {
         glPopDebugGroup();

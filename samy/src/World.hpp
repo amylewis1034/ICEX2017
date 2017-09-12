@@ -88,7 +88,6 @@ private:
     Material *defaultMaterial;
 	Texture *defaultTexture;
 
-    GameObject *heightMapComponent;
 	RenderSettings renderSettings;
 };
 

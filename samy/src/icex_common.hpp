@@ -20,6 +20,7 @@
 #include <Components/Shader.hpp>
 #include <Components/Skybox.hpp>
 #include <Components/Transform.hpp>
+#include <Components/WaterMesh.hpp>
 
 #include <Input/GLFWHandler.hpp>
 #include <Input/Keyboard.hpp>

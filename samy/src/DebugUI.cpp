@@ -65,13 +65,6 @@ void DebugUI::render(float dt, World *world) {
 		world->setMainLightColor(mainlight_color);
 	}
 
-	/* Caustics */
-	{
-		extern float caustic_smin, caustic_smax;
-		ImGui::SliderFloat("Caustic smin", &caustic_smin, 1.0f, 20.0f);
-		ImGui::SliderFloat("Caustic smax", &caustic_smax, 10.0f, 100.0f);
-	}
-
 	/* Toggle free camera */
 	if (ImGui::Button("Toggle free camera")) {
 		GameObject *player = world->getGameObjectWithComponent<PlayerInput>();

@@ -18,8 +18,11 @@ public:
     void bind() const;
     void unbind() const;
     void draw() const;
+    void draw_instanced(GLsizei num_instances) const;
 
     void getCollider(Collider &collider) const;
+
+    GLuint getVAO() { return vao; }
 
 private:
     GLuint vao, ebo;

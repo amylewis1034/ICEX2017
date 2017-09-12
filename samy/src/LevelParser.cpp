@@ -222,6 +222,19 @@ static Component *parseTexture(Value &args) {
 	return (Component *) texture;
 }
 
+static Component *parseWaterMesh(Value &args) {
+	WaterMesh *water;
+
+	if (args.Size() == 2 && args[0].IsInt() && args[1].IsInt()) {
+		water = new WaterMesh(args[0].GetInt(), args[1].GetInt());
+	}
+	else {
+		water = new WaterMesh();
+	}
+
+	return (Component *) water;
+}
+
 // look up table of functions
 const static std::map<std::string, std::function<Component *(Value &args)>> cmap = {
     {"Transform", parseTransform},
@@ -237,7 +250,8 @@ const static std::map<std::string, std::function<Component *(Value &args)>> cmap
 	{"Particle", parseParticle},
 	{"Shader", parseShader},
     {"Skybox", parseSkybox},
-	{"Texture", parseTexture}
+	{"Texture", parseTexture},
+	{"WaterMesh", parseWaterMesh}
 };
 
 static Component *parseComponent(Value &c, const SharedComponentMap &sharedComponents) {

@@ -12,6 +12,9 @@ public:
 
     void bind() const;
     void unbind() const;
+
+    GLuint getHandle() const { return handle; };
+    
 private:
     GLuint handle;
     GLenum target;
