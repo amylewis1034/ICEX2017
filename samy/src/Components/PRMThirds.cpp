@@ -59,9 +59,8 @@ void PRMThirds::init() {
     assert(targetCollider != nullptr);
     assert(targetMesh != nullptr);
 
-    PRMNode::setCenterOfWorld(targetMesh->getCenterOfMass() + targetTransform->getPosition());
-    
-    //PRMNode::setCenterOfWorld(targetTransform->getPosition());
+    PRMNode::setCenterOfWorld(targetMesh->getCenterOfMass() + targetTransform->getPosition()); // for center of mass
+    //PRMNode::setCenterOfWorld(targetTransform->getPosition()); // for center of wreck
     PRMNode::setLowerLeftOfBB(targetCollider->getMin());
     PRMNode::setUpperRightOfBB(targetCollider->getMax());
 

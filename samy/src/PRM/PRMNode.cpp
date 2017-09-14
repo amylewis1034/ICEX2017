@@ -42,9 +42,9 @@ glm::vec3 PRMNode::calcFreePosition(float height, int pathLength, int numNodes) 
 
 	if (getParent() == NULL) {
 		output = glm::vec3(
-			posX = PRMNode::getCenterOfWorld()[0] + curRadius / 2, 
+			posX = PRMNode::getCenterOfWorld()[0] + curRadius, 
 			posY = PRMNode::getCenterOfWorld()[1] + height,
-			posZ = PRMNode::getCenterOfWorld()[2] + curRadius / 3);
+			posZ = PRMNode::getCenterOfWorld()[2] + curRadius);
 	}
 	else {
 		posX = getParent()->getPosition()[0];
@@ -71,9 +71,9 @@ glm::vec3 PRMNode::calcFreePosition(float height, int pathLength, int numNodes) 
 	return output;
 }
 
-glm::vec3 PRMNode::calcFreeDirection(glm::vec3 pos, float theta, int pathLength) {
-	float randTheta = randRangef(0.0872665f, 0.261799f);
-	float randPhi = randRangef(0.0872665f, 0.261799f);
+glm::vec3 PRMNode::calcFreeDirection(glm::vec3 pos, float theta, int pathLength, int numNodes) {
+	float randTheta = randRangef(M_PI / (3.0f * float(numNodes)), M_PI / float(numNodes));
+	float randPhi = randRangef(M_PI / (3.0f * float(numNodes)), M_PI / float(numNodes));
 
 	float curTheta, curPhi;
 	if (getParent() == NULL) {
@@ -93,7 +93,7 @@ glm::vec3 PRMNode::calcFreeDirection(glm::vec3 pos, float theta, int pathLength)
 	float camZ = cos(curPhi) * cos(M_PI/2 - curTheta);
 
 	glm::vec3 cameraPos = glm::vec3( camX, camY, camZ );
-	glm::vec3 cameraTarget = glm::vec3(PRMNode::getCenterOfWorld()[0] + radius / 2, PRMNode::getCenterOfWorld()[1], PRMNode::getCenterOfWorld()[2] + radius / 3);
+	glm::vec3 cameraTarget = glm::vec3(PRMNode::getCenterOfWorld()[0] + radius / 2, PRMNode::getCenterOfWorld()[1], PRMNode::getCenterOfWorld()[2] + radius / 2);
 	glm::vec3 cameraDirection = glm::normalize(cameraTarget - pos);
 
 	return cameraDirection;
@@ -122,12 +122,13 @@ PRMNode::PRMNode(int numNodes) {
 			numNodes);
 	}
 	else {
-		position = calcFreePosition(randRangef(4.0, 12.0), pathLength - 1, numNodes);
+		position = calcFreePosition(randRangef(10.0, 12.0), pathLength - 1, numNodes);
 		direction = calcFreeDirection(position,
 			randRangef(
 				initalTheta - 3 * thetaMaxDelta, 
 				initalTheta + 3 * thetaMaxDelta), //random pitch
-			pathLength - 1);
+			pathLength - 1,
+			numNodes);
 	}
 }
 
@@ -158,12 +159,13 @@ PRMNode::PRMNode(int numNodes, PRMNode *withinDelta) {
 		position = calcFreePosition(height, pathLength - 1, numNodes);
 		direction = calcFreeDirection(position,
 			randRangef(parentT - thetaMaxDelta, parentT + thetaMaxDelta), 
-			pathLength - 1);
+			pathLength - 1,
+			numNodes);
 	}
 }
 
 void PRMNode::setCenterOfWorld(glm::vec3 centerPos) {
-	PRMNode::centerOfWorld = centerPos;
+	PRMNode::centerOfWorld = centerPos - glm::vec3(radius / 2, 0, radius /2);
 }
 
 void PRMNode::setUpperRightOfBB(glm::vec3 upperRightPos) {

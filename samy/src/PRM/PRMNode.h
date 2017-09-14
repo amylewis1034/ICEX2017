@@ -8,7 +8,7 @@
 
 #include <glm/glm.hpp>
 
-const int minHeight = 2, maxHeight = 24;
+const int minHeight = 8, maxHeight = 24;
 
 class PRMNode {
 
@@ -26,7 +26,7 @@ public:
 	void setNdx(int index) {ndx = index;}
 	double getWeight() {return weight;}
 	void setWeight(double nodeWeight) {weight = nodeWeight;}
-	glm::vec3 calcFreeDirection(glm::vec3 pos, float theta, int pathLength);
+	glm::vec3 calcFreeDirection(glm::vec3 pos, float theta, int pathLength, int numNodes);
 	glm::vec3 calcFreePosition(float height, int pathLength, int numNodes);
 	float getCamTheta() { return camTheta; }
 	float getCamPhi() { return camPhi; }

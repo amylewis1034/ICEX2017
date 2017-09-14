@@ -8,8 +8,9 @@ ICEX = os.path.abspath('/Users/zwood/Desktop/ICEX2017/samy/build')
 
 weights=[]
 
-for i in range(1, 3):
+for i in range(1, 51):
     p = subprocess.Popen([os.path.join(ICEX, 'icex'), 'renderthirds.json'], stdout=subprocess.PIPE)
+    p.wait()
     filename = '../resources/paths/path_test%d.txt' %i
     os.rename(os.path.join(ICEX, '../resources/paths/path_test.txt'), os.path.join(ICEX, filename))
 
