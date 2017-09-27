@@ -44,7 +44,7 @@ static glm::vec3 wave_normal(float x, float y, float t, const Wave &wave) {
 }
 
 WaterMesh::WaterMesh(int width, int height) :
-    width(width), height(height), wave({0.5f, 4.0f, 1.0f, glm::vec2(1.0f, 0.0f)}) {}
+    width(width), height(height), wave({0.5f, 2.0f, 1.0f, glm::vec2(1.0f, 0.0f)}) {}
 
 WaterMesh::~WaterMesh() {}
 
@@ -203,7 +203,7 @@ void WaterMesh::generate_bboxes() {
         glm::mat4 t, s;
         t = glm::translate(t, bboxes[i].center);
         s = glm::scale(s, bboxes[i].scale);
-        instance_matrices[i] = t * s;  
+        instance_matrices[i] = glm::mat3(t * s);  
 
         a[0] = b[0];
         a[1] = b[1];
