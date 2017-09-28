@@ -16,6 +16,7 @@
 #include <Components/Texture.hpp>
 #include <icex_common.hpp>
 #include "GLFW/glfw3.h"
+#include "PRM/Utilities.h"
 
 #include <GL/glew.h>
 
@@ -111,6 +112,9 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
     dirlightShader.linkProgram(SHADER_PATH "textured_quad.vert", SHADER_PATH "dirlight.frag");
     pointlightShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "pointlight.frag");
     lightStencilShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "empty.frag");
+
+    causticShader.linkProgram(SHADER_PATH "caustics.vert", SHADER_PATH "caustics.frag");
+
     /* Initialize quad and sphere*/
     GLQuad::init();
     GLSphere::init();
@@ -138,7 +142,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glCullFace(GL_FRONT);
 
     shadowmapShader.bind();
-    
+
     const glm::vec3 &lightPos = world.getMainlightPosition();
     const float lz_near = 0.1f, lz_far = 75.0f, l_boundary = 50.0f;
     glm::mat4 lp = glm::ortho(-l_boundary, l_boundary, -l_boundary, l_boundary, lz_near, lz_far);
@@ -216,7 +220,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 			hmap->draw();
 		}
         else if (water) {
-            water->draw();
+            //water->draw();
         }
 
 	}
@@ -371,7 +375,9 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Caustics");
     }
 
-    glCullFace(GL_BACK);
+     glCullFace(GL_FRONT);
+    //glDisable(GL_CULL_FACE);
+    glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -472,6 +478,9 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 
         glDisable(GL_BLEND);
     }
+    
+    glCullFace(GL_BACK);
+    glEnable(GL_DEPTH_TEST);
 
     if (GLEW_KHR_debug) {
         glPopDebugGroup();

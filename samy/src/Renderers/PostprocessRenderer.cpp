@@ -129,7 +129,7 @@ void PostprocessRenderer::render(const glm::mat4 &projection, const glm::mat4 &v
 
 	/* Gaussian blur */
 	blurShader.bind();
-	const int blurs = 8;
+	const int blurs = 0;
 	for (int i = 0; i < blurs; i++) {
 		bloomFBO[i % 2].bind();
 		glUniformMatrix4fv(blurShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));

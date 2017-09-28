@@ -24,6 +24,8 @@ public:
     std::vector<float> getPositions() { return positions; }
     glm::vec3 getCenterOfMass();
 
+    GLuint getVAO() { return vao; }
+
 private:
     GLuint vao, ebo;
     GLsizei count;
