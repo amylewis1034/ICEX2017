@@ -41,24 +41,18 @@ static Component *parseTransform(Value &args) {
 }
 
 static Component *parseCamera(Value &args) {
-    Camera *camera;
-
+	Camera *camera;
+	
 	if (args.Size() == 4) {
 		camera = new Camera(
 			args[0].GetFloat(),
 			args[1].GetFloat(),
 			args[2].GetFloat(),
-			args[3].GetFloat()
+			args[3].GetBool()
 		);
 	}
 	else {
 		camera = new Camera();
-		if (args.Size() == 1) {
-			auto arg = args.GetArray()[0].GetString();
-			if (!string(arg).compare(string("fps"))) {
-				camera->setFirstPerson();
-			}
-		}
 	}
 
     return (Component *) camera;
@@ -86,8 +80,17 @@ static Component *parseCollider(Value &args) {
 static Component *parseHeightmap(Value &args) {
     Heightmap *heightmap = new Heightmap();
 
-	assert(args.Size() == 1 && args[0].IsString());
-    heightmap->loadFromFile(rpath + args.GetArray()[0].GetString());
+	assert(args.Size() == 1 || args.Size() == 2);
+	assert(args[0].IsString());
+
+	if (args.Size() == 2 && args[1].IsFloat()) {
+		heightmap->setTextureScale(args[1].GetFloat());
+	}
+
+	std::cout << heightmap->getTextureScale() << std::endl;
+	
+	heightmap->loadFromFile(rpath + args.GetArray()[0].GetString());
+	
 
     return (Component *) heightmap;
 }
@@ -228,6 +231,19 @@ static Component *parseTexture(Value &args) {
 	return (Component *) texture;
 }
 
+static Component *parseWaterMesh(Value &args) {
+	WaterMesh *water;
+
+	if (args.Size() == 2 && args[0].IsInt() && args[1].IsInt()) {
+		water = new WaterMesh(args[0].GetInt(), args[1].GetInt());
+	}
+	else {
+		water = new WaterMesh();
+	}
+
+	return (Component *) water;
+}
+
 // look up table of functions
 const static std::map<std::string, std::function<Component *(Value &args)>> cmap = {
     {"Transform", parseTransform},
@@ -244,7 +260,8 @@ const static std::map<std::string, std::function<Component *(Value &args)>> cmap
 	{"Particle", parseParticle},
 	{"Shader", parseShader},
     {"Skybox", parseSkybox},
-	{"Texture", parseTexture}
+	{"Texture", parseTexture},
+	{"WaterMesh", parseWaterMesh}
 };
 
 static Component *parseComponent(Value &c, const SharedComponentMap &sharedComponents) {

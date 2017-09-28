@@ -61,7 +61,6 @@ public:
 	void setLightUBO(GLShaderProgram &program) const;
 	const glm::vec3 &getMainlightPosition() const;
 	const glm::vec3 &getMainlightColor() const;
-
 	
 	const Renderer *getRenderer() const;
 	Renderer *getPostrenderer() const;
@@ -69,6 +68,9 @@ public:
 	const std::vector<GameObject *> getParticleSystems();
 	const RenderSettings &getRenderSetting() const;
 	void setKatieRenderSetting(bool setting);
+
+	const float getNear() const;
+	const float getFar() const;
 
 private:
     std::vector<GameObject *> gameobjects;
@@ -86,7 +88,6 @@ private:
     Material *defaultMaterial;
 	Texture *defaultTexture;
 
-    GameObject *heightMapComponent;
 	RenderSettings renderSettings;
 };
 

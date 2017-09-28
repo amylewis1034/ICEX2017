@@ -64,13 +64,6 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
     GLuint att[] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
     glDrawBuffers(3, att);
 
-    // gBuffer.attachRenderbuffer(
-    //     GL_DEPTH_ATTACHMENT,
-    //     GL_DEPTH_COMPONENT,
-    //     width,
-    //     height
-    // );
-
     gBuffer.attachTexture(
         GL_DEPTH_STENCIL_ATTACHMENT,
         GL_DEPTH24_STENCIL8,
@@ -147,8 +140,9 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     shadowmapShader.bind();
     
     const glm::vec3 &lightPos = world.getMainlightPosition();
-    glm::mat4 lp = glm::ortho(-10.0f, 10.0f, -10.0f, 10.0f, 0.1f, 30.0f);
-    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    const float lz_near = 0.1f, lz_far = 75.0f, l_boundary = 50.0f;
+    glm::mat4 lp = glm::ortho(-l_boundary, l_boundary, -l_boundary, l_boundary, lz_near, lz_far);
+    glm::mat4 lv = glm::lookAt(lightPos, glm::vec3(0, 0, 0), glm::vec3(0.0f, 0.0f, -1.0f));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(lp));
     glUniformMatrix4fv(shadowmapShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(lv));
 	for (GameObject *g : world.getRenderables(projection, view)) {
@@ -198,19 +192,12 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 	for (GameObject *g : world.getRenderables(projection, view)) {
 		Transform *t = g->getComponent<Transform>();
 		Mesh *mesh = g->getComponent<Mesh>();
-		// Material *m = g->getComponent<Material>();
 		Heightmap *hmap = g->getComponent<Heightmap>();
 		Texture *texture = g->getComponent<Texture>();
-
-		/* Set material properties */
-		// if (m == nullptr) {
-		// 	m = defaultMaterial;
-		// }
-		// m->setUniforms(deferredShader);
+        WaterMesh *water = g->getComponent<WaterMesh>();
 
 		/* Set any textures */
 		if (texture == nullptr) {
-			/* TODO: not sure if default works */
             defaultTexture.bind();
 		}
         else {
@@ -228,6 +215,9 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 		else if (hmap) {
 			hmap->draw();
 		}
+        else if (water) {
+            water->draw();
+        }
 
 	}
     deferredShader.unbind();
@@ -289,9 +279,6 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 
         float maxlight = glm::max(glm::max(p.color.r, p.color.g), p.color.b);
         float radius = (-p.b + glm::sqrt(p.b * p.b - 4 * p.c * (p.a - maxlight * 256.0f / 1.0f))) / (2.0f * p.c);
-
-    //     // std::cout << glm::to_string(p.pos) << " " << glm::to_string(p.color);
-    //     // printf(" %f %f %f %f\n", p.a, p.b, p.c, radius);
 
         glm::mat4 trans, scale, pm;
         trans = glm::translate(trans, p.pos);
@@ -376,48 +363,121 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glBindTexture(GL_TEXTURE_2D, 0);
     dirlightShader.unbind();
 
-    glEnable(GL_CULL_FACE);
+    glEnable(GL_DEPTH_TEST);
+
     glDisable(GL_BLEND);
 
-	/* Draw to textured quad */
-	// {
-	// 	quadShader.bind();
-	// 	glUniformMatrix4fv(quadShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(p));
-	// 	glUniformMatrix4fv(quadShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(v));
-	// 	glUniformMatrix4fv(quadShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(m));
+    if (GLEW_KHR_debug) {
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Caustics");
+    }
 
-	// 	gBuffer.bindTextures();
-	// 	glUniform1i(quadShader.uniformLocation("gPosition"), 0);
-	// 	glUniform1i(quadShader.uniformLocation("gNormal"), 1);
-	// 	glUniform1i(quadShader.uniformLocation("gAlbedoSpecular"), 2);
+    glCullFace(GL_BACK);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-	// 	/* Set eye */
-	// 	glUniform3fv(quadShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
+    GameObject *watermesh = world.getGameObjectWithComponent<WaterMesh>();
+    if (watermesh) {
+        WaterMesh *water = watermesh->getComponent<WaterMesh>();
+        Transform *water_transform = watermesh->getComponent<Transform>();
 
-	// 	/* Set main and point lights */
-	// 	world.setLightUBO(quadShader);
+        causticShader.bind();
+        gBuffer.bindTextures();
+        glUniform1i(causticShader.uniformLocation("world_positions"), 0);
+        
+        glBindBufferBase(GL_UNIFORM_BUFFER, 0, water->uniform_block.getHandle());
+        GLuint block_index;
+        block_index = glGetUniformBlockIndex(causticShader.getHandle(), "Caustics");
+        glUniformBlockBinding(causticShader.getHandle(), block_index, 0);
 
-    //     glm::mat4 ls = lp * lv;
-    //     glUniformMatrix4fv(quadShader.uniformLocation("ls"), 1, GL_FALSE, glm::value_ptr(ls));
-    //     glActiveTexture(GL_TEXTURE3);
-    //     glBindTexture(GL_TEXTURE_2D, lightFBO.getTexture(0));
-    //     glUniform1i(quadShader.uniformLocation("shadowMap"), 3);
+        glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        
+        glUniform3fv(causticShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
 
-	// 	GLQuad::draw();
-	// 	gBuffer.unbindTextures();
-    //     glActiveTexture(GL_TEXTURE3);
-    //     glBindTexture(GL_TEXTURE_2D, 0);
-	// 	quadShader.unbind();
-	// }
+        water->draw_caustics();
+        // cube->draw_instanced(16 * 16);
+        // for (int i = 0; i < water->indices.size() - 2; i++) {
+        //     // i = ((int) (4 * glfwGetTime())) % (water->indices.size() - 2);
+        //     glUniform1uiv(causticShader.uniformLocation("index"), 3, &water->indices[i]);
 
-    glDepthMask(GL_TRUE);
+        //     glm::mat4 model, t, s;
+        //     BoundingBox &bbox = water->bboxes[i];
+        //     t = glm::translate(t, bbox.center + water_transform->getPosition());
+        //     s = glm::scale(s, bbox.scale * water_transform->getScale());
+        //     model = t * s;         
+        //     glUniformMatrix4fv(causticShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
+            
 
-	// glBindFramebuffer(GL_READ_FRAMEBUFFER, gBuffer.getHandle());
-    // glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nextFBO);
-	// glBlitFramebuffer(0, 0, width, height, 0, 0, width, height, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
-    // glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
+        //     // std::cout << "=================" << std::endl;
+        //     // unsigned *indices = &water->indices[i];
+        //     // std::cout << indices[0] << " " << indices[1] << " " << indices[2] << std::endl;
+        //     // glm::vec3 v[3] = {
+        //     //     water->vertices[indices[0]],
+        //     //     water->vertices[indices[1]],
+        //     //     water->vertices[indices[2]]
+        //     // };
+        //     // glm::vec3 n[3] = {
+        //     //     water->normals[indices[0]],
+        //     //     water->normals[indices[1]],
+        //     //     water->normals[indices[2]]
+        //     // };
+        //     // glm::vec3 r[3] = {
+        //     //     water->refracted_rays[indices[0]],
+        //     //     water->refracted_rays[indices[1]],
+        //     //     water->refracted_rays[indices[2]]
+        //     // };
+        //     // glm::vec3 basis_x = glm::normalize(v[1] - v[0]);
+        //     // glm::vec3 basis_y = glm::normalize(
+        //     //     glm::cross(
+        //     //         v[1] - v[0], v[2] - v[0]
+        //     //     )
+        //     // );
+        //     // // glm::vec3 basis_y = glm::normalize(n[0] + n[1] + n[2]);
+        //     // glm::vec3 basis_z = glm::cross(basis_x, basis_y);
+        //     // glm::mat3 cob {basis_x, basis_y, basis_z};
+        //     // cob = glm::transpose(cob);
 
-    glEnable(GL_DEPTH_TEST);
+        //     // std::cout << glm::to_string(basis_x) << std::endl;
+        //     // std::cout << glm::to_string(basis_y) << std::endl;
+        //     // std::cout << glm::to_string(basis_z) << std::endl;
+
+        //     // for (int j = 0; j < 3; j++) {
+        //     //     std::cout << "vertex[" << j << "]: " <<
+        //     //         glm::to_string(v[j]) << " " <<
+        //     //         glm::to_string(n[j]) << " " <<
+        //     //         glm::to_string(r[j]) << " " << std::endl;
+        //     // }
+        //     // v[0] = cob * v[0];
+        //     // v[1] = cob * v[1];
+        //     // v[2] = cob * v[2];
+        //     // r[0] = cob * r[0];
+        //     // r[1] = cob * r[1];
+        //     // r[2] = cob * r[2];
+        //     // r[0] /= r[0].y;
+        //     // r[1] /= r[1].y;
+        //     // r[2] /= r[2].y;
+        //     // for (int j = 0; j < 3; j++) {
+        //     //     std::cout << "vertex[" << j << "]: " <<
+        //     //         glm::to_string(v[j]) << " " <<
+        //     //         glm::to_string(n[j]) << " " <<
+        //     //         glm::to_string(r[j]) << " " << std::endl;
+        //     // }
+
+        //     cube->draw();
+        //     // break;
+        // }
+
+        gBuffer.unbindTextures();
+        causticShader.unbind();
+
+        glDisable(GL_BLEND);
+    }
+
+    if (GLEW_KHR_debug) {
+        glPopDebugGroup();
+    }
+
+    glDepthMask(GL_TRUE);    
 
     if (GLEW_KHR_debug) {
         glPopDebugGroup();

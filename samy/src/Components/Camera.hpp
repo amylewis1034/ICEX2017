@@ -7,7 +7,7 @@
 class Camera : public Component {
 public:
     Camera();
-    Camera(float fov, float aspect, float near, float far);
+    Camera(float fov, float near, float far, bool isFirstPerson);
 
     void init();
     void update(float dt);
@@ -20,6 +20,9 @@ public:
 	void setOffset(const glm::vec3 &offset);
     void setFirstPerson();
     void setSpringFactor(float k);
+
+    const float getNear() const { return near; }
+    const float getFar() const { return far; }
 
 private:
     float fov, aspect, near, far;

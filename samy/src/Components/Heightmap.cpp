@@ -11,7 +11,9 @@
 const float left = -1.0f, right = 1.0f;
 const float bot = -1.0f, top = 1.0f;
 
-Heightmap::Heightmap() {
+Heightmap::Heightmap(float texture_scale) :
+    texture_scale(texture_scale)
+{
 
 }
 
@@ -56,7 +58,8 @@ void Heightmap::loadFromFile(const std::string &filename) {
 			texcoords[j * width + i] = glm::vec2(
 				(float)i / width,
 				1.0f - (float)j / height
-			);
+            );
+            texcoords[j * width + i] *= this->texture_scale;
         }
     }
 

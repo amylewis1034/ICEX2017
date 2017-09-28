@@ -185,6 +185,9 @@ void PostprocessRenderer::render(const glm::mat4 &projection, const glm::mat4 &v
         lastVP = projection * view;
     }
 
+    glUniform1f(quadShader.uniformLocation("near"), world.getNear());
+    glUniform1f(quadShader.uniformLocation("far"), world.getFar());
+
     GLQuad::draw();
     postprocessFBO.unbindTextures();
     glActiveTexture(GL_TEXTURE2);

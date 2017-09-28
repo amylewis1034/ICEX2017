@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 2.8)
 project(icex)
 
 # Glob files (make sure to clear cmake cache and rerun after adding/removing files)
@@ -11,13 +11,16 @@ add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${SHADERS})
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Compile with c++14
-set(CMAKE_CXX_STANDARD 14)
+#set(CMAKE_CXX_STANDARD 11)
+add_definitions('--std=c++11')
 
 # Preprocessor macros to locate resources and shader directory
 add_definitions(-DRESOURCE_PATH="${CMAKE_SOURCE_DIR}/resources/")
 add_definitions(-DSHADER_PATH="${CMAKE_SOURCE_DIR}/shaders/")
 
 # Find all packages and check we found them
+# If OpenCV and GLEW are not in default directories, set OpenCV_DIR and GLEW_DIR environment variables
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{OpenCV_DIR} $ENV{GLEW_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
 find_package(OpenGL REQUIRED)

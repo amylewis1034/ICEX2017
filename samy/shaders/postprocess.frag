@@ -18,6 +18,8 @@ uniform mat4 lastVP;
 uniform sampler2D worldPos;
 uniform float blurScale;
 
+uniform float near, far;
+
 out vec4 color;
 
 vec3 gammacorrect(vec3 color) {
@@ -38,9 +40,10 @@ vec3 tonemap(vec3 color) {
 
 void main() {
     color = texture(color_in, fragTexcoord);
+    return;
+
     float curDepth = texture(depth, fragTexcoord).r;
     // Linearize (http://glampert.com/2014/01-26/visualizing-the-depth-buffer/)
-    float near = 0.1, far = 250.0;
     curDepth = 2 * near / (far + near - curDepth * (far - near));
     vec3 worldPos = texture(worldPos, fragTexcoord).xyz;
 

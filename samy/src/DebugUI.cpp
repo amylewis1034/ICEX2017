@@ -65,33 +65,6 @@ void DebugUI::render(float dt, World *world) {
 		world->setMainLightColor(mainlight_color);
 	}
 
-	/* Adjust postprocessing values */
-	{
-		PostprocessRenderer *pr = dynamic_cast<PostprocessRenderer *>(world->getPostrenderer());
-		if (pr != nullptr) {
-			ImGui::SliderFloat("Gamma", &pr->gamma, 0.0f, 5.0f);
-			ImGui::SliderFloat("Exposure", &pr->exposure, 0.0f, 10.0f);
-			ImGui::SliderFloat3("Fog Color", glm::value_ptr(pr->fog_color), 0.0f, 1.0f);
-			ImGui::SliderFloat3("Fog Extinction", glm::value_ptr(pr->be), 0.0f, 0.1f);
-			ImGui::SliderFloat3("Fog Inscattering", glm::value_ptr(pr->bi), 0.0f, 0.1f);
-		}
-		
-		// float gamma = pr->getGamma(), exposure = pr->getExposure(), fogDensity = pr->getFogDensity(), 
-		// 	ten = pr->getTen(), factor1 = pr->getFactor1(), factor2 = pr->getFactor2();
-		// ImGui::SliderFloat("Gamma", &gamma, 0.0f, 5.0f);
-		// ImGui::SliderFloat("Exposure", &exposure, 0.0f, 10.0f);
-		// ImGui::SliderFloat("Fog Density", &fogDensity, 0.0f, 100.0f);
-		// ImGui::SliderFloat("ten", &ten, 0.0f, 20.0f);
-		// ImGui::SliderFloat("factor1", &factor1, 0.001f, 0.01f);
-		// ImGui::SliderFloat("factor2", &factor2, 0.001f, 0.01f);
-		// pr->setGamma(gamma);
-		// pr->setExposure(exposure);
-		// pr->setFogDensity(fogDensity);
-		// pr->setTen(ten);
-		// pr->setFactor1(factor1);
-		// pr->setFactor2(factor2);
-	}
-
 	/* Toggle free camera */
 	if (ImGui::Button("Toggle free camera")) {
 		GameObject *player = world->getGameObjectWithComponent<PlayerInput>();
@@ -184,6 +157,33 @@ void DebugUI::render(float dt, World *world) {
 			tex_id = (ImTextureID)(uintptr_t)dr->getLightDepth();
 			ImGui::Image(tex_id, image_size, uv0, uv1, tint, border_color);
 		}
+	}
+
+	/* Adjust postprocessing values */
+	if (ImGui::CollapsingHeader("Postprocessing Values")) {
+		PostprocessRenderer *pr = dynamic_cast<PostprocessRenderer *>(world->getPostrenderer());
+		if (pr != nullptr) {
+			ImGui::SliderFloat("Gamma", &pr->gamma, 0.0f, 5.0f);
+			ImGui::SliderFloat("Exposure", &pr->exposure, 0.0f, 10.0f);
+			ImGui::SliderFloat3("Fog Color", glm::value_ptr(pr->fog_color), 0.0f, 1.0f);
+			ImGui::SliderFloat3("Fog Extinction", glm::value_ptr(pr->be), 0.0f, 0.1f);
+			ImGui::SliderFloat3("Fog Inscattering", glm::value_ptr(pr->bi), 0.0f, 0.1f);
+		}
+		
+		// float gamma = pr->getGamma(), exposure = pr->getExposure(), fogDensity = pr->getFogDensity(), 
+		// 	ten = pr->getTen(), factor1 = pr->getFactor1(), factor2 = pr->getFactor2();
+		// ImGui::SliderFloat("Gamma", &gamma, 0.0f, 5.0f);
+		// ImGui::SliderFloat("Exposure", &exposure, 0.0f, 10.0f);
+		// ImGui::SliderFloat("Fog Density", &fogDensity, 0.0f, 100.0f);
+		// ImGui::SliderFloat("ten", &ten, 0.0f, 20.0f);
+		// ImGui::SliderFloat("factor1", &factor1, 0.001f, 0.01f);
+		// ImGui::SliderFloat("factor2", &factor2, 0.001f, 0.01f);
+		// pr->setGamma(gamma);
+		// pr->setExposure(exposure);
+		// pr->setFogDensity(fogDensity);
+		// pr->setTen(ten);
+		// pr->setFactor1(factor1);
+		// pr->setFactor2(factor2);
 	}
 
 	/* Show the ImGui test window */

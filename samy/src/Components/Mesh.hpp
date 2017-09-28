@@ -18,6 +18,7 @@ public:
     void bind() const;
     void unbind() const;
     void draw() const;
+    void draw_instanced(GLsizei num_instances) const;
 
     void getCollider(Collider &collider) const;
     std::vector<float> getPositions() { return positions; }
