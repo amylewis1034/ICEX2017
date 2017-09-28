@@ -9,7 +9,7 @@ layout (std140) uniform Caustics {
 };
 
 uniform sampler2D world_positions;
-// uniform uint index[3];
+uniform vec3 eye;
 
 in vec4 fragPos;
 flat in uvec3 fragIndices;

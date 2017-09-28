@@ -297,8 +297,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Caustics");
     }
 
-    // glCullFace(GL_BACK);
-    glDisable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
@@ -306,11 +305,6 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     if (watermesh) {
         WaterMesh *water = watermesh->getComponent<WaterMesh>();
         Transform *water_transform = watermesh->getComponent<Transform>();
-
-        // Mesh *cube = nullptr;
-        // if (!cube) {
-        //     cube = new Mesh(RESOURCE_PATH "objs/cube.obj");
-        // }
 
         causticShader.bind();
         gBuffer.bindTextures();
@@ -322,6 +316,8 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 
         glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        
+        glUniform3fv(causticShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
 
         water->draw_caustics();
         // cube->draw_instanced(16 * 16);
