@@ -1,19 +1,20 @@
 #version 330 core
 
-struct CausticVertex {
-    vec3 position, normal, refracted_ray;
-};
+// struct CausticVertex {
+//     vec3 position, normal, refracted_ray;
+// };
 
-layout (std140) uniform Caustics {
-    CausticVertex vertices[1024];
-};
+// layout (std140) uniform Caustics {
+//     CausticVertex vertices[1024];
+// };
 
 uniform sampler2D world_positions;
+uniform samplerBuffer tbo;
 uniform vec3 eye;
 
 in vec4 fragPos;
 in vec4 fragWorldPos;
-flat in uvec3 fragIndices;
+flat in ivec3 fragIndices;
 
 out vec4 color;
 
@@ -29,9 +30,12 @@ void main() {
     // color = vec4(worldPos, 1); return;
 
     // Transform point into local coordinate system
-    vec3 v[3] = vec3[3](vertices[fragIndices.x].position, vertices[fragIndices.y].position, vertices[fragIndices.z].position);
-    vec3 n[3] = vec3[3](vertices[fragIndices.x].normal, vertices[fragIndices.y].normal, vertices[fragIndices.z].normal);
-    vec3 r[3] = vec3[3](vertices[fragIndices.x].refracted_ray, vertices[fragIndices.y].refracted_ray, vertices[fragIndices.z].refracted_ray);
+    // vec3 v[3] = vec3[3](vertices[fragIndices.x].position, vertices[fragIndices.y].position, vertices[fragIndices.z].position);
+    // vec3 n[3] = vec3[3](vertices[fragIndices.x].normal, vertices[fragIndices.y].normal, vertices[fragIndices.z].normal);
+    // vec3 r[3] = vec3[3](vertices[fragIndices.x].refracted_ray, vertices[fragIndices.y].refracted_ray, vertices[fragIndices.z].refracted_ray);
+    vec3 v[3] = vec3[3](texelFetch(tbo, 3 * fragIndices.x + 0).xyz, texelFetch(tbo, 3 * fragIndices.y + 0).xyz, texelFetch(tbo, 3 * fragIndices.z + 0).xyz);
+    vec3 n[3] = vec3[3](texelFetch(tbo, 3 * fragIndices.x + 1).xyz, texelFetch(tbo, 3 * fragIndices.y + 1).xyz, texelFetch(tbo, 3 * fragIndices.z + 1).xyz);
+    vec3 r[3] = vec3[3](texelFetch(tbo, 3 * fragIndices.x + 2).xyz, texelFetch(tbo, 3 * fragIndices.y + 2).xyz, texelFetch(tbo, 3 * fragIndices.z + 2).xyz);
 
     // Check values are correct
     // color = vec4(

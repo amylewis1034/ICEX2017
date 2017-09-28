@@ -313,9 +313,10 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
         gBuffer.bindTextures();
         glUniform1i(causticShader.uniformLocation("world_positions"), 0);
         
-        GLuint block_index;
-        block_index = glGetUniformBlockIndex(causticShader.getHandle(), "Caustics");
-        glUniformBlockBinding(causticShader.getHandle(), block_index, 0);
+        glUniform1i(causticShader.uniformLocation("tbo"), 1);
+        // GLuint block_index;
+        // block_index = glGetUniformBlockIndex(causticShader.getHandle(), "Caustics");
+        // glUniformBlockBinding(causticShader.getHandle(), block_index, 0);
 
         glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
         glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));

@@ -12,12 +12,12 @@ uniform mat4 view;
 
 out vec4 fragPos;
 out vec4 fragWorldPos;
-flat out uvec3 fragIndices;
+flat out ivec3 fragIndices;
 
 void main() {
     mat4 model = mat4(model_x, model_y, model_z, model_trans);
     gl_Position = projection * view * model * vec4(position, 1);
     fragPos = gl_Position;
     fragWorldPos = model * vec4(position, 1);
-    fragIndices = indices;
+    fragIndices = ivec3(indices);
 }

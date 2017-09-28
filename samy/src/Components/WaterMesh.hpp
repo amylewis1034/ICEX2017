@@ -50,6 +50,7 @@ public:
 
     GLuint wave_program;
     GLuint grid_vao, grid_vbo, feedback_vbo;
+    GLuint tbo_tex;
     
     int which = 0;
     GLBuffer vertex_buf[2];

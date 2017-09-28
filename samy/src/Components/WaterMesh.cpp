@@ -118,6 +118,8 @@ void WaterMesh::init() {
     glBufferData(GL_ARRAY_BUFFER, width * height * 3 * sizeof(glm::vec4), nullptr, GL_STATIC_READ);
 
     generate_water(0.0f);
+
+    glGenTextures(1, &tbo_tex);
 }
 
 void WaterMesh::generate_water(float t) {
@@ -206,8 +208,12 @@ void WaterMesh::draw() {
 }
 
 void WaterMesh::draw_caustics() {
-    glBindBuffer(GL_UNIFORM_BUFFER, feedback_vbo);
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, feedback_vbo);
+    glBindBuffer(GL_TEXTURE_BUFFER, feedback_vbo);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, feedback_vbo);
+    // glBindBuffer(GL_UNIFORM_BUFFER, feedback_vbo);
+    // glBindBufferBase(GL_UNIFORM_BUFFER, 0, feedback_vbo);
     // glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->vertex_buf[which].getHandle());
     cubemesh->draw_instanced(indices.size() - 2);
 }
