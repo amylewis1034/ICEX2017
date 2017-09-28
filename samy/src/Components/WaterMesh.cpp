@@ -2,11 +2,13 @@
 #include "Transform.hpp"
 #include <GameObject.hpp>
 #include <World.hpp>
+#include <Graphics/GLShader.hpp>
 
 #include <fstream>
 #include <iostream>
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtc/epsilon.hpp>
 #include <limits>
 
 extern World *world;
@@ -54,6 +56,7 @@ void WaterMesh::init() {
     normals.resize(width * height, glm::vec3(0));
     refracted_rays.resize(width * height);
     vertices.resize(width * height, {glm::vec3(0), 0, glm::vec3(0), 0, glm::vec3(0), 0});
+    // vertices.resize(width * height, {glm::vec3(0), glm::vec3(0), glm::vec3(0)});
 
     generate_vertices(0.0f, world->getMainlightPosition());
     generate_indices();
@@ -66,12 +69,126 @@ void WaterMesh::init() {
     assert(cubemesh);
 
     init_buffers();
+
+    // Transform feedback shader program
+    GLShader wave_shader {GL_VERTEX_SHADER, SHADER_PATH "wave_gen.vert"};
+    wave_program = glCreateProgram();
+    glAttachShader(wave_program, wave_shader.getHandle());
+
+    const GLchar *feedbackVaryings[] = {"pos", "normal", "refracted_ray"};
+    glTransformFeedbackVaryings(wave_program, 3, feedbackVaryings, GL_INTERLEAVED_ATTRIBS);
+    
+    glLinkProgram(wave_program);
+    GLint success;
+	GLchar infoLog[512];
+    glGetProgramiv(wave_program, GL_LINK_STATUS, &success);
+	if (!success) {
+		glGetProgramInfoLog(wave_program, 512, NULL, infoLog);
+		std::cout
+			<< "ERROR::SHADER_PROGRAM::COMPILATION_FAILED\n"
+			<< infoLog
+			<< std::endl;
+	}
+
+    // make sure buffers stick around
+    glm::vec2 grid_points[width * height];
+    float xoffset = (right - left) / (width - 1);
+    float yoffset = (top - bot) / (height - 1);
+    for (int j = 0; j < height; j++) {
+        for (int i = 0; i < width; i++) {
+            int index = j * width + i;
+            float x = i * xoffset + left;
+            float y = j * yoffset + bot;
+            grid_points[index] = glm::vec2(x, y);
+            // std::cout << glm::to_string(grid_points[index]) << std::endl;
+        }
+    }
+
+    glGenVertexArrays(1, &grid_vao);
+    glBindVertexArray(grid_vao);
+
+    glGenBuffers(1, &grid_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, grid_vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(grid_points), grid_points, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+
+    glGenBuffers(1, &feedback_vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, feedback_vbo);
+    glBufferData(GL_ARRAY_BUFFER, width * height * 3 * sizeof(glm::vec4), nullptr, GL_STATIC_READ);
+
+    generate_water(0.0f);
+}
+
+void WaterMesh::generate_water(float t) {
+    // GLuint query;
+    // glGenQueries(1, &query);
+
+    glEnable(GL_RASTERIZER_DISCARD);
+    glBindBuffer(GL_ARRAY_BUFFER, feedback_vbo);    
+    glBindBufferBase(GL_TRANSFORM_FEEDBACK_BUFFER, 0, feedback_vbo);
+
+    glUseProgram(wave_program);
+    glBindVertexArray(grid_vao);
+
+    glUniform3fv(glGetUniformLocation(wave_program, "light_pos"), 1, glm::value_ptr(world->getMainlightPosition()));
+    glUniform1f(glGetUniformLocation(wave_program, "time"), t);
+    glUniform1f(glGetUniformLocation(wave_program, "wave.amplitude"), wave.amplitude);
+    glUniform1f(glGetUniformLocation(wave_program, "wave.frequency"), wave.frequency);
+    glUniform1f(glGetUniformLocation(wave_program, "wave.phase"), wave.phase);
+    glUniform2f(glGetUniformLocation(wave_program, "wave.direction"), wave.direction.x, wave.direction.y);
+
+    // glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
+    glBeginTransformFeedback(GL_POINTS);
+    glDrawArrays(GL_POINTS, 0, width * height);
+    glEndTransformFeedback();
+    // glEndQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN);
+
+    glBindVertexArray(0);
+    glUseProgram(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    glDisable(GL_RASTERIZER_DISCARD);
+
+    // glFlush();
+
+    // GLuint primitives;
+    // glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
+    // std::cerr << "Wrote " << primitives << " primitives" << std::endl;
+    // glDeleteQueries(1, &query);
+    
+    // VertexInfo vertex_info[width * height];
+    // glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(vertex_info), vertex_info);
+
+    // bool matches = true;
+    // for (int i = 0; i < width * height; i++) {
+    //     auto &v = vertex_info[i];
+    //     const float epsilon = 1e-4;
+    //     bool position_equal = glm::all(glm::epsilonEqual(v.position, verts[i], epsilon));
+    //     bool normal_equal = glm::all(glm::epsilonEqual(v.normal, normals[i], epsilon));
+    //     bool ray_equal = glm::all(glm::epsilonEqual(v.refracted_ray, refracted_rays[i], epsilon));
+
+    //     matches = matches && position_equal && normal_equal && ray_equal;
+    //     // if (!(position_equal && normal_equal && ray_equal)) {
+    //     //     std::cerr << "no work :(" << std::endl;
+    //     // }
+    //     // std::cout << glm::to_string(v.position) << std::endl;
+    //     // std::cout << glm::to_string(verts[i]) << std::endl;
+    //     // std::cout << glm::to_string(v.normal) << std::endl;
+    //     // std::cout << glm::to_string(normals[i]) << std::endl;
+    //     // std::cout << glm::to_string(v.refracted_ray) << std::endl;
+    //     // std::cout << glm::to_string(refracted_rays[i]) << std::endl;
+    // }
+    // if (!matches) {
+    //     std::cerr << "Transform feedback values differ from cpu side" << std::endl;
+    // }
 }
 
 void WaterMesh::update(float dt) {
     static float t = 0.0f;
     t += dt;
 
+    generate_water(t);
     generate_vertices(t, world->getMainlightPosition());
     generate_bboxes();
 
@@ -89,29 +206,10 @@ void WaterMesh::draw() {
 }
 
 void WaterMesh::draw_caustics() {
-    glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->vertex_buf[which].getHandle());
+    glBindBuffer(GL_UNIFORM_BUFFER, feedback_vbo);
+    glBindBufferBase(GL_UNIFORM_BUFFER, 0, feedback_vbo);
+    // glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->vertex_buf[which].getHandle());
     cubemesh->draw_instanced(indices.size() - 2);
-}
-
-float WaterMesh::getHeightAt(float x, float z) const {
-	assert(gameobject != nullptr);
-
-	Transform *t = this->gameobject->getComponent<Transform>();
-
-	assert(t != nullptr);
-
-	const glm::vec3 &pos = t->getPosition();
-	const glm::vec3 &scale = t->getScale();
-
-	/* Scale to between -1 and 1 */
-	float scaled_x = x / scale.x;
-	float scaled_z = z / scale.z;
-
-	int i = (this->width - 1) * ((scaled_x + 1) / 2.0f);
-	int j = (this->height - 1) * ((scaled_z + 1) / 2.0f);
-
-	float offset = vertices[j * this->height + i].position.y;
-	return pos.y + offset * scale.y;
 }
 
 void WaterMesh::generate_vertices(float t, const glm::vec3 &light_position) {
@@ -274,15 +372,15 @@ void WaterMesh::init_buffers() {
     glBindVertexArray(0);
 
     /* Caustic block */
-    vertex_buf[this->which].loadData(GL_UNIFORM_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
+    // vertex_buf[this->which].loadData(GL_UNIFORM_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
 }
 
 void WaterMesh::update_buffers() {
     positions.loadData(GL_ARRAY_BUFFER, verts.size() * sizeof(glm::vec3), verts.data(), GL_STREAM_DRAW);
     nBuf.loadData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STREAM_DRAW);
 
-    this->which = 1 - this->which;
-    vertex_buf[this->which].loadData(GL_UNIFORM_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
+    // this->which = 1 - this->which;
+    // vertex_buf[this->which].loadData(GL_UNIFORM_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
 
     this->instanceBuf.loadData(GL_ARRAY_BUFFER, this->instance_matrices.size() * sizeof(glm::mat3), this->instance_matrices.data(), GL_STREAM_DRAW);    
 }

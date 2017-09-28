@@ -35,8 +35,6 @@ public:
     void draw();
     void draw_caustics();
 
-    float getHeightAt(float x, float z) const;
-
 // private:
     int width, height;
     std::vector<glm::vec3> verts;
@@ -50,6 +48,9 @@ public:
 
     Wave wave;
 
+    GLuint wave_program;
+    GLuint grid_vao, grid_vbo, feedback_vbo;
+    
     int which = 0;
     GLBuffer vertex_buf[2];
     GLBuffer positions, nBuf, tBuf, instanceBuf, instanceIndicesBuf;
@@ -66,6 +67,7 @@ public:
     void generate_bboxes();
     void init_buffers();
     void update_buffers();
+    void generate_water(float t);
 };
 
 #endif
