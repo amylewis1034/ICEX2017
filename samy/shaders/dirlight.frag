@@ -1,8 +1,9 @@
 #version 330 core
 
-in vec3 fragPosition;
+in vec4 fragPosition;
 in vec3 fragNormal;
 in vec2 fragTexcoord;
+in vec4 fragProjected;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
@@ -15,6 +16,7 @@ uniform vec3 dirlightColor;
 
 uniform mat4 ls;
 uniform sampler2D shadowMap;
+uniform sampler2D caustics;
 
 uniform mat4 geomView;
 uniform bool genNormals;
@@ -71,7 +73,13 @@ void main() {
 	float vdotr = max(dot(normal, h), 0);
 	
 	vec3 specular = pow(vdotr, albedo.a) * dirlightColor * albedo.rgb;
-    
+
+	vec4 caustic_color = texture(caustics, (fragProjected.xy / fragProjected.w + 1.0) * 0.5).rgba;
+
+	// color = vec4(caustic_color.rgb, 1); return;
+
+	color = vec4(ambient + diffuse + specular + caustic_color.rgb * caustic_color.a, 1);
+
     float shadowAmount = shadow((ls * vec4(position, 1.0)).xyz);
-	color = vec4((1.0 - shadowAmount) * (ambient + diffuse + specular), 1);
+	color = vec4((1.0 - shadowAmount) * color.rgb, 1);
 }

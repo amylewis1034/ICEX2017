@@ -24,6 +24,8 @@
 
 extern GLFWwindow *window;
 
+static const int caustic_width = 512, caustic_height = 512;
+
 DeferredShadowRenderer::DeferredShadowRenderer() {
     /* Initialize geometry buffer */
     GLsizei width, height;
@@ -100,6 +102,30 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
         std::cout << "Light Framebuffer not created successfully" << std::endl;
     }
     lightFBO.unbind();
+
+    /* Caustic FBO */
+    causticFBO.bind();
+
+    /* Attach color buffer */
+    causticFBO.attachTexture(
+        GL_COLOR_ATTACHMENT0,
+        GL_RGBA,
+        caustic_width,
+        caustic_height,
+        GL_RGBA,
+        GL_UNSIGNED_BYTE,
+        GL_LINEAR,
+        GL_LINEAR
+    );
+
+    /* Tell OpenGL about number of attachments */
+    GLuint caustic_att[] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, caustic_att);
+
+    if (causticFBO.getStatus() != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "Framebuffer not created successfully" << std::endl;
+    }
+    causticFBO.unbind();
 
     /* Initialize default texture */
     defaultTexture.loadTexture(RESOURCE_PATH "textures/default.png");
@@ -227,8 +253,60 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     deferredShader.unbind();
 
 	gBuffer.unbindTextures();
-	gBuffer.unbind();
+    gBuffer.unbind();
+
 	if (GLEW_KHR_debug) {
+        glPopDebugGroup();
+    }
+
+    /* Render caustics to texture */
+    if (GLEW_KHR_debug) {
+        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Caustics");
+    }
+
+    GameObject *watermesh = world.getGameObjectWithComponent<WaterMesh>();
+    if (watermesh) {
+        WaterMesh *water = watermesh->getComponent<WaterMesh>();
+        Transform *water_transform = watermesh->getComponent<Transform>();
+
+        glBindFramebuffer(GL_FRAMEBUFFER, causticFBO.getHandle());
+        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glViewport(0, 0, caustic_width, caustic_height);
+        glCullFace(GL_FRONT);
+        glDisable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_ONE, GL_ONE);
+
+        causticShader.bind();
+        gBuffer.bindTextures();
+        glUniform1i(causticShader.uniformLocation("world_positions"), 0);
+        
+        glUniform1i(causticShader.uniformLocation("tbo"), 1);
+        // GLuint block_index;
+        // block_index = glGetUniformBlockIndex(causticShader.getHandle(), "Caustics");
+        // glUniformBlockBinding(causticShader.getHandle(), block_index, 0);
+
+        glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+        
+        glUniform3fv(causticShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
+
+        water->draw_caustics();
+        gBuffer.unbindTextures();
+        causticShader.unbind();
+
+        glDisable(GL_BLEND);
+
+        // glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
+        glViewport(0, 0, width, height);
+
+        glCullFace(GL_BACK);
+        glEnable(GL_DEPTH_TEST);
+    }
+
+    if (GLEW_KHR_debug) {
         glPopDebugGroup();
     }
 
@@ -278,6 +356,10 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glBindTexture(GL_TEXTURE_2D, lightFBO.getTexture(0));
     glUniform1i(dirlightShader.uniformLocation("shadowMap"), 3);
 
+    glActiveTexture(GL_TEXTURE4);
+    glBindTexture(GL_TEXTURE_2D, causticFBO.getTexture(0));
+    glUniform1i(dirlightShader.uniformLocation("caustics"), 4);
+
     glUniformMatrix4fv(dirlightShader.uniformLocation("geomView"), 1, GL_FALSE, glm::value_ptr(view));    
     glUniform1i(dirlightShader.uniformLocation("genNormals"), world.getRenderSetting().genNormals) ;
     glUniform1i(dirlightShader.uniformLocation("genThirds"), world.getRenderSetting().genThirds);
@@ -291,124 +373,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     dirlightShader.unbind();
 
     glEnable(GL_DEPTH_TEST);
-
     glDisable(GL_BLEND);
-
-    if (GLEW_KHR_debug) {
-        glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Caustics");
-    }
-
-     glCullFace(GL_FRONT);
-    //glDisable(GL_CULL_FACE);
-    glDisable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-    GameObject *watermesh = world.getGameObjectWithComponent<WaterMesh>();
-    if (watermesh) {
-        WaterMesh *water = watermesh->getComponent<WaterMesh>();
-        Transform *water_transform = watermesh->getComponent<Transform>();
-
-        causticShader.bind();
-        gBuffer.bindTextures();
-        glUniform1i(causticShader.uniformLocation("world_positions"), 0);
-        
-        glUniform1i(causticShader.uniformLocation("tbo"), 1);
-        // GLuint block_index;
-        // block_index = glGetUniformBlockIndex(causticShader.getHandle(), "Caustics");
-        // glUniformBlockBinding(causticShader.getHandle(), block_index, 0);
-
-        glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
-        
-        glUniform3fv(causticShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
-
-        water->draw_caustics();
-        // cube->draw_instanced(16 * 16);
-        // for (int i = 0; i < water->indices.size() - 2; i++) {
-        //     // i = ((int) (4 * glfwGetTime())) % (water->indices.size() - 2);
-        //     glUniform1uiv(causticShader.uniformLocation("index"), 3, &water->indices[i]);
-
-        //     glm::mat4 model, t, s;
-        //     BoundingBox &bbox = water->bboxes[i];
-        //     t = glm::translate(t, bbox.center + water_transform->getPosition());
-        //     s = glm::scale(s, bbox.scale * water_transform->getScale());
-        //     model = t * s;         
-        //     glUniformMatrix4fv(causticShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
-            
-
-        //     // std::cout << "=================" << std::endl;
-        //     // unsigned *indices = &water->indices[i];
-        //     // std::cout << indices[0] << " " << indices[1] << " " << indices[2] << std::endl;
-        //     // glm::vec3 v[3] = {
-        //     //     water->vertices[indices[0]],
-        //     //     water->vertices[indices[1]],
-        //     //     water->vertices[indices[2]]
-        //     // };
-        //     // glm::vec3 n[3] = {
-        //     //     water->normals[indices[0]],
-        //     //     water->normals[indices[1]],
-        //     //     water->normals[indices[2]]
-        //     // };
-        //     // glm::vec3 r[3] = {
-        //     //     water->refracted_rays[indices[0]],
-        //     //     water->refracted_rays[indices[1]],
-        //     //     water->refracted_rays[indices[2]]
-        //     // };
-        //     // glm::vec3 basis_x = glm::normalize(v[1] - v[0]);
-        //     // glm::vec3 basis_y = glm::normalize(
-        //     //     glm::cross(
-        //     //         v[1] - v[0], v[2] - v[0]
-        //     //     )
-        //     // );
-        //     // // glm::vec3 basis_y = glm::normalize(n[0] + n[1] + n[2]);
-        //     // glm::vec3 basis_z = glm::cross(basis_x, basis_y);
-        //     // glm::mat3 cob {basis_x, basis_y, basis_z};
-        //     // cob = glm::transpose(cob);
-
-        //     // std::cout << glm::to_string(basis_x) << std::endl;
-        //     // std::cout << glm::to_string(basis_y) << std::endl;
-        //     // std::cout << glm::to_string(basis_z) << std::endl;
-
-        //     // for (int j = 0; j < 3; j++) {
-        //     //     std::cout << "vertex[" << j << "]: " <<
-        //     //         glm::to_string(v[j]) << " " <<
-        //     //         glm::to_string(n[j]) << " " <<
-        //     //         glm::to_string(r[j]) << " " << std::endl;
-        //     // }
-        //     // v[0] = cob * v[0];
-        //     // v[1] = cob * v[1];
-        //     // v[2] = cob * v[2];
-        //     // r[0] = cob * r[0];
-        //     // r[1] = cob * r[1];
-        //     // r[2] = cob * r[2];
-        //     // r[0] /= r[0].y;
-        //     // r[1] /= r[1].y;
-        //     // r[2] /= r[2].y;
-        //     // for (int j = 0; j < 3; j++) {
-        //     //     std::cout << "vertex[" << j << "]: " <<
-        //     //         glm::to_string(v[j]) << " " <<
-        //     //         glm::to_string(n[j]) << " " <<
-        //     //         glm::to_string(r[j]) << " " << std::endl;
-        //     // }
-
-        //     cube->draw();
-        //     // break;
-        // }
-
-        gBuffer.unbindTextures();
-        causticShader.unbind();
-
-        glDisable(GL_BLEND);
-    }
-    
-    glCullFace(GL_BACK);
-    glEnable(GL_DEPTH_TEST);
-
-    if (GLEW_KHR_debug) {
-        glPopDebugGroup();
-    }
-
     glDepthMask(GL_TRUE);    
 
     if (GLEW_KHR_debug) {

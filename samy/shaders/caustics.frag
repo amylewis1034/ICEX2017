@@ -16,7 +16,7 @@ in vec4 fragPos;
 in vec4 fragWorldPos;
 flat in ivec3 fragIndices;
 
-out vec4 color;
+layout (location = 0) out vec4 color;
 
 void main() {
     // color = vec4(1,1,1,1); return;
@@ -110,7 +110,8 @@ void main() {
     // Intensity calculation
     float area_specular = length(cross(v[1] - v[0], v[2] - v[0]));
     float area_caustic = length(cross(c[1] - c[0], c[2] - c[0]));
-    float intensity = min(area_specular / area_caustic, 1.0);
+    // float intensity = min(area_specular / area_caustic, 1.0);
+    float intensity = area_specular / area_caustic;
 
-    color = vec4(vec3(1), intensity / 2);
+    color = vec4(vec3(1), clamp(intensity * 0.2, 0.0, 1.0));
 }

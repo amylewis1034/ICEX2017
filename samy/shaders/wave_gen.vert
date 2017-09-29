@@ -19,7 +19,7 @@ uniform Wave wave;
 
 float single_wave(float x, float y, float t, Wave wave) {
     float theta = sqrt(dot(vec2(x, y), vec2(x, y)));
-    return 25.0 + wave.amplitude * cos(theta * wave.frequency + t * wave.phase);
+    return 20.0 + wave.amplitude * cos(theta * wave.frequency + t * wave.phase);
 }
 
 vec3 wave_normal(float x, float y, float t, Wave wave) {

@@ -22,7 +22,7 @@ public:
     GLuint getLightDepth() const;
 
 private:
-    GLFramebuffer gBuffer, lightFBO, causticFBO[2];
+    GLFramebuffer gBuffer, lightFBO, causticFBO;
     GLTexture defaultTexture;
     GLShaderProgram deferredShader, shadowmapShader, quadShader, dirlightShader, pointlightShader, lightStencilShader;
     GLShaderProgram causticShader, blurShader;

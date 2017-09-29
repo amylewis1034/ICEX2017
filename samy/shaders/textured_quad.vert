@@ -10,6 +10,7 @@ uniform mat4 model;
 out vec3 fragPosition;
 out vec3 fragNormal;
 out vec2 fragTexcoord;
+out vec4 fragProjected;
 
 void main() {
     fragPosition = vec3(model * vec4(position, 1.0));
@@ -17,4 +18,5 @@ void main() {
     // fragTexcoord = vec2(texcoord.x, 1.0 - texcoord.y);
     fragTexcoord = texcoord;
     gl_Position = projection * view * model * vec4(position, 1.0);
+    fragProjected = gl_Position;
 }
