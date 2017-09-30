@@ -40,9 +40,9 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 /* Game configuration */
-const int WIDTH = 1440, HEIGHT = 850;
+const int WIDTH = 1280, HEIGHT = 720;
 
-#define TITLE "PILE OF STAAAAAAAAAAACKS🥞🥞🥞"
+#define TITLE "ICEX 2017"
 
 #ifndef SHADER_PATH
 #define SHADER_PATH "../shaders/"

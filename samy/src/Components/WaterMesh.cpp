@@ -30,20 +30,20 @@ const float bot = -30.0f, top = 30.0f;
     
 //     return glm::normalize(glm::vec3(-dx, 1.0f, -dy));
 // }
-static float single_wave(float x, float y, float t, const Wave &wave) {
-    float theta = glm::sqrt(glm::dot(glm::vec2(x, y), glm::vec2(x, y)));
-    return 20.0f + wave.amplitude * glm::cos(theta * wave.frequency + t * wave.phase);
-}
+// static float single_wave(float x, float y, float t, const Wave &wave) {
+//     float theta = glm::sqrt(glm::dot(glm::vec2(x, y), glm::vec2(x, y)));
+//     return 20.0f + wave.amplitude * glm::cos(theta * wave.frequency + t * wave.phase);
+// }
 
-static glm::vec3 wave_normal(float x, float y, float t, const Wave &wave) {
-    float theta = glm::sqrt(glm::dot(glm::vec2(x, y), glm::vec2(x, y)));
-    float dx = wave.amplitude * wave.direction.x * wave.frequency * x
-        * glm::sin(theta * wave.frequency + t * wave.phase) / theta;
-    float dy = wave.amplitude * wave.direction.y * wave.frequency * y
-        * glm::sin(theta * wave.frequency + t * wave.phase) / theta;
+// static glm::vec3 wave_normal(float x, float y, float t, const Wave &wave) {
+//     float theta = glm::sqrt(glm::dot(glm::vec2(x, y), glm::vec2(x, y)));
+//     float dx = wave.amplitude * wave.direction.x * wave.frequency * x
+//         * glm::sin(theta * wave.frequency + t * wave.phase) / theta;
+//     float dy = wave.amplitude * wave.direction.y * wave.frequency * y
+//         * glm::sin(theta * wave.frequency + t * wave.phase) / theta;
     
-    return glm::normalize(glm::vec3(-dx, 1.0f, -dy));
-}
+//     return glm::normalize(glm::vec3(-dx, 1.0f, -dy));
+// }
 
 WaterMesh::WaterMesh(int width, int height) :
     width(width), height(height), wave({0.5f, 1.0f, 1.0f, glm::vec2(1.0f, 0.0f)}) {}
