@@ -52,8 +52,7 @@ public:
     GLuint grid_vao, grid_vbo, feedback_vbo;
     GLuint tbo_tex;
     
-    int which = 0;
-    GLBuffer vertex_buf[2];
+    GLBuffer vertex_buf;
     GLBuffer positions, nBuf, tBuf, instanceBuf, instanceIndicesBuf;
     GLVertexArrayObject vao;
     GLBuffer ebo;

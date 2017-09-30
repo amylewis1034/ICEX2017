@@ -56,7 +56,6 @@ void WaterMesh::init() {
     normals.resize(width * height, glm::vec3(0));
     refracted_rays.resize(width * height);
     vertices.resize(width * height, {glm::vec3(0), 0, glm::vec3(0), 0, glm::vec3(0), 0});
-    // vertices.resize(width * height, {glm::vec3(0), glm::vec3(0), glm::vec3(0)});
 
     generate_vertices(0.0f, world->getMainlightPosition());
     generate_indices();
@@ -90,8 +89,7 @@ void WaterMesh::init() {
 			<< std::endl;
 	}
 
-    // make sure buffers stick around
-    glm::vec2 grid_points[width * height];
+    static std::vector<glm::vec2> grid_points(width * height);
     float xoffset = (right - left) / (width - 1);
     float yoffset = (top - bot) / (height - 1);
     for (int j = 0; j < height; j++) {
@@ -109,7 +107,7 @@ void WaterMesh::init() {
 
     glGenBuffers(1, &grid_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, grid_vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(grid_points), grid_points, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, grid_points.size() * sizeof(glm::vec2), grid_points.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
 
@@ -152,7 +150,7 @@ void WaterMesh::generate_water(float t) {
 
     glDisable(GL_RASTERIZER_DISCARD);
 
-    // glFlush();
+    glFlush();
 
     // GLuint primitives;
     // glGetQueryObjectuiv(query, GL_QUERY_RESULT, &primitives);
@@ -161,6 +159,7 @@ void WaterMesh::generate_water(float t) {
     
     // VertexInfo vertex_info[width * height];
     // glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, sizeof(vertex_info), vertex_info);
+    glGetBufferSubData(GL_TRANSFORM_FEEDBACK_BUFFER, 0, vertices.size() * sizeof(VertexInfo), vertices.data());
 
     // bool matches = true;
     // for (int i = 0; i < width * height; i++) {
@@ -212,9 +211,6 @@ void WaterMesh::draw_caustics() {
     glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, feedback_vbo);
-    // glBindBuffer(GL_UNIFORM_BUFFER, feedback_vbo);
-    // glBindBufferBase(GL_UNIFORM_BUFFER, 0, feedback_vbo);
-    // glBindBufferBase(GL_UNIFORM_BUFFER, 0, this->vertex_buf[which].getHandle());
     cubemesh->draw_instanced(indices.size() - 2);
 }
 
@@ -231,23 +227,20 @@ void WaterMesh::generate_vertices(float t, const glm::vec3 &light_position) {
             float x = i * xoffset + left;
             float y = j * yoffset + bot;
 
-            // glm::vec3 &v = vertices[index];
-            // glm::vec3 &n = normals[index];
-            // glm::vec3 &r = refracted_rays[index];
-            // glm::vec2 &t = texcoords[index];
-            glm::vec3 &v = vertices[index].position;
-            glm::vec3 &n = vertices[index].normal;
-            glm::vec3 &r = vertices[index].refracted_ray;
+            // glm::vec3 &v = vertices[index].position;
+            // glm::vec3 &n = vertices[index].normal;
+            // glm::vec3 &r = vertices[index].refracted_ray;
 
-            float height = 0.0f;
-            height = single_wave(x, y, t, this->wave);
+            // float height = 0.0f;
+            // height = single_wave(x, y, t, this->wave);
 
-            verts[index] = v = glm::vec3(x, height, y);
-            normals[index] = n = wave_normal(x, y, t, this->wave);
+            // verts[index] =  glm::vec3(x, height, y);
+            // normals[index] =  wave_normal(x, y, t, this->wave);
 
-            glm::vec3 incident = glm::normalize(v - light_position);
-            refracted_rays[index] = r = glm::refract(incident, n, n_air / n_water);
+            // glm::vec3 incident = glm::normalize(verts[index] - light_position);
+            // refracted_rays[index] =  glm::refract(incident, normals[index], n_air / n_water);
 
+            // TODO: don't need to do this every frame
 			texcoords[index] = glm::vec2((float)i / width, 1.0f - (float)j / height);
             // texcoords[j * width + i] *= this->texture_scale;
         }
@@ -284,18 +277,12 @@ void WaterMesh::generate_indices() {
 
 void WaterMesh::generate_bboxes() {
     glm::vec3 a[2], b[2], c[2];
-    // a[0] = vertices[indices[0]];
-    // a[1] = vertices[indices[0]] - refracted_rays[indices[0]] * (a[0].y / refracted_rays[indices[0]].y);
-    // b[0] = vertices[indices[1]];
-    // b[1] = vertices[indices[1]] - refracted_rays[indices[1]] * (b[0].y / refracted_rays[indices[1]].y);
     a[0] = vertices[indices[0]].position;
     a[1] = vertices[indices[0]].position - vertices[indices[0]].refracted_ray * (a[0].y / vertices[indices[0]].refracted_ray.y);
     b[0] = vertices[indices[1]].position;
     b[1] = vertices[indices[1]].position - vertices[indices[1]].refracted_ray * (b[0].y / vertices[indices[1]].refracted_ray.y);
     
     for (int i = 0; i < bboxes.size(); i++) {
-        // c[0] = vertices[indices[i + 2]];
-        // c[1] = vertices[indices[i + 2]] - refracted_rays[indices[i + 2]] * (c[0].y / refracted_rays[indices[i + 2]].y);
         c[0] = vertices[indices[i + 2]].position;
         c[1] = vertices[indices[i + 2]].position - vertices[indices[i + 2]].refracted_ray * (c[0].y / vertices[indices[i + 2]].refracted_ray.y);
     
@@ -330,10 +317,6 @@ void WaterMesh::generate_bboxes() {
 
 void WaterMesh::init_buffers() {
     /* For drawing stuff */
-    positions.loadData(GL_ARRAY_BUFFER, verts.size() * sizeof(glm::vec3), verts.data(), GL_STREAM_DRAW);
-
-    nBuf.loadData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STREAM_DRAW);
-
 	tBuf.loadData(GL_ARRAY_BUFFER, texcoords.size() * sizeof(glm::vec2), texcoords.data(), GL_STATIC_DRAW);
 
     this->instanceBuf.loadData(GL_ARRAY_BUFFER, this->instance_matrices.size() * sizeof(glm::mat3), this->instance_matrices.data(), GL_STREAM_DRAW);    
@@ -342,15 +325,10 @@ void WaterMesh::init_buffers() {
 
     vao.bind();
 
-    positions.bind();
-    vao.addAttribute(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    nBuf.bind();
-    vao.addAttribute(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-    // vertex_buf.bind();
-    // vao.addAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexInfo), (GLvoid *)offsetof(VertexInfo, position));
-    // vao.addAttribute(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexInfo), (GLvoid *)offsetof(VertexInfo, normal));
+    vertex_buf.bind();
+    vertex_buf.loadData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
+    vao.addAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexInfo), (GLvoid *)offsetof(VertexInfo, position));
+    vao.addAttribute(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexInfo), (GLvoid *)offsetof(VertexInfo, normal));
 
 	tBuf.bind();
 	vao.addAttribute(2, 2, GL_FLOAT, GL_FALSE, 0, 0);
@@ -381,17 +359,10 @@ void WaterMesh::init_buffers() {
     glVertexAttribDivisor(7, 1);
 
     glBindVertexArray(0);
-
-    /* Caustic block */
-    // vertex_buf[this->which].loadData(GL_UNIFORM_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
 }
 
 void WaterMesh::update_buffers() {
-    positions.loadData(GL_ARRAY_BUFFER, verts.size() * sizeof(glm::vec3), verts.data(), GL_STREAM_DRAW);
-    nBuf.loadData(GL_ARRAY_BUFFER, normals.size() * sizeof(glm::vec3), normals.data(), GL_STREAM_DRAW);
-
-    // this->which = 1 - this->which;
-    // vertex_buf[this->which].loadData(GL_UNIFORM_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
+    vertex_buf.loadData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
 
     this->instanceBuf.loadData(GL_ARRAY_BUFFER, this->instance_matrices.size() * sizeof(glm::mat3), this->instance_matrices.data(), GL_STREAM_DRAW);    
 }

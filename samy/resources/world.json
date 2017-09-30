@@ -28,7 +28,7 @@
 				{"name": "Transform", "args": [
 					0, 0, 0, 
 					0, 1, 0, 0,
-					100, 1, 100]},
+					50, 1, 50]},
 				{"name": "Heightmap", "args": ["heightmaps/flat_terrain.jpg", 5.0]},
 				{"name": "Texture", "args": ["textures/seafloor_colored.png"]},
 				{"name": "Material", "args": [
@@ -156,7 +156,7 @@
 		//}
 	],
 
-	"MainLight": {"pos": [0.0, 40.0, 5.0], "color": [0.24, 0.48, 0.48]},
+	"MainLight": {"pos": [0.0, 40.0, -10.0], "color": [0.24, 0.48, 0.48]},
 	
 	"PointLights": [
 		// {"pos": [-105.0, 2.0, 8.0], "color": [0.35, 0.61, 0.80], "a": 1.0, "b": 1.0, "c": 1.0},
