@@ -10,12 +10,12 @@ GLTexture::GLTexture() :
     handle(0), target(GL_TEXTURE0)
     {}
 
-GLTexture::GLTexture(std::string texname) {
+GLTexture::GLTexture(const std::string &texname) {
     loadTexture(texname);
     this->target = GL_TEXTURE0;
 }
 
-GLTexture::GLTexture(std::string texname, GLenum target) {
+GLTexture::GLTexture(const std::string &texname, GLenum target) {
     loadTexture(texname);
     this->target = target;
 }
@@ -24,8 +24,8 @@ GLTexture::~GLTexture() {
     glDeleteTextures(1, &handle);
 }
 
-void GLTexture::loadTexture(std::string texname) {
-    this->handle = createTexture2D(texname);
+void GLTexture::loadTexture(const std::string &texname, GLint wrapS, GLint wrapT, GLint minFilter, GLint magFilter) {
+    this->handle = createTexture2D(texname, wrapS, wrapT, minFilter, magFilter);
 }
 
 void GLTexture::setTarget(GLenum target) {
@@ -42,7 +42,7 @@ void GLTexture::unbind() const {
     glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-GLuint GLTexture::createTexture2D(std::string texname) {
+GLuint GLTexture::createTexture2D(const std::string &texname, GLint wrapS, GLint wrapT, GLint minFilter, GLint magFilter) {
     int width, height, channels;
     unsigned char *image = stbi_load(texname.c_str(), &width, &height, &channels, 0);
     if (image == NULL) {
@@ -63,10 +63,10 @@ GLuint GLTexture::createTexture2D(std::string texname) {
 
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
 
     stbi_image_free(image);
     glBindTexture(GL_TEXTURE_2D, 0);

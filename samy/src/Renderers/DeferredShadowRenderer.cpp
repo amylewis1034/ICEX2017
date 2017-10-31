@@ -2,6 +2,7 @@
 #include "PostprocessRenderer.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <World.hpp>
@@ -25,6 +26,8 @@
 extern GLFWwindow *window;
 
 static const int caustic_width = 512, caustic_height = 512;
+
+using namespace glm;
 
 DeferredShadowRenderer::DeferredShadowRenderer() {
     /* Initialize geometry buffer */
@@ -102,6 +105,7 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
         std::cout << "Light Framebuffer not created successfully" << std::endl;
     }
     lightFBO.unbind();
+    
 
     /* Caustic FBO */
     causticFBO.bind();
@@ -135,7 +139,7 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
     shadowmapShader.linkProgram(SHADER_PATH "phong.vert", SHADER_PATH "empty.frag");
     quadShader.linkProgram(SHADER_PATH "textured_quad.vert", SHADER_PATH "deferred_ubo_shadows.frag");
 
-    dirlightShader.linkProgram(SHADER_PATH "textured_quad.vert", SHADER_PATH "dirlight.frag");
+    dirlightShader.linkProgram(SHADER_PATH "dirlight.vert", SHADER_PATH "dirlight.frag");
     pointlightShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "pointlight.frag");
     lightStencilShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "empty.frag");
 
@@ -364,6 +368,38 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glUniform1i(dirlightShader.uniformLocation("genNormals"), world.getRenderSetting().genNormals) ;
     glUniform1i(dirlightShader.uniformLocation("genThirds"), world.getRenderSetting().genThirds);
     glUniform1i(dirlightShader.uniformLocation("genCombo"), world.getRenderSetting().genCombo);
+
+    // Project texture map
+    // based on OpenGL 4.0 Shading Language Cookbook
+    {
+        static GLTexture *projTex = nullptr;
+        if (!projTex) {
+            projTex = new GLTexture();
+            projTex->loadTexture(
+                RESOURCE_PATH "textures/Smiley.png",
+                GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER,
+                GL_LINEAR, GL_LINEAR
+            );
+            projTex->setTarget(GL_TEXTURE5);
+        }
+
+        projTex->bind();
+        glUniform1i(dirlightShader.uniformLocation("projectorTex"), 5);
+        
+        glActiveTexture(GL_TEXTURE6);
+        glBindTexture(GL_TEXTURE_2D, gBuffer.getTexture(3));
+        glUniform1i(dirlightShader.uniformLocation("depth"), 6);
+
+        vec3 projPos {5.0f, 10.0f, 0.0f};
+        vec3 projAt {0.0f, 0.0f, 0.0f};
+        vec3 projUp {0.0f, 1.0f, 0.0f};
+        mat4 projView = lookAt(projPos, projAt, projUp);
+        mat4 projProj = perspective(45.0f, 1.0f, 0.1f, 100.0f);
+        mat4 projScaleTrans = translate(vec3(0.5f)) * scale(vec3(0.5f));
+        mat4 m = projScaleTrans * projProj * projView;
+
+        glUniformMatrix4fv(dirlightShader.uniformLocation("projector"), 1, GL_FALSE, value_ptr(m));
+    }
 
     GLQuad::draw();
 
