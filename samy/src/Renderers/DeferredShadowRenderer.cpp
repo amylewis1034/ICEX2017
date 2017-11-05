@@ -246,7 +246,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 			hmap->draw();
 		}
         else if (water) {
-            // water->draw();
+            water->draw();
         }
 
 	}

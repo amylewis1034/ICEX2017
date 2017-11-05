@@ -9,6 +9,11 @@
 #include <string>
 #include <vector>
 
+struct GerstnerWave {
+    float q, a, omega, phi;
+    glm::vec2 d;
+};
+
 struct Wave {
     float amplitude, frequency, phase;
     glm::vec2 direction;

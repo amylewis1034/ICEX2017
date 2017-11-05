@@ -45,6 +45,8 @@ const float bot = -30.0f, top = 30.0f;
 //     return glm::normalize(glm::vec3(-dx, 1.0f, -dy));
 // }
 
+GerstnerWave waves[4];
+
 WaterMesh::WaterMesh(int width, int height) :
     width(width), height(height), wave({0.5f, 1.0f, 1.0f, glm::vec2(1.0f, 0.0f)}) {}
 
@@ -137,6 +139,15 @@ void WaterMesh::generate_water(float t) {
     glUniform1f(glGetUniformLocation(wave_program, "wave.frequency"), wave.frequency);
     glUniform1f(glGetUniformLocation(wave_program, "wave.phase"), wave.phase);
     glUniform2f(glGetUniformLocation(wave_program, "wave.direction"), wave.direction.x, wave.direction.y);
+
+    for (int i = 0; i < 4; i++) {
+        auto name = std::string("waves[") + std::to_string(i) + std::string("].");
+        glUniform1f(glGetUniformLocation(wave_program, (name + std::string("q")).c_str()), waves[i].q);
+        glUniform1f(glGetUniformLocation(wave_program, (name + std::string("a")).c_str()), waves[i].a);
+        glUniform1f(glGetUniformLocation(wave_program, (name + std::string("omega")).c_str()), waves[i].omega);
+        glUniform1f(glGetUniformLocation(wave_program, (name + std::string("phi")).c_str()), waves[i].phi);
+        glUniform2f(glGetUniformLocation(wave_program, (name + std::string("d")).c_str()), waves[i].d.x, waves[i].d.y);
+    }
 
     // glBeginQuery(GL_TRANSFORM_FEEDBACK_PRIMITIVES_WRITTEN, query);
     glBeginTransformFeedback(GL_POINTS);

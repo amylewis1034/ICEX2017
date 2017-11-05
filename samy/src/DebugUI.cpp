@@ -23,10 +23,13 @@
 #include <LevelParser.hpp>
 #include <Graphics/GLFramebuffer.hpp>
 #include <memory>
+#include <Components/WaterMesh.hpp>
 
 #include <icex_common.hpp>
 
 bool DebugUI::enabled = false;
+
+using namespace std;
 
 void DebugUI::init(GLFWwindow *window) {
 	ImGui_ImplGlfwGL3_Init(window, false);
@@ -50,7 +53,50 @@ void DebugUI::render(float dt, World *world) {
 		}
 	}
 
-	/* Play with lights */
+	if (ImGui::CollapsingHeader("Gerstner Waves")) {
+		extern GerstnerWave waves[4];
+
+		static float Q = 0.5f, medianWavelength = 20.0f, medianAmplitude = 0.2f;
+        static float direction = 0.0f, spread = 90.0f;
+        static float phi = 5.0f;
+		static float angle[4] = {0};
+
+		ImGui::SliderFloat("Q", &Q, 0.0f, 1.0f);
+		ImGui::SliderFloat("Median Wavelength", &medianWavelength, 0.1f, 100.0f);
+		ImGui::SliderFloat("Median Amplitude", &medianAmplitude, 0.01f, 10.0f);
+		ImGui::SliderFloat("Direction", &direction, 0.0f, 360.0f);
+		ImGui::SliderFloat("Spread (degrees)", &spread, 0.0f, 180.0f);
+        ImGui::SliderFloat("Speed", &phi, 0.0f, 20.0f);
+
+		if (ImGui::Button("Generate Waves")) {
+			for (int i = 0; i < 4; i++) {
+				float ratio = randFloat(0.5f, 2.0f);
+				float wavelength = ratio * medianWavelength;
+				float amplitude = ratio * medianAmplitude;
+				float frequency = glm::sqrt(9.8f * 2.0f * glm::pi<float>() / wavelength);
+				
+				waves[i].q = Q / (frequency * amplitude * 4);
+				waves[i].a = amplitude;
+				waves[i].omega = frequency;
+				waves[i].phi = phi;
+                angle[i] = direction + randFloat(-0.5f, 0.5f) * spread;
+                float tmp = glm::radians(angle[i]);
+				waves[i].d = glm::vec2(glm::cos(tmp), glm::sin(tmp));
+			}
+		}
+
+		ImGui::Text("Waves (q, a, omega, phi, direction)");
+        for (int i = 0; i < 4; i++) {
+			ImGui::DragFloat((string("q") + to_string(i)).c_str(), &waves[i].q, 0.01f, 0.0f, 1.0f);
+			ImGui::DragFloat((string("amplitude") + to_string(i)).c_str(), &waves[i].a, 0.1f, 0.0f, 10.0f);
+			ImGui::DragFloat((string("frequency") + to_string(i)).c_str(), &waves[i].omega, 0.1f, 0.0f, 10.0f);
+			ImGui::DragFloat((string("phi") + to_string(i)).c_str(), &waves[i].phi, 0.1f, 0.0f, 20.0f);
+			ImGui::DragFloat((string("direction") + to_string(i)).c_str(), &angle[i], 1.0f, 0.0f, 360.0f);
+			float tmp = glm::radians(angle[i]);
+			waves[i].d = glm::vec2(glm::cos(tmp), glm::sin(tmp));
+        }
+	}
+
 	{
 		float scale = 1.5f;
 		if (ImGui::Button("Brighten")) {
