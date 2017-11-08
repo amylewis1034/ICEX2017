@@ -15,6 +15,7 @@
 #include <Components/Mesh.hpp>
 #include <Components/Heightmap.hpp>
 #include <Components/Texture.hpp>
+#include <Components/ProjectiveTexture.hpp>
 #include <icex_common.hpp>
 #include "GLFW/glfw3.h"
 #include "PRM/Utilities.h"
@@ -372,33 +373,31 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     // Project texture map
     // based on OpenGL 4.0 Shading Language Cookbook
     {
-        static GLTexture *projTex = nullptr;
-        if (!projTex) {
-            projTex = new GLTexture();
-            projTex->loadTexture(
-                RESOURCE_PATH "textures/Smiley.png",
-                GL_CLAMP_TO_BORDER, GL_CLAMP_TO_BORDER,
-                GL_LINEAR, GL_LINEAR
-            );
-            projTex->setTarget(GL_TEXTURE5);
+        // hack it up
+        static ProjectiveTexture *projTex = nullptr;
+        if (!projTex && world.getGameObjectWithComponent<ProjectiveTexture>()) {
+            projTex = world.getGameObjectWithComponent<ProjectiveTexture>()->getComponent<ProjectiveTexture>();
+            projTex->texture.setTarget(GL_TEXTURE5);
+            std::cout << "hi\n";
         }
 
-        projTex->bind();
-        glUniform1i(dirlightShader.uniformLocation("projectorTex"), 5);
-        
-        glActiveTexture(GL_TEXTURE6);
-        glBindTexture(GL_TEXTURE_2D, gBuffer.getTexture(3));
-        glUniform1i(dirlightShader.uniformLocation("depth"), 6);
+        if (projTex) {
+            glUniform1i(dirlightShader.uniformLocation("hasProjectiveTexture"), 1);
 
-        vec3 projPos {5.0f, 10.0f, 0.0f};
-        vec3 projAt {0.0f, 0.0f, 0.0f};
-        vec3 projUp {0.0f, 1.0f, 0.0f};
-        mat4 projView = lookAt(projPos, projAt, projUp);
-        mat4 projProj = perspective(45.0f, 1.0f, 0.1f, 100.0f);
-        mat4 projScaleTrans = translate(vec3(0.5f)) * scale(vec3(0.5f));
-        mat4 m = projScaleTrans * projProj * projView;
+            projTex->texture.bind();
+            glUniform1i(dirlightShader.uniformLocation("projectorTex"), 5);
+            
+            glActiveTexture(GL_TEXTURE6);
+            glBindTexture(GL_TEXTURE_2D, gBuffer.getTexture(3));
+            glUniform1i(dirlightShader.uniformLocation("depth"), 6);
 
-        glUniformMatrix4fv(dirlightShader.uniformLocation("projector"), 1, GL_FALSE, value_ptr(m));
+            mat4 m = projTex->getProjectorMatrix();
+
+            glUniformMatrix4fv(dirlightShader.uniformLocation("projector"), 1, GL_FALSE, value_ptr(m));
+        }
+        else {
+            glUniform1i(dirlightShader.uniformLocation("hasProjectiveTexture"), 0);
+        }
     }
 
     GLQuad::draw();

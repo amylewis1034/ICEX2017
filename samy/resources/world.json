@@ -52,6 +52,16 @@
 				{"name": "WaterMesh", "args": [128, 128]}
 			]
 		},
+        {
+            "tag": "projectiveTexture",
+            "components": [
+                {"name": "Transform", "args": [
+                    0, 0, 0,
+                    0, 1, 0, 0,
+                    1, 1, 1]},
+                {"name": "ProjectiveTexture", "args": [5, 10, 0, 0, 0, 0, "textures/Smiley.png"]}
+            ]
+        },
 		// {
 		// 	"tag": "particlesCurrent",
 		// 	"components": [

@@ -7,6 +7,7 @@ in vec4 fragProjected;
 
 uniform mat4 projector;
 uniform sampler2D projectorTex;
+uniform bool hasProjectiveTexture;
 
 uniform sampler2D gPosition;
 uniform sampler2D gNormal;
@@ -87,13 +88,15 @@ void main() {
     float shadowAmount = shadow((ls * vec4(position, 1.0)).xyz);
 	color = vec4((1.0 - shadowAmount) * color.rgb, 1);
 
-    float depth = texture(depth, fragTexcoord).r;
-    float near = 0.1, far = 100.0;
-    depth = 2 * near / (far + near - depth * (far - near));
+    if (hasProjectiveTexture) {
+        float depth = texture(depth, fragTexcoord).r;
+        float near = 0.1, far = 100.0;
+        depth = 2 * near / (far + near - depth * (far - near));
 
-    vec4 projectorCoords = projector * vec4(position, 1.0);
-    // hack to make sure don't project onto empty background
-    if (depth < 0.99 && projectorCoords.z > 0) {
-            color += textureProj(projectorTex, projectorCoords);
+        vec4 projectorCoords = projector * vec4(position, 1.0);
+        // hack to make sure don't project onto empty background
+        if (depth < 0.99 && projectorCoords.z > 0) {
+                color += textureProj(projectorTex, projectorCoords);
+        }
     }
 }
