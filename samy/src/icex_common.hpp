@@ -18,6 +18,7 @@
 #include <Components/PRMCombo.hpp>
 #include <Components/PRMNorms.hpp>
 #include <Components/PRMThirds.hpp>
+#include <Components/ProjectiveTexture.hpp>
 #include <Components/Shader.hpp>
 #include <Components/Skybox.hpp>
 #include <Components/Transform.hpp>

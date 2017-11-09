@@ -7,11 +7,13 @@
 class GLTexture {
 public:
     GLTexture();
-    GLTexture(std::string texname);
-    GLTexture(std::string texname, GLenum target);
+    GLTexture(const std::string &texname);
+    GLTexture(const std::string &texname, GLenum target);
     ~GLTexture();
 
-    void loadTexture(std::string texname);
+    void loadTexture(const std::string &texname,
+            GLint wrapS = GL_REPEAT, GLint wrapT = GL_REPEAT,
+            GLint minFilter = GL_LINEAR_MIPMAP_LINEAR, GLint magFilter = GL_LINEAR);
     void setTarget(GLenum target);
     void bind() const;
     void unbind() const;
@@ -19,7 +21,9 @@ public:
 private:
     GLuint handle, target;
 
-    static GLuint createTexture2D(std::string texname);
+    static GLuint createTexture2D(const std::string &texname,
+            GLint wrapS = GL_REPEAT, GLint wrapT = GL_REPEAT,
+            GLint minFilter = GL_LINEAR_MIPMAP_LINEAR, GLint magFilter = GL_LINEAR);
 };
 
 #endif

@@ -189,6 +189,19 @@ static Component *parseParticle(Value &args) {
 	return (Component *) particle;
 }
 
+static Component *parseProjectiveTexture(Value &args) {
+    ProjectiveTexture *ptex = nullptr;
+
+    if (args.Size() == 7) {
+        glm::vec3 position = {args[0].GetFloat(), args[1].GetFloat(), args[2].GetFloat()};
+        glm::vec3 target = {args[3].GetFloat(), args[4].GetFloat(), args[5].GetFloat()};
+        std::string textureName = rpath + args[6].GetString();
+        ptex = new ProjectiveTexture(position, target, textureName);
+    }
+
+    return (Component *) ptex;
+}
+
 static Component *parseShader(Value &args) {
 	Shader *shader;
 
@@ -258,6 +271,7 @@ const static std::map<std::string, std::function<Component *(Value &args)>> cmap
 	{"Material", parseMaterial},
     {"Mesh", parseMesh},
 	{"Particle", parseParticle},
+    {"ProjectiveTexture", parseProjectiveTexture},
 	{"Shader", parseShader},
     {"Skybox", parseSkybox},
 	{"Texture", parseTexture},

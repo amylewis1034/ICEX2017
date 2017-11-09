@@ -2,6 +2,7 @@
 #include "PostprocessRenderer.hpp"
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <World.hpp>
@@ -14,6 +15,7 @@
 #include <Components/Mesh.hpp>
 #include <Components/Heightmap.hpp>
 #include <Components/Texture.hpp>
+#include <Components/ProjectiveTexture.hpp>
 #include <icex_common.hpp>
 #include "GLFW/glfw3.h"
 #include "PRM/Utilities.h"
@@ -25,6 +27,8 @@
 extern GLFWwindow *window;
 
 static const int caustic_width = 512, caustic_height = 512;
+
+using namespace glm;
 
 DeferredShadowRenderer::DeferredShadowRenderer() {
     /* Initialize geometry buffer */
@@ -102,6 +106,7 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
         std::cout << "Light Framebuffer not created successfully" << std::endl;
     }
     lightFBO.unbind();
+    
 
     /* Caustic FBO */
     causticFBO.bind();
@@ -135,7 +140,7 @@ DeferredShadowRenderer::DeferredShadowRenderer() {
     shadowmapShader.linkProgram(SHADER_PATH "phong.vert", SHADER_PATH "empty.frag");
     quadShader.linkProgram(SHADER_PATH "textured_quad.vert", SHADER_PATH "deferred_ubo_shadows.frag");
 
-    dirlightShader.linkProgram(SHADER_PATH "textured_quad.vert", SHADER_PATH "dirlight.frag");
+    dirlightShader.linkProgram(SHADER_PATH "dirlight.vert", SHADER_PATH "dirlight.frag");
     pointlightShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "pointlight.frag");
     lightStencilShader.linkProgram(SHADER_PATH "lightpass.vert", SHADER_PATH "empty.frag");
 
@@ -364,6 +369,35 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     glUniform1i(dirlightShader.uniformLocation("genNormals"), world.getRenderSetting().genNormals) ;
     glUniform1i(dirlightShader.uniformLocation("genThirds"), world.getRenderSetting().genThirds);
     glUniform1i(dirlightShader.uniformLocation("genCombo"), world.getRenderSetting().genCombo);
+
+    // Project texture map
+    // based on OpenGL 4.0 Shading Language Cookbook
+    {
+        // hack it up
+        static ProjectiveTexture *projTex = nullptr;
+        if (!projTex && world.getGameObjectWithComponent<ProjectiveTexture>()) {
+            projTex = world.getGameObjectWithComponent<ProjectiveTexture>()->getComponent<ProjectiveTexture>();
+            projTex->texture.setTarget(GL_TEXTURE5);
+        }
+
+        if (projTex) {
+            glUniform1i(dirlightShader.uniformLocation("hasProjectiveTexture"), 1);
+
+            projTex->texture.bind();
+            glUniform1i(dirlightShader.uniformLocation("projectorTex"), 5);
+            
+            glActiveTexture(GL_TEXTURE6);
+            glBindTexture(GL_TEXTURE_2D, gBuffer.getTexture(3));
+            glUniform1i(dirlightShader.uniformLocation("depth"), 6);
+
+            mat4 m = projTex->getProjectorMatrix();
+
+            glUniformMatrix4fv(dirlightShader.uniformLocation("projector"), 1, GL_FALSE, value_ptr(m));
+        }
+        else {
+            glUniform1i(dirlightShader.uniformLocation("hasProjectiveTexture"), 0);
+        }
+    }
 
     GLQuad::draw();
 
