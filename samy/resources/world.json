@@ -52,16 +52,26 @@
 				{"name": "WaterMesh", "args": [128, 128]}
 			]
 		},
-        {
-            "tag": "projectiveTexture",
-            "components": [
-                {"name": "Transform", "args": [
-                    0, 0, 0,
-                    0, 1, 0, 0,
-                    1, 1, 1]},
-                {"name": "ProjectiveTexture", "args": [5, 10, 0, 0, 0, 0, "textures/Smiley.png"]}
-            ]
-        },
+//        {
+//            "tag": "projectiveTexture",
+//            "components": [
+//                {"name": "Transform", "args": [
+//                    0, 0, 0,
+//                    0, 1, 0, 0,
+//                    1, 1, 1]},
+//                {"name": "ProjectiveTexture", "args": [-0.3, 10, -6, 0, 0, -15, "textures/cropped_beaufigher2.png"]}
+//            ]
+//        },
+//        {
+//            "tag": "projectiveTexture",
+//            "components": [
+//                {"name": "Transform", "args": [
+//                    0, 0, 0,
+//                    0, 1, 0, 0,
+//                    1, 1, 1]},
+//                {"name": "ProjectiveTexture", "args": [-0.3, 10, -5, 0, 0, -15, "textures/cropped_beaufigher2.png"]}
+//            ]
+//        },
 		// {
 		// 	"tag": "particlesCurrent",
 		// 	"components": [
@@ -73,17 +83,17 @@
 		// 		{"name": "Particle", "args": [300, -150.0, 50.0, 2.0, 35.0, -100.0, 100.0,  0.2, 0.2, 0.6, 0.2]}
 		// 	]
 		// },
-		// {
-		// 	"tag": "particlesBubble",
-		// 	"components": [
-		// 		{"name": "Transform", "args": [
-		// 			0, 0, 0,
-		// 			0, 1, 0, 0,
-		// 			1, 1, 1
-		// 		]},
-		// 		{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
-		// 	]
-		// },
+		 {
+		 	"tag": "particlesBubble",
+		 	"components": [
+		 		{"name": "Transform", "args": [
+		 			0, 0, 0,
+		 			0, 1, 0, 0,
+		 			1, 1, 1
+		 		]},
+		 		{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
+		 	]
+		 },
         // {
         //     "tag": "chimney",
         //     "components": [
