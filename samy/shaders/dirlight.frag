@@ -96,7 +96,8 @@ void main() {
         vec4 projectorCoords = projector * vec4(position, 1.0);
         // hack to make sure don't project onto empty background
         if (depth < 0.99 && projectorCoords.z > 0) {
-                color += textureProj(projectorTex, projectorCoords);
+                vec4 projColor = textureProj(projectorTex, projectorCoords);
+                color.rgb = mix(color.rgb, projColor.rgb, projColor.a * 0.9);
         }
     }
 }
