@@ -41,7 +41,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 /* Game configuration */
-const int WIDTH = 1280, HEIGHT = 720;
+const int WIDTH = 800, HEIGHT = 600;
 
 #define TITLE "ICEX 2017"
 

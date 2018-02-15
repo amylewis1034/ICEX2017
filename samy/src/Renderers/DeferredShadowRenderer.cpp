@@ -26,7 +26,7 @@
 
 extern GLFWwindow *window;
 
-static const int caustic_width = 512, caustic_height = 512;
+static const int caustic_width = 128, caustic_height = 128;
 
 using namespace glm;
 
