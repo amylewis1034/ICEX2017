@@ -1,111 +1,74 @@
 cmake_minimum_required(VERSION 2.8)
+project(icex)
 
-# Name of the project
-project(ProjF)
+# Glob files (make sure to clear cmake cache and rerun after adding/removing files)
+file(GLOB_RECURSE SOURCES src/*.cpp)
+file(GLOB_RECURSE HEADERS src/*.h src/*.hpp)
+file(GLOB_RECURSE SHADERS shaders/*.vert shaders/*.frag shaders/*.comp)
 
-# Use glob to get the list of all source files.
-file(GLOB_RECURSE SOURCES "src/*.cpp")
+add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${SHADERS})
 
-# We don't really need to include header and resource files to build, but it's
-# nice to have them show up in IDEs.
-file(GLOB_RECURSE HEADERS "src/*.h")
-file(GLOB_RECURSE GLSL "*resources/.glsl")
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# Set the executable.
-add_executable(${CMAKE_PROJECT_NAME} ${SOURCES} ${HEADERS} ${GLSL})
+# Compile with c++14
+#set(CMAKE_CXX_STANDARD 11)
+add_definitions('--std=c++11')
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
+# Preprocessor macros to locate resources and shader directory
+add_definitions(-DRESOURCE_PATH="${CMAKE_SOURCE_DIR}/resources/")
+add_definitions(-DSHADER_PATH="${CMAKE_SOURCE_DIR}/shaders/")
 
-# Get the Eigen environment variable. Since Eigen is a header-only library, we
-# just need to add it to the include directory.
-find_path(EIGEN3_INCLUDE_DIR Eigen/Dense PATHS ENV EIGEN3_INCLUDE_DIR PATH_SUFFIXES eigen eigen3)
-#set(EIGEN3_INCLUDE_DIR "$ENV{EIGEN3_INCLUDE_DIR}")
-if(NOT EIGEN3_INCLUDE_DIR)
-  MESSAGE(FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
-endif()
-include_directories(${EIGEN3_INCLUDE_DIR})
+# Find all packages and check we found them
+# If OpenCV and GLEW are not in default directories, set OpenCV_DIR and GLEW_DIR environment variables
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} $ENV{OpenCV_DIR} $ENV{GLEW_DIR})
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR}/cmake)
 
-# Get the GLFW environment variable. There should be a CMakeLists.txt in the 
-# specified directory.
+find_package(OpenGL REQUIRED)
 find_package(GLFW REQUIRED)
-if(GLFW_FOUND)
-    include_directories(${CMAKE_PROJECT_NAME} ${GLFW_INCLUDE_DIR})
-    target_link_libraries(${CMAKE_PROJECT_NAME} ${GLFW_LIBRARY})
-endif()
-#set(GLFW_DIR "$ENV{GLFW_DIR}")
-#if(NOT GLFW_DIR)
-#  message(FATAL_ERROR "Please point the environment variable GLFW_DIR to the root directory of your GLFW3 installation.")
-#endif()
-#option(GLFW_BUILD_EXAMPLES "GLFW_BUILD_EXAMPLES" OFF)
-#option(GLFW_BUILD_TESTS "GLFW_BUILD_TESTS" OFF)
-#option(GLFW_BUILD_DOCS "GLFW_BUILD_DOCS" OFF)
-#if(CMAKE_BUILD_TYPE MATCHES Release)
-#  add_subdirectory(${GLFW_DIR} ${GLFW_DIR}/release)
-#else()
-#  add_subdirectory(${GLFW_DIR} ${GLFW_DIR}/debug)
-#endif()
-#include_directories(${GLFW_DIR}/include)
-#target_link_libraries(${CMAKE_PROJECT_NAME} glfw ${GLFW_LIBRARIES})
-
 find_package(GLEW)
-if (GLEW_FOUND)
-    include_directories(${CMAKE_PROJECT_NAME} ${GLEW_INCLUDE_DIRS})
-    target_link_libraries(${CMAKE_PROJECT_NAME} ${GLEW_LIBRARIES})
-elseif (DEFINED ENV{GLEW_DIR})
-    include_directories(${CMAKE_PROJECT_NAME} "$ENV{GLEW_DIR}/include")
-    if (WIN32)
-        target_link_libraries(${CMAKE_PROJECT_NAME} "$ENV{GLEW_DIR}/lib/Release/Win32/glew32s.lib")
-    else()
-        target_link_libraries(${CMAKE_PROJECT_NAME} "$ENV{GLEW_DIR}/lib/libGLEW.a")
-    endif()
-else()
-    message(FATAL_ERROR "Can't find GLEW")
-endif()
-# Get the GLEW environment variable.
-#set(GLEW_DIR "$ENV{GLEW_DIR}")
-#if(NOT GLEW_DIR)
-#  message(FATAL_ERROR "Please point the environment variable GLEW_DIR to the root directory of your GLEW installation.")
-#endif()
-#include_directories(${GLEW_DIR}/include)
-#if(WIN32)
-#  # With prebuilt binaries
-#  target_link_libraries(${CMAKE_PROJECT_NAME} ${GLEW_DIR}/lib/Release/Win32/glew32s.lib)
-#else()
-#  target_link_libraries(${CMAKE_PROJECT_NAME} ${GLEW_DIR}/lib/libGLEW.a)
-#endif()
-
-#OpenCV
-# set(OPENCV_DIR "$ENV{OPENCV_DIR}")
-# if(NOT OPENCV_DIR)
-#   message(FATAL_ERROR "Please point the environment variable OPENCV_DIR to the root directory of your OpenCV installation.")
-# endif()
-# include_directories(${OPENCV_DIR}/opencv)
-# target_link_libraries(${CMAKE_PROJECT_NAME} ${OpenCV_LIBS})
-
-# find_package(OpenCV REQUIRED)
-
-
+find_path(EIGEN3_INCLUDE_DIR Eigen/Dense PATHS ENV EIGEN3_INCLUDE_DIR PATH_SUFFIXES eigen eigen3)
+find_path(GLM_INCLUDE_DIR glm/glm.hpp PATHS ENV GLM_DIR GLM_LOCATION) 
 find_package(OpenCV REQUIRED)
-# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}  -std=c++11")
-#include_directories(${OPENCV_DIR})
-#target_link_libraries(${CMAKE_PROJECT_NAME} ${OpenCV_LIBS})
-include_directories(${OpenCV_INCLUDE_DIR})
-target_link_libraries(${CMAKE_PROJECT_NAME} ${OpenCV_LIBS})
 
+if (NOT EIGEN3_INCLUDE_DIR)
+  message(FATAL_ERROR "Please point the environment variable EIGEN3_INCLUDE_DIR to the include directory of your Eigen3 installation.")
+endif()
 
-# OS specific options and libraries
-if(WIN32)
-  # c++0x is enabled by default.
-  # -Wall produces way too many warnings.
-  # -pedantic is not supported.
-else()
-  # Enable all pedantic warnings.
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -Wall -pedantic -O3")
-  if(APPLE)
-    # Add required frameworks for GLFW.
-    target_link_libraries(${CMAKE_PROJECT_NAME} "-framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo")
-  else()
-    #Link the Linux OpenGL library
-    target_link_libraries(${CMAKE_PROJECT_NAME} "GL")
-  endif()
+if (NOT GLM_INCLUDE_DIR)
+    message(FATAL_ERROR "Please point the environment variable GLM_DIR or GLM_LOCATION to the include directory of your GLM installation.")
+endif()
+
+if (NOT GLEW_FOUND)
+    if (DEFINED ENV{GLEW_DIR})
+        if (WIN32)
+            set(GLFW_LIBRARY "$ENV{GLEW_DIR}/lib/Release/Win32/glew32s.lib")
+        else()
+            set(GLFW_LIBRARY "$ENV{GLEW_DIR}/lib/libGLEW.a")
+        endif()
+    else()
+        message(FATAL_ERROR "Can't find GLEW")
+    endif()
+endif()
+
+# Include required directories and link libraries
+include_directories(
+    src/
+    src/imgui
+    ${EIGEN3_INCLUDE_DIR}
+    ${GLM_INCLUDE_DIR}
+    ${OPENGL_INCLUDE_DIR}
+    ${GLFW_INCLUDE_DIR}
+    ${GLEW_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIR}
+)
+
+target_link_libraries(${CMAKE_PROJECT_NAME}
+    ${OPENGL_gl_LIBRARY}
+    ${GLFW_LIBRARY}
+    ${GLEW_LIBRARY}
+    ${OpenCV_LIBS}
+)
+
+if (APPLE)
+    add_definitions(-std=c++14)
 endif()
