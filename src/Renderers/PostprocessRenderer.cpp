@@ -167,6 +167,8 @@ void PostprocessRenderer::render(const glm::mat4 &projection, const glm::mat4 &v
     glBindTexture(GL_TEXTURE_2D, bloomFBO[1].getTexture(0));
 	glUniform1i(quadShader.uniformLocation("bloom"), 2);
 
+    glUniform1f(quadShader.uniformLocation("time"), (float)glfwGetTime());
+
     glUniform1f(quadShader.uniformLocation("gamma"), this->gamma);
     glUniform1f(quadShader.uniformLocation("exposure"), this->exposure);
     glUniform3fv(quadShader.uniformLocation("fog_color"), 1, glm::value_ptr(this->fog_color));

@@ -10,6 +10,7 @@ uniform sampler2D color_in;
 uniform sampler2D depth;
 uniform sampler2D bloom;
 
+uniform float time;
 uniform float gamma;
 uniform float exposure;
 uniform vec3 fog_color, be, bi;
@@ -21,6 +22,19 @@ uniform float blurScale;
 uniform float near, far;
 
 out vec4 color;
+
+//	<https://www.shadertoy.com/view/4dS3Wd>
+//	By Morgan McGuire @morgan3d, http://graphicscodex.com
+//
+float hash(float n) { return fract(sin(n) * 1e4); }
+float hash(vec2 p) { return fract(1e4 * sin(17.0 * p.x + p.y * 0.1) * (0.1 + abs(sin(p.y * 13.0 + p.x)))); }
+
+float noise(float x) {
+	float i = floor(x);
+	float f = fract(x);
+	float u = f * f * (3.0 - 2.0 * f);
+	return mix(hash(i), hash(i + 1.0), u);
+}
 
 vec3 gammacorrect(vec3 color) {
     if (gamma > 0)
@@ -40,6 +54,9 @@ vec3 tonemap(vec3 color) {
 
 void main() {
     color = texture(color_in, fragTexcoord);
+    // variable scrolling offset + contraction * fragTexcoord.x
+    float noise = noise(fragTexcoord.x * 200 * (0.05* sin(time) + 0.5) + 5 * time - 10 * noise(time / 2));
+    color.rgb += noise * vec3(0.3, 0.3, 0.5);
     return;
 
     float curDepth = texture(depth, fragTexcoord).r;
