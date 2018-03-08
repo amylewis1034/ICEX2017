@@ -55,8 +55,8 @@ vec3 tonemap(vec3 color) {
 void main() {
     color = texture(color_in, fragTexcoord);
     // variable scrolling offset + contraction * fragTexcoord.x
-    float noise = noise(fragTexcoord.x * 200 * (0.05* sin(time) + 0.5) + 5 * time - 10 * noise(time / 2));
-    color.rgb += noise * vec3(0.3, 0.3, 0.5);
+    float noise = noise(fragTexcoord.x * 50 * (0.05* sin(time) * sin(time) + 0.5) + 5 * time - 10 * noise(time / 2));
+    color.rgb += noise * vec3(0.1, 0.1, 0.3);
     return;
 
     float curDepth = texture(depth, fragTexcoord).r;
