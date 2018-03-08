@@ -5,6 +5,10 @@ in vec3 fragNormal;
 in vec2 fragTexcoord;
 
 uniform vec3 eye;
+uniform vec3 lightPos;
+uniform mat4 quadproj, quadview;
+uniform mat4 projection;
+uniform mat4 view;
 
 uniform sampler2D color_in;
 uniform sampler2D depth;
@@ -52,17 +56,62 @@ vec3 tonemap(vec3 color) {
         return color;
 }
 
+vec3 godshaft(vec2 tc) {
+    const float NUM_SAMPLES = 128, Density = 0.84, Weight = 5.65, Decay = 1.0, Exposure = 0.0034;
+    vec4 ScreenLightPos = quadproj * vec4(0, -40, 10, 1);
+    ScreenLightPos.xyz /= ScreenLightPos.w;
+    // ScreenLightPos.xy = 0.5 * ScreenLightPos.xy + 0.5;
+    ScreenLightPos.xy = clamp(0.5 * ScreenLightPos.xy + 0.5, vec2(0), vec2(1));
+    
+    // Calculate vector from pixel to light source in screen space.
+    // vec2 deltaTexCoord = (tc - ScreenLightPos.xy);
+    vec2 deltaTexCoord = vec2(0, -1.0);
+    // Divide by number of samples and scale by control factor.
+    deltaTexCoord *= 1.0 / NUM_SAMPLES * Density;
+    // Store initial sample.
+    vec3 color = texture(color_in, tc).rgb;
+    // Set up illumination decay factor.
+    float illuminationDecay = 1.0;
+
+    // Evaluate summation from Equation 3 NUM_SAMPLES iterations.
+    for (int i = 0; i < NUM_SAMPLES; i++) {
+        // Step sample location along ray.
+        tc -= deltaTexCoord;
+        // Retrieve sample at new location.
+        vec3 sample = texture(color_in, tc).rgb;
+        // Apply sample attenuation scale/decay factors.
+        sample *= illuminationDecay * Weight;
+        // Accumulate combined color.
+        color += sample;
+        // Update exponential decay factor.
+        illuminationDecay *= Decay;
+    }
+    // Output final color with a further scale control factor.
+    return color * Exposure;
+}
+
 void main() {
     color = texture(color_in, fragTexcoord);
     // variable scrolling offset + contraction * fragTexcoord.x
-    float noise = noise(fragTexcoord.x * 50 * (0.05* sin(time) * sin(time) + 0.5) + 5 * time - 10 * noise(time / 2));
-    color.rgb += noise * vec3(0.1, 0.1, 0.3);
+    // float noise = noise(fragTexcoord.x * 50 * (0.05* sin(time) * sin(time) + 0.5) + 5 * time - 10 * noise(time / 2));
+    // color.rgb += noise * vec3(0.1, 0.1, 0.3);
+    vec3 worldPos = texture(worldPos, fragTexcoord).xyz;
+
+    color.rgb += godshaft(fragTexcoord);
+
+    // vec4 ScreenLightPos = quadproj * quadview * vec4(lightPos, 1);
+    // ScreenLightPos.xyz /= ScreenLightPos.w;
+    // ScreenLightPos.xy = clamp(0.5 * ScreenLightPos.xy + 0.5, vec2(0), vec2(1));
+    // color.rb = ScreenLightPos.xy;
+    // color.g = 0;
+    color = vec4(gammacorrect(tonemap(color.rgb)), 1.0);
+
     return;
 
     float curDepth = texture(depth, fragTexcoord).r;
     // Linearize (http://glampert.com/2014/01-26/visualizing-the-depth-buffer/)
     curDepth = 2 * near / (far + near - curDepth * (far - near));
-    vec3 worldPos = texture(worldPos, fragTexcoord).xyz;
+    // vec3 worldPos = texture(worldPos, fragTexcoord).xyz;
 
     // Slightly modified from John Chapman's (http://john-chapman-graphics.blogspot.com/2013/01/what-is-motion-blur-motion-pictures-are.html)
     if (curDepth < .9) {

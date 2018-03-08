@@ -31,7 +31,11 @@ PostprocessRenderer::PostprocessRenderer() {
         width,
         height,
         GL_RGBA,
-        GL_FLOAT
+        GL_FLOAT,
+        GL_LINEAR,
+        GL_LINEAR,
+        GL_CLAMP,
+        GL_CLAMP
     );
     GLuint att[] = { GL_COLOR_ATTACHMENT0 };
     glDrawBuffers(1, att);
@@ -158,6 +162,12 @@ void PostprocessRenderer::render(const glm::mat4 &projection, const glm::mat4 &v
     glUniformMatrix4fv(quadShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(m));
 
     glUniform3fv(quadShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
+
+    const glm::vec3 &lightPos = world.getMainlightPosition();
+    glUniform3fv(quadShader.uniformLocation("lightPos"), 1, glm::value_ptr(lightPos));
+    glUniformMatrix4fv(quadShader.uniformLocation("quadproj"), 1, GL_FALSE, glm::value_ptr(projection));
+    glUniformMatrix4fv(quadShader.uniformLocation("quadview"), 1, GL_FALSE, glm::value_ptr(view));
+
 
     postprocessFBO.bindTextures();
     glUniform1i(quadShader.uniformLocation("color_in"), 0);

@@ -41,17 +41,35 @@
 			]
 		},
 		// {
-		// 	"tag": "water",
+		// 	"tag": "terrain2",
 		// 	"components": [
-		// 		// don't change transform pls
 		// 		{"name": "Transform", "args": [
-		// 			0, 0, 0, 
-		// 			0, 1, 0, 0,
-		// 			1, 1, 1]},
-		// 		{"name": "Texture", "args": ["textures/seafloor_colored.png"]},
-		// 		{"name": "WaterMesh", "args": [128, 128]}
+		// 			0, 20, 0, 
+		// 			1, 0, 0, 185,
+		// 			50, 1, 50]},
+		// 		{"name": "Heightmap", "args": ["heightmaps/flat_terrain.jpg", 5.0]},
+		// 		{"name": "Texture", "args": ["textures/invis.png"]},
+		// 		{"name": "Material", "args": [
+		// 			0.05, 0.05, 0.05,
+		// 			0.1, 0.08, 0.05,
+		// 			0.05, 0.05, 0.05,
+		// 			20,
+		// 			1.0
+		// 		]}
 		// 	]
 		// },
+		{
+			"tag": "water",
+			"components": [
+				// don't change transform pls
+				{"name": "Transform", "args": [
+					0, 0, 0, 
+					0, 1, 0, 0,
+					1, 1, 1]},
+				{"name": "Texture", "args": ["textures/seafloor_colored.png"]},
+				{"name": "WaterMesh", "args": [32, 32]}
+			]
+		},
 //        {
 //            "tag": "projectiveTexture",
 //            "components": [
@@ -83,17 +101,61 @@
 		// 		{"name": "Particle", "args": [300, -150.0, 50.0, 2.0, 35.0, -100.0, 100.0,  0.2, 0.2, 0.6, 0.2]}
 		// 	]
 		// },
-		 {
-		 	"tag": "particlesBubble",
-		 	"components": [
-		 		{"name": "Transform", "args": [
-		 			0, 0, 0,
-		 			0, 1, 0, 0,
-		 			1, 1, 1
-		 		]},
-		 		{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
-		 	]
-		 },
+		// {
+		// 	"tag": "particlesBubble",
+		// 	"components": [
+		// 		{"name": "Transform", "args": [
+		// 			0, 0, 0,
+		// 			0, 1, 0, 0,
+		// 			1, 1, 1
+		// 		]},
+		// 		{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
+		// 	]
+		// },
+		// {
+		// 	"tag": "particlesBubble",
+		// 	"components": [
+		// 		{"name": "Transform", "args": [
+		// 			0, 0, 0,
+		// 			0, 1, 0, 0,
+		// 			1, 1, 1
+		// 		]},
+		// 		{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
+		// 	]
+		// },
+		// {
+		// 	"tag": "particlesBubble",
+		// 	"components": [
+		// 		{"name": "Transform", "args": [
+		// 			0, 0, 0,
+		// 			0, 1, 0, 0,
+		// 			1, 1, 1
+		// 		]},
+		// 		{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
+		// 	]
+		// },
+		// {
+		// 	"tag": "particlesBubble",
+		// 	"components": [
+		// 		{"name": "Transform", "args": [
+		// 			0, 0, 0,
+		// 			0, 1, 0, 0,
+		// 			1, 1, 1
+		// 		]},
+		// 		{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
+		// 	]
+		// },
+		// {
+		// 	"tag": "particlesBubble",
+		// 	"components": [
+		// 		{"name": "Transform", "args": [
+		// 			0, 0, 0,
+		// 			0, 1, 0, 0,
+		// 			1, 1, 1
+		// 		]},
+		// 		{"name": "Particle", "args": [90, -150.0, 50.0, 2.0, 100.0, -100.0, 100.0]}
+		// 	]
+		// },
         // {
         //     "tag": "chimney",
         //     "components": [

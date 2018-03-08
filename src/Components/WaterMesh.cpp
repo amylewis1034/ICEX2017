@@ -115,7 +115,7 @@ void WaterMesh::init() {
 
     glGenBuffers(1, &feedback_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, feedback_vbo);
-    glBufferData(GL_ARRAY_BUFFER, width * height * 3 * sizeof(glm::vec4), nullptr, GL_STATIC_READ);
+    glBufferData(GL_ARRAY_BUFFER, width * height * 3 * sizeof(glm::vec4), nullptr, GL_STREAM_COPY);
 
     generate_water(0.0f);
 

@@ -185,6 +185,8 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 		Mesh *mesh = g->getComponent<Mesh>();
 		Heightmap *hmap = g->getComponent<Heightmap>();
 
+        if (g->getTag() == "terrain2") continue;
+
 		/* Set model matrix */
 		glm::mat4 model = t->getMatrix();
 		glUniformMatrix4fv(shadowmapShader.uniformLocation("model"), 1, GL_FALSE, glm::value_ptr(model));
@@ -230,6 +232,8 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 		Heightmap *hmap = g->getComponent<Heightmap>();
 		Texture *texture = g->getComponent<Texture>();
         WaterMesh *water = g->getComponent<WaterMesh>();
+
+        // if (g->getTag() == "terrain2") continue;
 
 		/* Set any textures */
 		if (texture == nullptr) {

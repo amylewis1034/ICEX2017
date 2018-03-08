@@ -54,12 +54,12 @@ void Particle::init() {
             float tmpY = randFloat(-5, 0);
             float tmpZ = randFloat(minZ, maxZ);
 
-            partPositions[i + 0] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-            partPositions[i + 1] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-            partPositions[i + 2] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-            partPositions[i + 3] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-            partPositions[i + 4] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-            partPositions[i + 5] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
+            partPositions[i + 0] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+            partPositions[i + 1] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+            partPositions[i + 2] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+            partPositions[i + 3] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+            partPositions[i + 4] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+            partPositions[i + 5] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
          
             partColors[i + 0] = vec4(r, g, b, a);
             partColors[i + 1] = vec4(r, g, b, a);
@@ -101,19 +101,19 @@ void Particle::init() {
 
 void Particle::rebirth(int idx) {
     if (numP == 300) {
-        partPositions[idx] = vec3(randFloat(minX, maxX - 100), randFloat(minY, maxY), randFloat(minZ, maxZ));
+        partPositions[idx] = vec3(randFloat(minX, maxX - 100), 10, randFloat(minZ, maxZ));
     }
     else {
         float tmpX = randFloat(minX, maxX);
         float tmpY = randFloat(-5, 0);
         float tmpZ = randFloat(minZ, maxZ);
 
-        partPositions[idx + 0] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-        partPositions[idx + 1] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-        partPositions[idx + 2] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-        partPositions[idx + 3] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-        partPositions[idx + 4] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
-        partPositions[idx + 5] = vec3(tmpX + randFloat(-1, 1), tmpY + randFloat(-1, 1), tmpZ + randFloat(-1, 1));
+        partPositions[idx + 0] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+        partPositions[idx + 1] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+        partPositions[idx + 2] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+        partPositions[idx + 3] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+        partPositions[idx + 4] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
+        partPositions[idx + 5] = vec3(tmpX + randFloat(-1, 1), 10, tmpZ + randFloat(-1, 1));
     }
 }
 
@@ -134,7 +134,7 @@ void Particle::update(float dt) {
         }
         else {
             for (int g = 0; g < 6; g++) {
-                particles[idx + g].partVel = vec3(2 * dt, 10 / randFloat(4,6), 1);
+                particles[idx + g].partVel = vec3(2 * dt, 0, 1);
 
                 partPositions[idx + g] += particles[idx].partVel * dt;
 
