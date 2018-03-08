@@ -9,6 +9,7 @@
 #include <glm/gtx/string_cast.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/epsilon.hpp>
+#include <glm/gtc/packing.hpp>
 #include <limits>
 
 extern World *world;
@@ -64,7 +65,6 @@ void WaterMesh::init() {
 
     bboxes.resize(indices.size() - 2);
     instance_matrices.resize(bboxes.size());
-    generate_bboxes();
 
     cubemesh = new Mesh(RESOURCE_PATH "objs/cube.obj");
     assert(cubemesh);
@@ -91,7 +91,7 @@ void WaterMesh::init() {
 			<< std::endl;
 	}
 
-    static std::vector<glm::vec2> grid_points(width * height);
+    static std::vector<glm::uint32> grid_points(width * height);
     float xoffset = (right - left) / (width - 1);
     float yoffset = (top - bot) / (height - 1);
     for (int j = 0; j < height; j++) {
@@ -99,7 +99,7 @@ void WaterMesh::init() {
             int index = j * width + i;
             float x = i * xoffset + left;
             float y = j * yoffset + bot;
-            grid_points[index] = glm::vec2(x, y);
+            grid_points[index] = glm::packHalf2x16(glm::vec2(x, y));
             // std::cout << glm::to_string(grid_points[index]) << std::endl;
         }
     }
@@ -109,9 +109,9 @@ void WaterMesh::init() {
 
     glGenBuffers(1, &grid_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, grid_vbo);
-    glBufferData(GL_ARRAY_BUFFER, grid_points.size() * sizeof(glm::vec2), grid_points.data(), GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, grid_points.size() * sizeof(glm::uint32), grid_points.data(), GL_STATIC_DRAW);
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
+    glVertexAttribPointer(0, 2, GL_HALF_FLOAT, GL_FALSE, 0, 0);
 
     glGenBuffers(1, &feedback_vbo);
     glBindBuffer(GL_ARRAY_BUFFER, feedback_vbo);
@@ -120,6 +120,8 @@ void WaterMesh::init() {
     generate_water(0.0f);
 
     glGenTextures(1, &tbo_tex);
+
+    generate_bboxes();    
 }
 
 void WaterMesh::generate_water(float t) {
@@ -287,6 +289,44 @@ void WaterMesh::generate_indices() {
 }
 
 void WaterMesh::generate_bboxes() {
+    static GLuint program = 0;
+    if (program == 0) {
+        GLint success;
+        GLchar infoLog[512];
+        GLShader shader(GL_COMPUTE_SHADER, SHADER_PATH "computeBoundingBoxes.comp");
+        program = glCreateProgram();
+        glAttachShader(program, shader.getHandle());
+        glLinkProgram(program);
+        glGetProgramiv(program, GL_LINK_STATUS, &success);
+        if (!success) {
+            glGetProgramInfoLog(program, 512, NULL, infoLog);
+            std::cout
+                << "ERROR::SHADER_PROGRAM::COMPILATION_FAILED\n"
+                << infoLog
+                << std::endl;
+        }
+    }
+    glUseProgram(program);
+
+    glUniform1i(glGetUniformLocation(program, "max_index"), bboxes.size() - 1);
+    
+    glBindBuffer(GL_TEXTURE_BUFFER, feedback_vbo);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
+    glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, feedback_vbo);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->instanceBuf.getHandle());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, this->instanceBuf.getHandle());
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->ebo.getHandle());
+    glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, this->ebo.getHandle());
+
+    glDispatchCompute((bboxes.size() + 64 - 1) / 64, 1, 1);
+
+    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    glUseProgram(0);
+    return;
+
     glm::vec3 a[2], b[2], c[2];
     a[0] = vertices[indices[0]].position;
     a[1] = vertices[indices[0]].position - vertices[indices[0]].refracted_ray * (a[0].y / vertices[indices[0]].refracted_ray.y);
@@ -294,6 +334,7 @@ void WaterMesh::generate_bboxes() {
     b[1] = vertices[indices[1]].position - vertices[indices[1]].refracted_ray * (b[0].y / vertices[indices[1]].refracted_ray.y);
     
     for (int i = 0; i < bboxes.size(); i++) {
+        // instance_matrices[i] = glm::scale(glm::mat4(), glm::vec3(100.0f));
         c[0] = vertices[indices[i + 2]].position;
         c[1] = vertices[indices[i + 2]].position - vertices[indices[i + 2]].refracted_ray * (c[0].y / vertices[indices[i + 2]].refracted_ray.y);
     
@@ -375,5 +416,5 @@ void WaterMesh::init_buffers() {
 void WaterMesh::update_buffers() {
     vertex_buf.loadData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
 
-    this->instanceBuf.loadData(GL_ARRAY_BUFFER, this->instance_matrices.size() * sizeof(glm::mat3), this->instance_matrices.data(), GL_STREAM_DRAW);    
+    // this->instanceBuf.loadData(GL_ARRAY_BUFFER, this->instance_matrices.size() * sizeof(glm::mat3), this->instance_matrices.data(), GL_STREAM_DRAW);    
 }

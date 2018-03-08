@@ -6,6 +6,7 @@
 #include <Graphics/GLVertexArrayObject.hpp>
 #include <Graphics/GLBuffer.hpp>
 #include <glm/glm.hpp>
+#include <glm/gtc/packing.hpp>
 #include <string>
 #include <vector>
 
