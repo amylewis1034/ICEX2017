@@ -3,7 +3,7 @@
 // glDispatchCompute((bboxes.size() + 64 - 1) / 64, 1, 1);
 layout(local_size_x = 64, local_size_y = 1, local_size_z = 1) in;
 
-uniform uint max_index;
+uniform int max_index;
 layout(binding = 1) uniform samplerBuffer tbo;
 
 layout(binding = 0, std140) buffer InstanceMatrices {
@@ -11,7 +11,7 @@ layout(binding = 0, std140) buffer InstanceMatrices {
 };
 
 layout(binding = 1, std140) buffer Indices {
-    uint indices[];
+    uvec4 indices[];
 };
 
 void main() {
@@ -20,9 +20,15 @@ void main() {
     if (threadId.x > max_index)
         return;
 
-    vec3 v[3] = vec3[3](texelFetch(tbo, 3 * int(indices[threadId.x]) + 0).xyz, texelFetch(tbo, 3 * int(indices[threadId.x] + 1) + 0).xyz, texelFetch(tbo, 3 * int(indices[threadId.x] + 2) + 0).xyz);
-    // vec3 n[3] = vec3[3](texelFetch(tbo, 3 * int(indices[threadId.x]) + 1).xyz, texelFetch(tbo, 3 * int(indices[threadId.x] + 1) + 1).xyz, texelFetch(tbo, 3 * int(indices[threadId.x] + 2) + 1).xyz);
-    vec3 r[3] = vec3[3](texelFetch(tbo, 3 * int(indices[threadId.x]) + 2).xyz, texelFetch(tbo, 3 * int(indices[threadId.x] + 1) + 2).xyz, texelFetch(tbo, 3 * int(indices[threadId.x] + 2) + 2).xyz);
+    vec3 v[3], r[3];
+    for (int i = 0; i < 3; i++) {
+        int base = (threadId.x + i) / 4;
+        int component = (threadId.x + i) % 4;
+        int index = int(indices[base][component]);
+
+        v[i] = texelFetch(tbo, 3 * index + 0).xyz;
+        r[i] = texelFetch(tbo, 3 * index + 2).xyz;
+    }
 
     vec3 a[2], b[2], c[2];
     a[0] = v[0];
@@ -54,4 +60,10 @@ void main() {
         0, 0, scale.z, 0,
         center, 1
     );
+    // instance_matrix[threadId.x] = mat4(
+    //     10, 0, 0, 0,
+    //     0, 10, 0, 0,
+    //     0, 0, 10, 0,
+    //     0, 0, 0, 1
+    // );
 }

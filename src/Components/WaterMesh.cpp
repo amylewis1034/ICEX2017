@@ -11,6 +11,7 @@
 #include <glm/gtc/epsilon.hpp>
 #include <glm/gtc/packing.hpp>
 #include <limits>
+#include <icex_common.hpp>
 
 extern World *world;
 
@@ -121,7 +122,27 @@ void WaterMesh::init() {
 
     glGenTextures(1, &tbo_tex);
 
-    generate_bboxes();    
+    generate_bboxes();
+    
+
+    float Q = 0.5f, medianWavelength = 20.0f, medianAmplitude = 0.2f;
+    float direction = 0.0f, spread = 90.0f;
+    float phi = 5.0f;
+    float angle[4] = {0};
+    for (int i = 0; i < 4; i++) {
+        float ratio = randFloat(0.5f, 2.0f);
+        float wavelength = ratio * medianWavelength;
+        float amplitude = ratio * medianAmplitude;
+        float frequency = glm::sqrt(9.8f * 2.0f * glm::pi<float>() / wavelength);
+        
+        waves[i].q = Q / (frequency * amplitude * 4);
+        waves[i].a = amplitude;
+        waves[i].omega = frequency;
+        waves[i].phi = phi;
+        angle[i] = direction + randFloat(-0.5f, 0.5f) * spread;
+        float tmp = glm::radians(angle[i]);
+        waves[i].d = glm::vec2(glm::cos(tmp), glm::sin(tmp));
+    }
 }
 
 void WaterMesh::generate_water(float t) {
@@ -315,15 +336,15 @@ void WaterMesh::generate_bboxes() {
     glBindTexture(GL_TEXTURE_BUFFER, tbo_tex);
     glTexBuffer(GL_TEXTURE_BUFFER, GL_RGBA32F, feedback_vbo);
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->instanceBuf.getHandle());
+    // glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->instanceBuf.getHandle());
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, this->instanceBuf.getHandle());
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->ebo.getHandle());
+    // glBindBuffer(GL_SHADER_STORAGE_BUFFER, this->ebo.getHandle());
     glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, this->ebo.getHandle());
 
     glDispatchCompute((bboxes.size() + 64 - 1) / 64, 1, 1);
 
-    glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
+    // glBindBuffer(GL_SHADER_STORAGE_BUFFER, 0);
     glUseProgram(0);
     return;
 
@@ -377,7 +398,6 @@ void WaterMesh::init_buffers() {
 
     vao.bind();
 
-    vertex_buf.bind();
     vertex_buf.loadData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexInfo), vertices.data(), GL_STREAM_DRAW);
     vao.addAttribute(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexInfo), (GLvoid *)offsetof(VertexInfo, position));
     vao.addAttribute(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexInfo), (GLvoid *)offsetof(VertexInfo, normal));

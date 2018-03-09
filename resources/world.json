@@ -67,7 +67,7 @@
 					0, 1, 0, 0,
 					1, 1, 1]},
 				{"name": "Texture", "args": ["textures/seafloor_colored.png"]},
-				{"name": "WaterMesh", "args": [64, 64]}
+				{"name": "WaterMesh", "args": [128, 128]}
 			]
 		},
 //        {
