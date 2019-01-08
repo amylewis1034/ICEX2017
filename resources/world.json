@@ -58,18 +58,18 @@
 		// 		]}
 		// 	]
 		// },
-		{
-			"tag": "water",
-			"components": [
-				// don't change transform pls
-				{"name": "Transform", "args": [
-					0, 0, 0, 
-					0, 1, 0, 0,
-					1, 1, 1]},
-				{"name": "Texture", "args": ["textures/seafloor_colored.png"]},
-				{"name": "WaterMesh", "args": [32, 32]}
-			]
-		},
+		// {
+		// 	"tag": "water",
+		// 	"components": [
+		// 		// don't change transform pls
+		// 		{"name": "Transform", "args": [
+		// 			0, 0, 0, 
+		// 			0, 1, 0, 0,
+		// 			1, 1, 1]},
+		// 		{"name": "Texture", "args": ["textures/seafloor_colored.png"]},
+		// 		{"name": "WaterMesh", "args": [32, 32]}
+		// 	]
+		// },
 //        {
 //            "tag": "projectiveTexture",
 //            "components": [

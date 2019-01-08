@@ -231,7 +231,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 		Mesh *mesh = g->getComponent<Mesh>();
 		Heightmap *hmap = g->getComponent<Heightmap>();
 		Texture *texture = g->getComponent<Texture>();
-        WaterMesh *water = g->getComponent<WaterMesh>();
+        // WaterMesh *water = g->getComponent<WaterMesh>();
 
         // if (g->getTag() == "terrain2") continue;
 
@@ -254,9 +254,9 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
 		else if (hmap) {
 			hmap->draw();
 		}
-        else if (water) {
-            /* water->draw(); */
-        }
+        // else if (water) {
+        //     /* water->draw(); */
+        // }
 
 	}
     deferredShader.unbind();
@@ -273,7 +273,7 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
         glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, -1, "Caustics");
     }
 
-    GameObject *watermesh = world.getGameObjectWithComponent<WaterMesh>();
+    // GameObject *watermesh = world.getGameObjectWithComponent<WaterMesh>();
     // if (watermesh) {
     //     WaterMesh *water = watermesh->getComponent<WaterMesh>();
     //     Transform *water_transform = watermesh->getComponent<Transform>();

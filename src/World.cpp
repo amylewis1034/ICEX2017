@@ -190,7 +190,11 @@ void World::render(const glm::mat4 &projection, const glm::mat4 &view, const glm
 void World::addGameObject(GameObject *gameobject) {
     gameobjects.push_back(gameobject);
 
-    if (gameobject->hasComponent<Mesh>() || gameobject->hasComponent<Heightmap>() || gameobject->hasComponent<WaterMesh>()) {
+    // if (gameobject->hasComponent<Mesh>() || gameobject->hasComponent<Heightmap>() || gameobject->hasComponent<WaterMesh>()) {
+    //     renderables.push_back(gameobject);
+    // }
+
+	if (gameobject->hasComponent<Mesh>() || gameobject->hasComponent<Heightmap>()) {
         renderables.push_back(gameobject);
     }
 	
