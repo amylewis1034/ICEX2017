@@ -36,6 +36,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <time.h>
 
 #include <icex_common.hpp>
 

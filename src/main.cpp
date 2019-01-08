@@ -160,7 +160,7 @@ GLFWwindow *init_window() {
 
     glfwSwapInterval(0);
 
-    glewExperimental = GL_TRUE;
+    //glewExperimental = GL_TRUE;
     if (glewInit() != GLEW_OK) {
         std::cout << "Failed to initialize GLEW" << std::endl;
         exit(EXIT_FAILURE);

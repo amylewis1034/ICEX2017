@@ -274,46 +274,46 @@ void DeferredShadowRenderer::render(const glm::mat4 &projection, const glm::mat4
     }
 
     GameObject *watermesh = world.getGameObjectWithComponent<WaterMesh>();
-    if (watermesh) {
-        WaterMesh *water = watermesh->getComponent<WaterMesh>();
-        Transform *water_transform = watermesh->getComponent<Transform>();
+    // if (watermesh) {
+    //     WaterMesh *water = watermesh->getComponent<WaterMesh>();
+    //     Transform *water_transform = watermesh->getComponent<Transform>();
 
-        glBindFramebuffer(GL_FRAMEBUFFER, causticFBO.getHandle());
-        glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
+    //     glBindFramebuffer(GL_FRAMEBUFFER, causticFBO.getHandle());
+    //     glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    //     glClear(GL_COLOR_BUFFER_BIT);
 
-        glViewport(0, 0, caustic_width, caustic_height);
-        glCullFace(GL_FRONT);
-        glDisable(GL_DEPTH_TEST);
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_ONE, GL_ONE);
+    //     glViewport(0, 0, caustic_width, caustic_height);
+    //     glCullFace(GL_FRONT);
+    //     glDisable(GL_DEPTH_TEST);
+    //     glEnable(GL_BLEND);
+    //     glBlendFunc(GL_ONE, GL_ONE);
 
-        causticShader.bind();
-        gBuffer.bindTextures();
-        glUniform1i(causticShader.uniformLocation("world_positions"), 0);
+    //     causticShader.bind();
+    //     gBuffer.bindTextures();
+    //     glUniform1i(causticShader.uniformLocation("world_positions"), 0);
         
-        glUniform1i(causticShader.uniformLocation("tbo"), 1);
-        // GLuint block_index;
-        // block_index = glGetUniformBlockIndex(causticShader.getHandle(), "Caustics");
-        // glUniformBlockBinding(causticShader.getHandle(), block_index, 0);
+    //     glUniform1i(causticShader.uniformLocation("tbo"), 1);
+    //     // GLuint block_index;
+    //     // block_index = glGetUniformBlockIndex(causticShader.getHandle(), "Caustics");
+    //     // glUniformBlockBinding(causticShader.getHandle(), block_index, 0);
 
-        glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
+    //     glUniformMatrix4fv(causticShader.uniformLocation("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+    //     glUniformMatrix4fv(causticShader.uniformLocation("view"), 1, GL_FALSE, glm::value_ptr(view));
         
-        glUniform3fv(causticShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
+    //     glUniform3fv(causticShader.uniformLocation("eye"), 1, glm::value_ptr(eye));
 
-        water->draw_caustics();
-        gBuffer.unbindTextures();
-        causticShader.unbind();
+    //     water->draw_caustics();
+    //     gBuffer.unbindTextures();
+    //     causticShader.unbind();
 
-        glDisable(GL_BLEND);
+    //     glDisable(GL_BLEND);
 
-        // glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
-        glViewport(0, 0, width, height);
+    //     // glBindFramebuffer(GL_FRAMEBUFFER, nextFBO);
+    //     glViewport(0, 0, width, height);
 
-        glCullFace(GL_BACK);
-        glEnable(GL_DEPTH_TEST);
-    }
+    //     glCullFace(GL_BACK);
+    //     glEnable(GL_DEPTH_TEST);
+    // }
 
     if (GLEW_KHR_debug) {
         glPopDebugGroup();
